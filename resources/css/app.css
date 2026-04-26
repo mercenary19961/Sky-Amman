@@ -3,9 +3,33 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../**/*.tsx';
+@source '../**/*.ts';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    /* Sky Amman brand palette — sky-blue primary tones, light theme only. */
+    --color-primary: #5BA4D8;
+    --color-primary-dark: #3E84B5;
+    --color-primary-light: #B7DDF5;
+    --color-surface: #FFFFFF;
+    --color-surface-muted: #F5F8FB;
+    --color-ink: #1A2433;
+    --color-ink-muted: #5C6B82;
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-arabic: 'Cairo', var(--font-sans);
+}
+
+html[dir="rtl"] body {
+    font-family: var(--font-arabic);
+}
+
+@keyframes toast-slide-in {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-toast-in {
+    animation: toast-slide-in 200ms ease-out;
 }

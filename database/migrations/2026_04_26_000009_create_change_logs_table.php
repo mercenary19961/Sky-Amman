@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('action', 30); // create / update / delete / restore
             $table->json('old_data')->nullable();
             $table->json('new_data')->nullable();
-            $table->string('label')->nullable(); // human-readable summary
+            $table->string('label')->nullable();
             $table->foreignId('changed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('reverted_at')->nullable();

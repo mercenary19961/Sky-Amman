@@ -1,7 +1,42 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
+  "resources/js/Components/Layout/AdminSidebar.tsx": [
+    "/build/assets/Dashboard-OmxYUTC9.js"
+  ],
+  "resources/js/Components/Layout/Footer.tsx": [
+    "/build/assets/Welcome-BaDBTZwt.js"
+  ],
+  "resources/js/Components/Layout/Header.tsx": [
+    "/build/assets/Welcome-BaDBTZwt.js"
+  ],
+  "resources/js/Components/Layout/SocialIcons.tsx": [
+    "/build/assets/Welcome-BaDBTZwt.js"
+  ],
+  "resources/js/Components/Public/Turnstile.tsx": [
+    "/build/assets/Login-CmcIwHqM.js"
+  ],
+  "resources/js/Layouts/AdminLayout.tsx": [
+    "/build/assets/Dashboard-OmxYUTC9.js"
+  ],
+  "resources/js/Layouts/PublicLayout.tsx": [
+    "/build/assets/Welcome-BaDBTZwt.js"
+  ],
+  "resources/js/Pages/Admin/Dashboard.tsx": [
+    "/build/assets/Dashboard-OmxYUTC9.js"
+  ],
+  "resources/js/Pages/Admin/Login.tsx": [
+    "/build/assets/Login-CmcIwHqM.js"
+  ],
   "resources/js/Pages/Public/Welcome.tsx": [
-    "/build/assets/Welcome-CI6LKb1e.js"
+    "/build/assets/Welcome-BaDBTZwt.js"
+  ],
+  "resources/js/contexts/LanguageContext.tsx": [],
+  "resources/js/contexts/ToastContext.tsx": [],
+  "resources/js/i18n/ar.ts": [],
+  "resources/js/i18n/en.ts": [],
+  "resources/js/i18n/index.ts": [],
+  "resources/js/lib/cn.ts": [
+    "/build/assets/cn-H80jjgLf.js"
   ],
   "resources/js/ssr.tsx": []
 }

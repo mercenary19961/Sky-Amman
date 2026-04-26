@@ -6,29 +6,42 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Unified table for all project listings — Sky Amman shows everything from this
+     * single table on the homepage Project Showcase carousel and on /properties.
+     *
+     * `category` is the structural classification (drives which filter pill the
+     * project lives under). `listing_status` is the commercial badge ("FOR SALE",
+     * "FOR RENT") that appears on the card.
+     */
     public function up(): void
     {
-        Schema::create('properties', function (Blueprint $table) {
+        Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('title_en');
             $table->string('title_ar');
             $table->string('slug')->unique();
+
+            $table->enum('category', ['under_development', 'ready', 'investment_opportunity']);
+            $table->enum('listing_status', ['for_sale', 'for_rent', 'sold', 'reserved'])->nullable();
+
             $table->text('short_description_en')->nullable();
             $table->text('short_description_ar')->nullable();
             $table->text('description_en')->nullable();
             $table->text('description_ar')->nullable();
 
-            $table->enum('listing_type', ['buy', 'rent', 'build']);
-            $table->enum('status', ['available', 'reserved', 'sold'])->default('available');
-
-            $table->string('location_en')->nullable();
+            $table->string('location_en')->nullable();   // "Jordan - Amman" (card line)
             $table->string('location_ar')->nullable();
-            $table->string('price_en')->nullable(); // free-form ("250,000 JOD", "Price on request")
-            $table->string('price_ar')->nullable();
+            $table->string('address_en')->nullable();    // "Amman - Dabouq - yazan abusahwish ST." (detail page)
+            $table->string('address_ar')->nullable();
 
-            $table->unsignedInteger('bedrooms')->nullable();
-            $table->unsignedInteger('bathrooms')->nullable();
+            // Detail-page spec fields. All nullable — investment opportunities and
+            // land plots leave most of these unset; villas fill them all in.
             $table->unsignedInteger('area_sqm')->nullable();
+            $table->unsignedSmallInteger('completion_year')->nullable();
+            $table->unsignedTinyInteger('floors')->nullable();
+            $table->unsignedTinyInteger('bedrooms')->nullable();
+            $table->unsignedTinyInteger('bathrooms')->nullable();
 
             $table->foreignId('featured_image_id')->nullable()->constrained('media')->nullOnDelete();
 
@@ -48,13 +61,14 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['listing_type', 'status', 'is_active']);
+            $table->index(['category', 'is_active']);
+            $table->index('listing_status');
             $table->index('is_featured');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('properties');
+        Schema::dropIfExists('projects');
     }
 };

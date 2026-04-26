@@ -8,8 +8,10 @@ return new class extends Migration
 {
     /**
      * Single inbox for ALL public-facing forms.
-     * Innovation #4: per-listing inquiries — submissions can carry an optional FK to
-     * a property, investment opportunity, or self-build package.
+     *
+     * Innovation #4: per-listing inquiries — submissions can carry an optional FK
+     * to a project. "Contact about this project" CTAs on Properties detail page
+     * pre-fill the form and stamp project_id so admin sees inquiries-per-project.
      */
     public function up(): void
     {
@@ -22,10 +24,7 @@ return new class extends Migration
             $table->string('subject')->nullable();
             $table->text('message');
 
-            // Optional listing linkage — only one of these will be set per row.
-            $table->foreignId('property_id')->nullable()->constrained('properties')->nullOnDelete();
-            $table->foreignId('investment_opportunity_id')->nullable()->constrained('investment_opportunities')->nullOnDelete();
-            $table->foreignId('self_build_package_id')->nullable()->constrained('self_build_packages')->nullOnDelete();
+            $table->foreignId('project_id')->nullable()->constrained('projects')->nullOnDelete();
 
             $table->boolean('is_read')->default(false);
             $table->boolean('is_archived')->default(false);
@@ -36,9 +35,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['request_type', 'is_archived']);
-            $table->index('property_id');
-            $table->index('investment_opportunity_id');
-            $table->index('self_build_package_id');
+            $table->index('project_id');
         });
     }
 

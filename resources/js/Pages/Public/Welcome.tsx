@@ -1,15 +1,24 @@
 import { Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
+import PublicLayout from '@/Layouts/PublicLayout';
 
 export default function Welcome() {
+    const { t } = useTranslation();
+
     return (
-        <>
-            <Head title="Welcome" />
-            <main className="min-h-screen flex items-center justify-center bg-white text-gray-900">
-                <div className="text-center px-6">
-                    <h1 className="text-4xl font-semibold mb-3">Sky Amman</h1>
-                    <p className="text-gray-600">Foundation scaffolded. Pages coming soon.</p>
+        <PublicLayout>
+            <Head title={t('home.hero.title')} />
+            <section className="min-h-[80vh] flex items-center justify-center px-4">
+                <div className="text-center max-w-3xl">
+                    <p className="text-sm font-semibold tracking-widest text-primary uppercase mb-3">
+                        Sky Amman — {t('footer.tagline')}
+                    </p>
+                    <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-ink">
+                        {t('home.hero.title')}
+                    </h1>
+                    <p className="text-lg text-ink-muted">{t('home.hero.subtitle')}</p>
                 </div>
-            </main>
-        </>
+            </section>
+        </PublicLayout>
     );
 }
