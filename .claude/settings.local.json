@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \"^$\")",
+      "Bash(npm ls *)",
+      "Bash(composer show *)",
+      "Bash(npm install *)",
+      "Bash(composer update *)",
+      "Bash(npx vite *)"
+    ]
+  }
+}
