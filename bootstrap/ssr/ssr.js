@@ -548,7 +548,7 @@ createServer(
     title: (title) => title ? `Sky Amman | ${title}` : "Sky Amman",
     resolve: (name) => resolvePageComponent(
       `./Pages/${name}.tsx`,
-      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-OmxYUTC9.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-BRy-GIpT.js") })
+      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-OmxYUTC9.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-DJcHGPoD.js") })
     ),
     setup: ({ App, props }) => /* @__PURE__ */ jsx(App, { ...props, children: ({ Component, props: pageProps, key }) => /* @__PURE__ */ jsx(Providers, { children: /* @__PURE__ */ jsx(Component, { ...pageProps }, key) }) })
   })

@@ -1,37 +1,37 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "resources/js/Components/Home/AssurancePillars.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/HomeHero.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/InvestmentBanner.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/LocationMap.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/MediaRoom.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/ProjectShowcase.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Home/ValueProposition.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Layout/AdminSidebar.tsx": [
     "/build/assets/Dashboard-OmxYUTC9.js"
   ],
   "resources/js/Components/Layout/Footer.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Layout/Header.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Layout/SocialIcons.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Components/Public/Turnstile.tsx": [
     "/build/assets/Login-CmcIwHqM.js"
@@ -40,7 +40,7 @@
     "/build/assets/Dashboard-OmxYUTC9.js"
   ],
   "resources/js/Layouts/PublicLayout.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/Pages/Admin/Dashboard.tsx": [
     "/build/assets/Dashboard-OmxYUTC9.js"
@@ -49,7 +49,7 @@
     "/build/assets/Login-CmcIwHqM.js"
   ],
   "resources/js/Pages/Public/Home.tsx": [
-    "/build/assets/Home-BRy-GIpT.js"
+    "/build/assets/Home-DJcHGPoD.js"
   ],
   "resources/js/contexts/LanguageContext.tsx": [],
   "resources/js/contexts/ToastContext.tsx": [],
