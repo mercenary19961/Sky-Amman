@@ -12,9 +12,9 @@ export function HomeHero({ content }: HomeHeroProps) {
     const cta = hero.cta?.content ?? '';
 
     return (
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden" data-nav-bg="dark">
             {/* Sky gradient: primary → white, top to bottom */}
-            <div className="absolute inset-0 bg-gradient-to-b from-primary to-surface" aria-hidden="true" />
+            <div className="absolute inset-0 bg-linear-to-b from-primary to-surface" aria-hidden="true" />
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight">

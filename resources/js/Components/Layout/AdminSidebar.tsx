@@ -57,7 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 export function AdminSidebar() {
-    const { auth, url } = usePage<PageProps>().props as PageProps & { url?: string };
+    const { auth } = usePage<PageProps>().props;
     const currentUrl = usePage<PageProps>().url;
     const isAdmin = auth.user?.role === 'admin';
 

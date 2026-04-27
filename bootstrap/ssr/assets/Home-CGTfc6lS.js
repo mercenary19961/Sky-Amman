@@ -1,10 +1,10 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { usePage, Link, Head } from "@inertiajs/react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { u as useLanguage } from "../ssr.js";
 import { c as cn } from "./cn-H80jjgLf.js";
 import { Users, Building2, CalendarDays, Square, ChevronRight, ChevronLeft, Award, ShieldCheck, Tag, CreditCard } from "lucide-react";
-import { useRef, useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import "i18next";
 import "@inertiajs/react/server";
@@ -24,34 +24,80 @@ function Header() {
   const { t } = useTranslation();
   const { toggleLanguage } = useLanguage();
   const { url } = usePage();
-  return /* @__PURE__ */ jsx("header", { className: "sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-ink/5", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6", children: [
-    /* @__PURE__ */ jsx(Link, { href: "/", className: "font-bold text-lg text-primary tracking-wide", children: "SKY AMMAN" }),
-    /* @__PURE__ */ jsx("nav", { className: "hidden lg:flex items-center gap-6 text-sm", children: NAV_ITEMS.map((item) => {
-      const active = url === item.href;
-      return /* @__PURE__ */ jsx(
+  const [navBg, setNavBg] = useState("light");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SAMPLE_Y = 32;
+    const updateNavBg = () => {
+      const sections = document.querySelectorAll("[data-nav-bg]");
+      let bg = "light";
+      for (const section of sections) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= SAMPLE_Y && rect.bottom > SAMPLE_Y) {
+          const v = section.dataset.navBg;
+          if (v === "dark" || v === "light") {
+            bg = v;
+            break;
+          }
+        }
+      }
+      setNavBg(bg);
+    };
+    updateNavBg();
+    window.addEventListener("scroll", updateNavBg, { passive: true });
+    window.addEventListener("resize", updateNavBg);
+    return () => {
+      window.removeEventListener("scroll", updateNavBg);
+      window.removeEventListener("resize", updateNavBg);
+    };
+  }, []);
+  const isDark = navBg === "dark";
+  return (
+    // position: fixed so the navbar overlays section content (including
+    // the hero's gradient) instead of taking layout space. Pages without a
+    // top hero need to add their own top padding for the navbar.
+    /* @__PURE__ */ jsx("header", { className: "fixed top-0 inset-x-0 z-40", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6", children: [
+      /* @__PURE__ */ jsx(
         Link,
         {
-          href: item.href,
+          href: "/",
           className: cn(
-            "text-ink-muted hover:text-primary transition-colors",
-            active && "text-primary font-medium"
+            "font-bold text-lg tracking-wide transition-colors duration-200",
+            isDark ? "text-white" : "text-primary"
           ),
-          children: t(`nav.${item.key}`)
-        },
-        item.key
-      );
-    }) }),
-    /* @__PURE__ */ jsx(
-      "button",
-      {
-        type: "button",
-        onClick: toggleLanguage,
-        className: "text-sm font-medium text-ink hover:text-primary transition-colors",
-        "aria-label": "Toggle language",
-        children: t("language.toggle")
-      }
-    )
-  ] }) });
+          children: "SKY AMMAN"
+        }
+      ),
+      /* @__PURE__ */ jsx("nav", { className: "hidden lg:flex items-center gap-6 text-sm", children: NAV_ITEMS.map((item) => {
+        const active = url === item.href;
+        return /* @__PURE__ */ jsx(
+          Link,
+          {
+            href: item.href,
+            className: cn(
+              "transition-colors duration-200",
+              isDark ? active ? "text-white font-medium" : "text-white/80 hover:text-white" : active ? "text-primary font-medium" : "text-ink-muted hover:text-primary"
+            ),
+            children: t(`nav.${item.key}`)
+          },
+          item.key
+        );
+      }) }),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          type: "button",
+          onClick: toggleLanguage,
+          className: cn(
+            "text-sm font-medium transition-colors duration-200",
+            isDark ? "text-white hover:text-white/80" : "text-ink hover:text-primary"
+          ),
+          "aria-label": "Toggle language",
+          children: t("language.toggle")
+        }
+      )
+    ] }) })
+  );
 }
 const baseProps = (size) => ({
   width: size,
@@ -178,8 +224,8 @@ function HomeHero({ content }) {
   const title = hero.title?.content ?? "";
   const subtitle = hero.subtitle?.content ?? "";
   const cta = hero.cta?.content ?? "";
-  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden", children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-b from-primary to-surface", "aria-hidden": "true" }),
+  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden", "data-nav-bg": "dark", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-linear-to-b from-primary to-surface", "aria-hidden": "true" }),
     /* @__PURE__ */ jsxs("div", { className: "relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center", children: [
       /* @__PURE__ */ jsx("h1", { className: "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight", children: title }),
       /* @__PURE__ */ jsx("p", { className: "mt-4 text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto", children: subtitle }),
