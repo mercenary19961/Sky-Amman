@@ -546,10 +546,12 @@ createServer(
     page,
     render: renderToString,
     title: (title) => title ? `Sky Amman | ${title}` : "Sky Amman",
+    // Same v3 unwrap as app.tsx — resolvePageComponent returns
+    // Promise<{ default: Component }>; Inertia wants Promise<Component>.
     resolve: (name) => resolvePageComponent(
       `./Pages/${name}.tsx`,
-      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-OmxYUTC9.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-BRy-GIpT.js") })
-    ),
+      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-J11GGOwg.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-CGTfc6lS.js") })
+    ).then((m) => m.default),
     setup: ({ App, props }) => /* @__PURE__ */ jsx(App, { ...props, children: ({ Component, props: pageProps, key }) => /* @__PURE__ */ jsx(Providers, { children: /* @__PURE__ */ jsx(Component, { ...pageProps }, key) }) })
   })
 );

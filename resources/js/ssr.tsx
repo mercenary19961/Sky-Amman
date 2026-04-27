@@ -21,11 +21,13 @@ createServer((page) =>
         page,
         render: renderToString,
         title: (title) => (title ? `Sky Amman | ${title}` : 'Sky Amman'),
+        // Same v3 unwrap as app.tsx — resolvePageComponent returns
+        // Promise<{ default: Component }>; Inertia wants Promise<Component>.
         resolve: (name) =>
             resolvePageComponent(
                 `./Pages/${name}.tsx`,
                 import.meta.glob<{ default: ComponentType }>('./Pages/**/*.tsx'),
-            ),
+            ).then((m) => m.default),
         setup: ({ App, props }) => (
             <App {...props}>
                 {({ Component, props: pageProps, key }) => (

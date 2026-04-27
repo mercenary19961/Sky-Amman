@@ -36,7 +36,7 @@ const NAV_GROUPS = [
   }
 ];
 function AdminSidebar() {
-  const { auth, url } = usePage().props;
+  const { auth } = usePage().props;
   const currentUrl = usePage().url;
   const isAdmin = auth.user?.role === "admin";
   return /* @__PURE__ */ jsxs("aside", { className: "w-64 shrink-0 bg-white border-e border-ink/5 flex flex-col", children: [

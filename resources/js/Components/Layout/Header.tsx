@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,10 +20,57 @@ export function Header() {
     const { toggleLanguage } = useLanguage();
     const { url } = usePage<PageProps>();
 
+    // Sections opt in to a navbar theme by setting `data-nav-bg="dark"` on
+    // their root (= "this section's background is dark, so the navbar should
+    // render light/white content while it's overlapping me"). Default tone is
+    // "light" — dark text/logo on a light page background.
+    const [navBg, setNavBg] = useState<'light' | 'dark'>('light');
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const SAMPLE_Y = 32; // px — sampled at the vertical center of the navbar
+
+        const updateNavBg = () => {
+            const sections = document.querySelectorAll<HTMLElement>('[data-nav-bg]');
+            let bg: 'light' | 'dark' = 'light';
+            for (const section of sections) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= SAMPLE_Y && rect.bottom > SAMPLE_Y) {
+                    const v = section.dataset.navBg;
+                    if (v === 'dark' || v === 'light') {
+                        bg = v;
+                        break;
+                    }
+                }
+            }
+            setNavBg(bg);
+        };
+
+        updateNavBg();
+        window.addEventListener('scroll', updateNavBg, { passive: true });
+        window.addEventListener('resize', updateNavBg);
+        return () => {
+            window.removeEventListener('scroll', updateNavBg);
+            window.removeEventListener('resize', updateNavBg);
+        };
+    }, []);
+
+    const isDark = navBg === 'dark';
+
     return (
-        <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-ink/5">
+        // position: fixed so the navbar overlays section content (including
+        // the hero's gradient) instead of taking layout space. Pages without a
+        // top hero need to add their own top padding for the navbar.
+        <header className="fixed top-0 inset-x-0 z-40">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
-                <Link href="/" className="font-bold text-lg text-primary tracking-wide">
+                <Link
+                    href="/"
+                    className={cn(
+                        'font-bold text-lg tracking-wide transition-colors duration-200',
+                        isDark ? 'text-white' : 'text-primary',
+                    )}
+                >
                     SKY AMMAN
                 </Link>
 
@@ -34,8 +82,14 @@ export function Header() {
                                 key={item.key}
                                 href={item.href}
                                 className={cn(
-                                    'text-ink-muted hover:text-primary transition-colors',
-                                    active && 'text-primary font-medium',
+                                    'transition-colors duration-200',
+                                    isDark
+                                        ? active
+                                            ? 'text-white font-medium'
+                                            : 'text-white/80 hover:text-white'
+                                        : active
+                                            ? 'text-primary font-medium'
+                                            : 'text-ink-muted hover:text-primary',
                                 )}
                             >
                                 {t(`nav.${item.key}`)}
@@ -47,7 +101,10 @@ export function Header() {
                 <button
                     type="button"
                     onClick={toggleLanguage}
-                    className="text-sm font-medium text-ink hover:text-primary transition-colors"
+                    className={cn(
+                        'text-sm font-medium transition-colors duration-200',
+                        isDark ? 'text-white hover:text-white/80' : 'text-ink hover:text-primary',
+                    )}
                     aria-label="Toggle language"
                 >
                     {t('language.toggle')}

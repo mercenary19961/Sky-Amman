@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { useRef } from 'react';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 import type { FormEvent } from 'react';

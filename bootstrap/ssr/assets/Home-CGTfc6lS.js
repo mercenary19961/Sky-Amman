@@ -1,11 +1,11 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { usePage, Link, Head } from "@inertiajs/react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { u as useLanguage } from "../ssr.js";
 import { c as cn } from "./cn-H80jjgLf.js";
 import { Users, Building2, CalendarDays, Square, ChevronRight, ChevronLeft, Award, ShieldCheck, Tag, CreditCard } from "lucide-react";
-import { useRef, useState, useMemo } from "react";
-import { useScroll, useMotionValueEvent, AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import "i18next";
 import "@inertiajs/react/server";
 import "react-dom/server";
@@ -24,34 +24,80 @@ function Header() {
   const { t } = useTranslation();
   const { toggleLanguage } = useLanguage();
   const { url } = usePage();
-  return /* @__PURE__ */ jsx("header", { className: "sticky top-0 z-40 bg-surface/90 backdrop-blur border-b border-ink/5", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6", children: [
-    /* @__PURE__ */ jsx(Link, { href: "/", className: "font-bold text-lg text-primary tracking-wide", children: "SKY AMMAN" }),
-    /* @__PURE__ */ jsx("nav", { className: "hidden lg:flex items-center gap-6 text-sm", children: NAV_ITEMS.map((item) => {
-      const active = url === item.href;
-      return /* @__PURE__ */ jsx(
+  const [navBg, setNavBg] = useState("light");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SAMPLE_Y = 32;
+    const updateNavBg = () => {
+      const sections = document.querySelectorAll("[data-nav-bg]");
+      let bg = "light";
+      for (const section of sections) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= SAMPLE_Y && rect.bottom > SAMPLE_Y) {
+          const v = section.dataset.navBg;
+          if (v === "dark" || v === "light") {
+            bg = v;
+            break;
+          }
+        }
+      }
+      setNavBg(bg);
+    };
+    updateNavBg();
+    window.addEventListener("scroll", updateNavBg, { passive: true });
+    window.addEventListener("resize", updateNavBg);
+    return () => {
+      window.removeEventListener("scroll", updateNavBg);
+      window.removeEventListener("resize", updateNavBg);
+    };
+  }, []);
+  const isDark = navBg === "dark";
+  return (
+    // position: fixed so the navbar overlays section content (including
+    // the hero's gradient) instead of taking layout space. Pages without a
+    // top hero need to add their own top padding for the navbar.
+    /* @__PURE__ */ jsx("header", { className: "fixed top-0 inset-x-0 z-40", children: /* @__PURE__ */ jsxs("div", { className: "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6", children: [
+      /* @__PURE__ */ jsx(
         Link,
         {
-          href: item.href,
+          href: "/",
           className: cn(
-            "text-ink-muted hover:text-primary transition-colors",
-            active && "text-primary font-medium"
+            "font-bold text-lg tracking-wide transition-colors duration-200",
+            isDark ? "text-white" : "text-primary"
           ),
-          children: t(`nav.${item.key}`)
-        },
-        item.key
-      );
-    }) }),
-    /* @__PURE__ */ jsx(
-      "button",
-      {
-        type: "button",
-        onClick: toggleLanguage,
-        className: "text-sm font-medium text-ink hover:text-primary transition-colors",
-        "aria-label": "Toggle language",
-        children: t("language.toggle")
-      }
-    )
-  ] }) });
+          children: "SKY AMMAN"
+        }
+      ),
+      /* @__PURE__ */ jsx("nav", { className: "hidden lg:flex items-center gap-6 text-sm", children: NAV_ITEMS.map((item) => {
+        const active = url === item.href;
+        return /* @__PURE__ */ jsx(
+          Link,
+          {
+            href: item.href,
+            className: cn(
+              "transition-colors duration-200",
+              isDark ? active ? "text-white font-medium" : "text-white/80 hover:text-white" : active ? "text-primary font-medium" : "text-ink-muted hover:text-primary"
+            ),
+            children: t(`nav.${item.key}`)
+          },
+          item.key
+        );
+      }) }),
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          type: "button",
+          onClick: toggleLanguage,
+          className: cn(
+            "text-sm font-medium transition-colors duration-200",
+            isDark ? "text-white hover:text-white/80" : "text-ink hover:text-primary"
+          ),
+          "aria-label": "Toggle language",
+          children: t("language.toggle")
+        }
+      )
+    ] }) })
+  );
 }
 const baseProps = (size) => ({
   width: size,
@@ -178,8 +224,8 @@ function HomeHero({ content }) {
   const title = hero.title?.content ?? "";
   const subtitle = hero.subtitle?.content ?? "";
   const cta = hero.cta?.content ?? "";
-  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden", children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-b from-primary to-surface", "aria-hidden": "true" }),
+  return /* @__PURE__ */ jsxs("section", { className: "relative overflow-hidden", "data-nav-bg": "dark", children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-linear-to-b from-primary to-surface", "aria-hidden": "true" }),
     /* @__PURE__ */ jsxs("div", { className: "relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center", children: [
       /* @__PURE__ */ jsx("h1", { className: "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight", children: title }),
       /* @__PURE__ */ jsx("p", { className: "mt-4 text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto", children: subtitle }),
@@ -260,43 +306,98 @@ function AssurancePillars({ content }) {
     buildPillar(content.assurance_legal),
     buildPillar(content.assurance_safety)
   ];
-  const sectionRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"]
-  });
+  const wrapperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const next = Math.min(2, Math.max(0, Math.floor(v * 3)));
-    if (next !== activeIndex) setActiveIndex(next);
-  });
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [transitionSign, setTransitionSign] = useState(1);
+  const activeIndexRef = useRef(0);
+  const targetIndexRef = useRef(0);
+  const isAnimatingRef = useRef(false);
+  const animationTimerRef = useRef(null);
+  const ANIMATION_LOCKOUT_MS = 1700;
+  const startTransition = (nextIndex) => {
+    const sign = nextIndex > activeIndexRef.current ? 1 : -1;
+    isAnimatingRef.current = true;
+    activeIndexRef.current = nextIndex;
+    setTransitionSign(sign);
+    setActiveIndex(nextIndex);
+    if (animationTimerRef.current !== null) {
+      window.clearTimeout(animationTimerRef.current);
+    }
+    animationTimerRef.current = window.setTimeout(() => {
+      isAnimatingRef.current = false;
+      if (targetIndexRef.current !== activeIndexRef.current) {
+        startTransition(targetIndexRef.current);
+      }
+    }, ANIMATION_LOCKOUT_MS);
+  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  useEffect(() => {
+    if (typeof window === "undefined" || !isDesktop) return;
+    const handleScroll = () => {
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+      const rect = wrapper.getBoundingClientRect();
+      const stickyTravel = wrapper.offsetHeight - window.innerHeight;
+      if (stickyTravel <= 0) return;
+      const scrolled = -rect.top;
+      let next;
+      if (scrolled <= 0) {
+        next = 0;
+      } else {
+        const stepSize = stickyTravel / pillars.length;
+        next = Math.min(pillars.length - 1, Math.floor(scrolled / stepSize));
+      }
+      targetIndexRef.current = next;
+      if (!isAnimatingRef.current && next !== activeIndexRef.current) {
+        startTransition(next);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isDesktop, pillars.length]);
+  useEffect(() => {
+    return () => {
+      if (animationTimerRef.current !== null) {
+        window.clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, []);
   const direction = isRTL ? -1 : 1;
-  const rotation = activeIndex * 120 * direction;
   const active = pillars[activeIndex] ?? pillars[0];
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(
       "section",
       {
-        ref: sectionRef,
-        className: "hidden md:block relative h-[300vh] bg-surface",
+        ref: wrapperRef,
+        className: "hidden md:block relative h-[240vh] bg-surface",
         "aria-label": "Sky Amman assurance pillars",
         children: /* @__PURE__ */ jsx("div", { className: "sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center", children: /* @__PURE__ */ jsx(
-          PillarVisual,
+          PillarStage,
           {
-            rotation,
             active,
-            activeIndex
+            activeIndex,
+            direction,
+            transitionSign
           }
         ) })
       }
     ),
     /* @__PURE__ */ jsx("section", { className: "md:hidden bg-surface py-12", "aria-label": "Sky Amman assurance pillars", children: /* @__PURE__ */ jsxs("div", { className: "px-4", children: [
       /* @__PURE__ */ jsx(
-        PillarVisual,
+        PillarStage,
         {
-          rotation,
           active,
           activeIndex,
+          direction,
+          transitionSign,
           compact: true
         }
       ),
@@ -304,7 +405,12 @@ function AssurancePillars({ content }) {
         "button",
         {
           type: "button",
-          onClick: () => setActiveIndex(i),
+          onClick: () => {
+            targetIndexRef.current = i;
+            if (!isAnimatingRef.current && i !== activeIndexRef.current) {
+              startTransition(i);
+            }
+          },
           "aria-label": `Show pillar ${p.number}`,
           "aria-current": i === activeIndex,
           className: `h-2.5 rounded-full transition-all ${i === activeIndex ? "w-8 bg-primary" : "w-2.5 bg-primary/30"}`
@@ -314,60 +420,119 @@ function AssurancePillars({ content }) {
     ] }) })
   ] });
 }
-function PillarVisual({ rotation, active, activeIndex, compact = false }) {
-  const halfCircleSize = compact ? "h-[420px]" : "h-[600px] lg:h-[680px]";
-  const innerCircleSize = compact ? "w-44 h-44" : "w-56 h-56 lg:w-64 lg:h-64";
-  return /* @__PURE__ */ jsxs("div", { className: "relative w-full max-w-5xl mx-auto", children: [
-    /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: `relative mx-auto rounded-t-full bg-primary/90 overflow-hidden ${halfCircleSize}`,
-        style: { width: compact ? "100%" : "90%", maxWidth: compact ? "100%" : "900px" },
-        children: /* @__PURE__ */ jsx("div", { className: "absolute inset-x-0 bottom-12 sm:bottom-16 flex items-center justify-center px-6 sm:px-12", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsx(
-          motion.ul,
-          {
-            initial: { opacity: 0, y: 12 },
-            animate: { opacity: 1, y: 0 },
-            exit: { opacity: 0, y: -12 },
-            transition: { duration: 0.45, ease: "easeInOut" },
-            className: "space-y-2 text-white text-center text-sm sm:text-base lg:text-lg max-w-2xl",
-            children: active.bullets.map((b, i) => /* @__PURE__ */ jsx("li", { children: b }, i))
-          },
-          `bullets-${activeIndex}`
-        ) }) })
+function PillarStage({ active, activeIndex, direction, transitionSign, compact = false }) {
+  const innerSize = compact ? "w-40 h-40" : "w-56 h-56 lg:w-64 lg:h-64";
+  const stageMaxWidth = compact ? "100%" : "min(900px, 90vw)";
+  const halfCircleRef = useRef(null);
+  const [orbitR, setOrbitR] = useState(compact ? 130 : 450);
+  useEffect(() => {
+    const el = halfCircleRef.current;
+    if (!el || typeof window === "undefined") return;
+    const update = (h) => {
+      setOrbitR(compact ? Math.min(150, h * 0.85) : h);
+    };
+    update(el.getBoundingClientRect().height);
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) update(entry.contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [compact]);
+  const SAMPLES = 12;
+  const ANGLE_RANGE_DEG = 120;
+  const times = Array.from({ length: SAMPLES + 1 }, (_, i) => i / SAMPLES);
+  const xSign = direction * transitionSign;
+  const customData = { xSign, orbitR };
+  const variants = {
+    // Static start position for the entering circle: the first sample of
+    // the incoming arc (bottom-left in LTR-forward, mirrored otherwise).
+    initial: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const startRad = -ANGLE_RANGE_DEG * Math.PI / 180;
+      return {
+        x: orbitR2 * Math.sin(startRad) * xSign2,
+        y: orbitR2 * (1 - Math.cos(startRad)),
+        opacity: 0
+      };
+    },
+    // Entering arc: from -ANGLE_RANGE → 0° (riding up the orbit to top).
+    enter: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const xs = [];
+      const ys = [];
+      const ops = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const t = i / SAMPLES;
+        const inRad = (-ANGLE_RANGE_DEG + ANGLE_RANGE_DEG * t) * Math.PI / 180;
+        xs.push(orbitR2 * Math.sin(inRad) * xSign2);
+        ys.push(orbitR2 * (1 - Math.cos(inRad)));
+        ops.push(Math.max(0, Math.min(1, (t - 0.35) / 0.55)));
       }
-    ),
-    /* @__PURE__ */ jsx(
+      return { x: xs, y: ys, opacity: ops };
+    },
+    // Exiting arc: from top (0°) → +ANGLE_RANGE (riding down the orbit
+    // into the fade zone).
+    exit: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const xs = [];
+      const ys = [];
+      const ops = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const t = i / SAMPLES;
+        const outRad = ANGLE_RANGE_DEG * t * Math.PI / 180;
+        xs.push(orbitR2 * Math.sin(outRad) * xSign2);
+        ys.push(orbitR2 * (1 - Math.cos(outRad)));
+        ops.push(Math.max(0, Math.min(1, 1 - (t - 0.35) / 0.55)));
+      }
+      return { x: xs, y: ys, opacity: ops };
+    }
+  };
+  return /* @__PURE__ */ jsxs("div", { className: "relative w-full mx-auto", style: { maxWidth: stageMaxWidth }, children: [
+    /* @__PURE__ */ jsxs("div", { ref: halfCircleRef, className: "relative w-full aspect-2/1", children: [
+      /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: "absolute inset-0 bg-primary rounded-t-full",
+          style: {
+            maskImage: "linear-gradient(to bottom, black 0%, black 55%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 55%, transparent 100%)"
+          }
+        }
+      ),
+      /* @__PURE__ */ jsx("div", { className: "absolute inset-x-0 top-[42%] sm:top-[45%] flex items-start justify-center px-6 sm:px-12", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsx(
+        motion.ul,
+        {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          exit: { opacity: 0, y: -10 },
+          transition: { duration: 0.5, ease: "easeInOut" },
+          className: "space-y-1.5 text-white text-center text-sm sm:text-base lg:text-lg max-w-2xl",
+          children: active.bullets.map((b, i) => /* @__PURE__ */ jsx("li", { children: b }, i))
+        },
+        `bullets-${activeIndex}`
+      ) }) })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: `absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 ${innerSize}`, children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "popLayout", initial: false, custom: customData, children: /* @__PURE__ */ jsxs(
       motion.div,
       {
-        className: `absolute left-1/2 -translate-x-1/2 -top-12 sm:-top-16 ${innerCircleSize} rounded-full bg-surface shadow-xl flex flex-col items-center justify-center text-center`,
-        animate: { rotate: rotation },
-        transition: { type: "spring", stiffness: 80, damping: 18 },
-        children: /* @__PURE__ */ jsx(
-          motion.div,
-          {
-            className: "flex flex-col items-center justify-center px-4",
-            animate: { rotate: -rotation },
-            transition: { type: "spring", stiffness: 80, damping: 18 },
-            children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxs(
-              motion.div,
-              {
-                initial: { opacity: 0 },
-                animate: { opacity: 1 },
-                exit: { opacity: 0 },
-                transition: { duration: 0.35 },
-                className: "flex flex-col items-center",
-                children: [
-                  /* @__PURE__ */ jsx("span", { className: "text-2xl sm:text-3xl font-bold text-primary", children: active.number }),
-                  /* @__PURE__ */ jsx("span", { className: "mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight", children: active.title })
-                ]
-              },
-              `label-${activeIndex}`
-            ) })
-          }
-        )
-      }
-    )
+        className: "absolute inset-0",
+        custom: customData,
+        variants,
+        initial: "initial",
+        animate: "enter",
+        exit: "exit",
+        transition: {
+          duration: 1.6,
+          ease: "easeInOut",
+          times
+        },
+        children: [
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 rounded-full bg-white shadow-xl border-4 border-primary" }),
+          /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-2xl sm:text-3xl font-bold text-primary", children: active.number }),
+            /* @__PURE__ */ jsx("span", { className: "mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight", children: active.title })
+          ] })
+        ]
+      },
+      `pillar-${activeIndex}`
+    ) }) })
   ] });
 }
 function ProjectShowcase({ content, projects }) {
