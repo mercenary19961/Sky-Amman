@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <linearGradient id="placeholder-villa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8EEF5"/>
+      <stop offset="100%" stop-color="#C8D6E5"/>
+    </linearGradient>
+  </defs>
+  <rect x="640" y="380" width="1280" height="900" fill="url(#placeholder-villa)" rx="24"/>
+  <text x="1280" y="850" font-family="system-ui, sans-serif" font-size="72" fill="#7C8DA3" text-anchor="middle" font-weight="600" opacity="0.6">HERO VILLA PLACEHOLDER</text>
+  <text x="1280" y="930" font-family="system-ui, sans-serif" font-size="36" fill="#7C8DA3" text-anchor="middle" opacity="0.6">2560 × 1440 · WebP transparent · subject right-of-center</text>
+</svg>

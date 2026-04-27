@@ -8,17 +8,18 @@
 
 @theme {
     /* Sky Amman brand palette — sky-blue primary tones, light theme only. */
-    --color-primary: #5BA4D8;
-    --color-primary-dark: #3E84B5;
-    --color-primary-light: #B7DDF5;
+    --color-primary: #94C4EE;
+    --color-primary-deep: #78AFCE;
+    --color-primary-light: #C8DEF1;
+    --color-primary-dark: #5C92B8;
     --color-surface: #FFFFFF;
     --color-surface-muted: #F5F8FB;
     --color-ink: #1A2433;
     --color-ink-muted: #5C6B82;
 
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-arabic: 'Cairo', var(--font-sans);
+    --font-arabic: 'IBM Plex Sans Arabic', var(--font-sans);
 }
 
 html[dir="rtl"] body {
@@ -32,4 +33,15 @@ html[dir="rtl"] body {
 
 .animate-toast-in {
     animation: toast-slide-in 200ms ease-out;
+}
+
+/* Slow horizontal drift for the footer cloud layer. The image is sized to 200%
+   width so a 50% horizontal shift loops seamlessly back to start. */
+@keyframes cloud-drift {
+    from { background-position-x: 0%; }
+    to { background-position-x: -50%; }
+}
+
+.animate-cloud-drift {
+    animation: cloud-drift 90s linear infinite;
 }

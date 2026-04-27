@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('Public/Welcome'))->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Locale toggle — hit by LanguageContext via fetch POST (not an Inertia visit).
 Route::post('/locale/{locale}', [LocaleController::class, 'set'])

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             DefaultSettingsSeeder::class,
             PagesSeeder::class,
             SiteContentSeeder::class,
+            ProjectsSeeder::class,
         ]);
     }
 }
