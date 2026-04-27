@@ -34,12 +34,52 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
         buildPillar(content.assurance_safety),
     ];
 
-    // Pinned-scroll driver — same shape as Nuor Steel's core values pattern.
-    // The wrapper takes 300vh of height; the inner section sticks to the top
-    // and stays fixed while we map the consumed scroll into a discrete step.
+    // Pinned-scroll driver. h-[240vh] gives 140vh of pinned travel — enough
+    // room for each transition to fully play out (~47vh per pillar) without
+    // the user feeling the page is "stuck".
     const wrapperRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [isDesktop, setIsDesktop] = useState(false);
+    // Per-transition direction sign: +1 when advancing (scroll down / next
+    // pillar), -1 when regressing (scroll up / previous pillar). This flips
+    // the orbital arc so the motion mirrors the user's scroll direction —
+    // clockwise on the way down, counter-clockwise on the way back up.
+    const [transitionSign, setTransitionSign] = useState<1 | -1>(1);
+
+    // Single-flight transition gate. Fast scrolling shouldn't kick off
+    // overlapping animations — instead, scroll updates the latest target and
+    // we chain to it once the running transition finishes. Refs avoid stale
+    // closures across the scroll handler / setTimeout / state cycle.
+    const activeIndexRef = useRef(0);
+    const targetIndexRef = useRef(0);
+    const isAnimatingRef = useRef(false);
+    const animationTimerRef = useRef<number | null>(null);
+
+    // Should match the longest running animation (orbital arc duration).
+    const ANIMATION_LOCKOUT_MS = 1700;
+
+    const startTransition = (nextIndex: number) => {
+        const sign: 1 | -1 = nextIndex > activeIndexRef.current ? 1 : -1;
+        isAnimatingRef.current = true;
+        activeIndexRef.current = nextIndex;
+        // Both state updates batch into one render so the entering motion.div
+        // and the exiting one (captured by AnimatePresence) see the same sign.
+        setTransitionSign(sign);
+        setActiveIndex(nextIndex);
+
+        if (animationTimerRef.current !== null) {
+            window.clearTimeout(animationTimerRef.current);
+        }
+        animationTimerRef.current = window.setTimeout(() => {
+            isAnimatingRef.current = false;
+            // Scroll may have moved on while we were animating. Chain to the
+            // latest target — skipping intermediate pillars keeps fast scrolls
+            // responsive without ever overlapping animations.
+            if (targetIndexRef.current !== activeIndexRef.current) {
+                startTransition(targetIndexRef.current);
+            }
+        }, ANIMATION_LOCKOUT_MS);
+    };
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -61,23 +101,41 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
             if (stickyTravel <= 0) return;
 
             const scrolled = -rect.top;
+            let next: number;
             if (scrolled <= 0) {
-                setActiveIndex(0);
-                return;
+                next = 0;
+            } else {
+                const stepSize = stickyTravel / pillars.length;
+                next = Math.min(pillars.length - 1, Math.floor(scrolled / stepSize));
             }
 
-            const stepSize = stickyTravel / pillars.length;
-            const next = Math.min(pillars.length - 1, Math.floor(scrolled / stepSize));
-            setActiveIndex(next);
+            targetIndexRef.current = next;
+
+            // Only kick off a transition if nothing is currently running and
+            // the target actually differs from what's on screen. Otherwise the
+            // post-lockout chain check picks it up.
+            if (!isAnimatingRef.current && next !== activeIndexRef.current) {
+                startTransition(next);
+            }
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
+        // startTransition reads only refs, so no need to depend on it here.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDesktop, pillars.length]);
 
-    // RTL flips both the orbital direction and the rim-spin so motion feels
-    // natural with right-to-left flow.
+    useEffect(() => {
+        return () => {
+            if (animationTimerRef.current !== null) {
+                window.clearTimeout(animationTimerRef.current);
+            }
+        };
+    }, []);
+
+    // RTL flips the orbital direction so motion stays natural with the
+    // right-to-left reading flow.
     const direction: 1 | -1 = isRTL ? -1 : 1;
     const active = pillars[activeIndex] ?? pillars[0];
 
@@ -86,25 +144,41 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
             {/* Desktop / tablet: pinned-scroll. */}
             <section
                 ref={wrapperRef}
-                className="hidden md:block relative h-[300vh] bg-surface"
+                className="hidden md:block relative h-[240vh] bg-surface"
                 aria-label="Sky Amman assurance pillars"
             >
                 <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
-                    <PillarStage active={active} activeIndex={activeIndex} direction={direction} />
+                    <PillarStage
+                        active={active}
+                        activeIndex={activeIndex}
+                        direction={direction}
+                        transitionSign={transitionSign}
+                    />
                 </div>
             </section>
 
             {/* Mobile: tab buttons advance the active pillar. */}
             <section className="md:hidden bg-surface py-12" aria-label="Sky Amman assurance pillars">
                 <div className="px-4">
-                    <PillarStage active={active} activeIndex={activeIndex} direction={direction} compact />
+                    <PillarStage
+                        active={active}
+                        activeIndex={activeIndex}
+                        direction={direction}
+                        transitionSign={transitionSign}
+                        compact
+                    />
 
                     <div className="mt-6 flex items-center justify-center gap-2">
                         {pillars.map((p, i) => (
                             <button
                                 key={i}
                                 type="button"
-                                onClick={() => setActiveIndex(i)}
+                                onClick={() => {
+                                    targetIndexRef.current = i;
+                                    if (!isAnimatingRef.current && i !== activeIndexRef.current) {
+                                        startTransition(i);
+                                    }
+                                }}
                                 aria-label={`Show pillar ${p.number}`}
                                 aria-current={i === activeIndex}
                                 className={`h-2.5 rounded-full transition-all ${
@@ -123,41 +197,129 @@ interface PillarStageProps {
     active: Pillar;
     activeIndex: number;
     direction: 1 | -1;
+    /**
+     * Per-transition sign: +1 advancing (clockwise in LTR), -1 regressing
+     * (counter-clockwise in LTR). Combined with `direction` (language) to
+     * produce the final orbital sign — RTL flips both, so the visual feel is:
+     *
+     *   LTR + advance  → clockwise (out top→right, in left→top)
+     *   LTR + regress  → counter-clockwise (out top→left, in right→top)
+     *   RTL + advance  → counter-clockwise (mirrored to RTL reading)
+     *   RTL + regress  → clockwise
+     */
+    transitionSign: 1 | -1;
     compact?: boolean;
 }
 
 /**
- * The visual stage. Three behaviours coordinate per pillar transition:
+ * Visual stage. Two layers per pillar transition:
  *
- *  1. The half-circle backdrop (true semicircle, aspect 2:1) stays fixed but
- *     fades from solid primary at top to transparent at the bottom edge,
- *     matching the Figma frame's "blends into white" treatment.
+ *  1. The half-circle backdrop (true semicircle, aspect 2/1) with a
+ *     fade-to-white mask at the bottom. Bullets cross-fade on activeIndex.
  *
- *  2. The small white circle traces a short orbital arc (right-and-up, then
- *     back) on each step — this is the "circle moving on an orbit" the user
- *     asked for. The orbital wrapper is keyed on activeIndex so each step
- *     re-runs the keyframe sequence cleanly.
+ *  2. The small white circle managed by AnimatePresence with mode="popLayout".
+ *     The OUTGOING circle traces the half-circle's actual arc clockwise from
+ *     top → past the right edge → down into the bottom-right fade zone, and
+ *     fades out along the way. The INCOMING circle simultaneously emerges
+ *     from the bottom-left fade zone and rides the same arc up to the top.
+ *     Both circles co-exist mid-transition, traveling clockwise on the same
+ *     orbit.
  *
- *  3. Inside the small circle, the disc visually spins 360° clockwise (or
- *     counter-clockwise in RTL) per step. A primary-coloured rim notch makes
- *     the rotation perceptible — a perfectly symmetric circle would otherwise
- *     hide the spin. Content is overlaid on top (not inside the rotating
- *     disc) so the number + title stay upright while the disc spins behind
- *     them; the content cross-fades at mid-rotation.
+ *     The orbit radius equals the half-circle's rendered height (measured at
+ *     runtime via ResizeObserver) so the small circle's path tracks the
+ *     half-circle's outer edge exactly. Position is parameterised by angle
+ *     θ from "straight up": x = R·sin(θ), y = R·(1 − cos(θ)). Sampling at
+ *     ~10° increments produces a path indistinguishable from a continuous
+ *     circular arc when framer-motion linearly interpolates between samples.
  */
-function PillarStage({ active, activeIndex, direction, compact = false }: PillarStageProps) {
+function PillarStage({ active, activeIndex, direction, transitionSign, compact = false }: PillarStageProps) {
     const innerSize = compact ? 'w-40 h-40' : 'w-56 h-56 lg:w-64 lg:h-64';
     const stageMaxWidth = compact ? '100%' : 'min(900px, 90vw)';
 
-    // Sweep magnitude scales with size; capped so the circle stays anchored.
-    const sweepX = compact ? 36 : 60;
-    const sweepY = compact ? -10 : -16;
+    // Measure the half-circle's rendered height; that becomes the orbit radius.
+    const halfCircleRef = useRef<HTMLDivElement>(null);
+    const [orbitR, setOrbitR] = useState(compact ? 130 : 450);
+
+    useEffect(() => {
+        const el = halfCircleRef.current;
+        if (!el || typeof window === 'undefined') return;
+        const update = (h: number) => {
+            // Cap mobile orbit so the small circle doesn't overshoot the
+            // tight half-circle on small viewports.
+            setOrbitR(compact ? Math.min(150, h * 0.85) : h);
+        };
+        update(el.getBoundingClientRect().height);
+        const observer = new ResizeObserver((entries) => {
+            for (const entry of entries) update(entry.contentRect.height);
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [compact]);
+
+    // Dense keyframes for smooth arc — 12 samples over a 120° arc ≈ 10° per
+    // step, well below where linear interpolation reads as faceted.
+    const SAMPLES = 12;
+    const ANGLE_RANGE_DEG = 120;
+    const times = Array.from({ length: SAMPLES + 1 }, (_, i) => i / SAMPLES);
+
+    // Combined custom data passed to AnimatePresence and the motion.div.
+    // Variants below read this at animation-evaluation time, NOT at render
+    // time, so even an exiting child (already removed from JSX) uses the
+    // current transitionSign — fixes the stale-prop bug on first transition
+    // and direction reversals.
+    const xSign = direction * transitionSign;
+    const customData = { xSign, orbitR };
+
+    type CustomData = typeof customData;
+
+    const variants = {
+        // Static start position for the entering circle: the first sample of
+        // the incoming arc (bottom-left in LTR-forward, mirrored otherwise).
+        initial: ({ xSign, orbitR }: CustomData) => {
+            const startRad = (-ANGLE_RANGE_DEG * Math.PI) / 180;
+            return {
+                x: orbitR * Math.sin(startRad) * xSign,
+                y: orbitR * (1 - Math.cos(startRad)),
+                opacity: 0,
+            };
+        },
+        // Entering arc: from -ANGLE_RANGE → 0° (riding up the orbit to top).
+        enter: ({ xSign, orbitR }: CustomData) => {
+            const xs: number[] = [];
+            const ys: number[] = [];
+            const ops: number[] = [];
+            for (let i = 0; i <= SAMPLES; i++) {
+                const t = i / SAMPLES;
+                const inRad = ((-ANGLE_RANGE_DEG + ANGLE_RANGE_DEG * t) * Math.PI) / 180;
+                xs.push(orbitR * Math.sin(inRad) * xSign);
+                ys.push(orbitR * (1 - Math.cos(inRad)));
+                // Invisible for first ~35% (still in fade zone), then fades in.
+                ops.push(Math.max(0, Math.min(1, (t - 0.35) / 0.55)));
+            }
+            return { x: xs, y: ys, opacity: ops };
+        },
+        // Exiting arc: from top (0°) → +ANGLE_RANGE (riding down the orbit
+        // into the fade zone).
+        exit: ({ xSign, orbitR }: CustomData) => {
+            const xs: number[] = [];
+            const ys: number[] = [];
+            const ops: number[] = [];
+            for (let i = 0; i <= SAMPLES; i++) {
+                const t = i / SAMPLES;
+                const outRad = (ANGLE_RANGE_DEG * t * Math.PI) / 180;
+                xs.push(orbitR * Math.sin(outRad) * xSign);
+                ys.push(orbitR * (1 - Math.cos(outRad)));
+                // Solid for first ~35% (still near top, visible), then fades out.
+                ops.push(Math.max(0, Math.min(1, 1 - (t - 0.35) / 0.55)));
+            }
+            return { x: xs, y: ys, opacity: ops };
+        },
+    } as const;
 
     return (
         <div className="relative w-full mx-auto" style={{ maxWidth: stageMaxWidth }}>
-            {/* True half-circle: aspect 2:1 + rounded-t-full = perfect semicircle.
-                The mask gradient in the bottom 45% gives the fade-to-white. */}
-            <div className="relative w-full aspect-[2/1]">
+            {/* True half-circle: aspect 2/1 + rounded-t-full = perfect semicircle. */}
+            <div ref={halfCircleRef} className="relative w-full aspect-2/1">
                 <div
                     className="absolute inset-0 bg-primary rounded-t-full"
                     style={{
@@ -176,7 +338,7 @@ function PillarStage({ active, activeIndex, direction, compact = false }: Pillar
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.4, ease: 'easeInOut' }}
+                            transition={{ duration: 0.5, ease: 'easeInOut' }}
                             className="space-y-1.5 text-white text-center text-sm sm:text-base lg:text-lg max-w-2xl"
                         >
                             {active.bullets.map((b, i) => (
@@ -187,57 +349,38 @@ function PillarStage({ active, activeIndex, direction, compact = false }: Pillar
                 </div>
             </div>
 
-            {/* Centering anchor — the small circle's center lands on the
+            {/* Centering anchor — small circle's resting center sits on the
                 half-circle's top edge. */}
             <div className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 ${innerSize}`}>
-                {/* Orbital sweep wrapper — keyed on activeIndex so each step
-                    triggers a fresh keyframe traversal (right + up, then back). */}
-                <motion.div
-                    key={`orbit-${activeIndex}`}
-                    className="absolute inset-0"
-                    initial={{ x: 0, y: 0 }}
-                    animate={{
-                        x: [0, sweepX * direction, 0],
-                        y: [0, sweepY, 0],
-                    }}
-                    transition={{ duration: 0.95, ease: 'easeInOut', times: [0, 0.5, 1] }}
-                >
-                    {/* Rotating disc — full primary border to match the Figma
-                        frame. The 360° spin still runs (drives the disc behind
-                        the content) but it's intentionally invisible on a
-                        symmetric circle; the orbital arc + content fade carry
-                        the perceived motion. */}
+                <AnimatePresence mode="popLayout" initial={false} custom={customData}>
                     <motion.div
-                        key={`disc-${activeIndex}`}
-                        className="absolute inset-0 rounded-full bg-white shadow-xl border-4 border-primary"
-                        initial={{ rotate: 0 }}
-                        animate={{ rotate: 360 * direction }}
-                        transition={{ duration: 0.95, ease: 'easeInOut' }}
-                    />
+                        key={`pillar-${activeIndex}`}
+                        className="absolute inset-0"
+                        custom={customData}
+                        variants={variants}
+                        initial="initial"
+                        animate="enter"
+                        exit="exit"
+                        transition={{
+                            duration: 1.6,
+                            ease: 'easeInOut',
+                            times,
+                        }}
+                    >
+                        {/* White disc with full primary border. */}
+                        <div className="absolute inset-0 rounded-full bg-white shadow-xl border-4 border-primary" />
 
-
-                    {/* Content overlay — does NOT rotate. Cross-fades at
-                        mid-rotation so the swap reads as part of the spin. */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={`label-${activeIndex}`}
-                                initial={{ opacity: 0, scale: 0.92 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.04 }}
-                                transition={{ duration: 0.4, delay: 0.3, ease: 'easeInOut' }}
-                                className="flex flex-col items-center"
-                            >
-                                <span className="text-2xl sm:text-3xl font-bold text-primary">
-                                    {active.number}
-                                </span>
-                                <span className="mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight">
-                                    {active.title}
-                                </span>
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
+                        {/* Number + title centered inside. */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
+                            <span className="text-2xl sm:text-3xl font-bold text-primary">
+                                {active.number}
+                            </span>
+                            <span className="mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight">
+                                {active.title}
+                            </span>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </div>
         </div>
     );

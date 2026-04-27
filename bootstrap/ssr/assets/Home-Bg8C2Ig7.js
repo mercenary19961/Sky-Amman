@@ -263,6 +263,28 @@ function AssurancePillars({ content }) {
   const wrapperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [transitionSign, setTransitionSign] = useState(1);
+  const activeIndexRef = useRef(0);
+  const targetIndexRef = useRef(0);
+  const isAnimatingRef = useRef(false);
+  const animationTimerRef = useRef(null);
+  const ANIMATION_LOCKOUT_MS = 1700;
+  const startTransition = (nextIndex) => {
+    const sign = nextIndex > activeIndexRef.current ? 1 : -1;
+    isAnimatingRef.current = true;
+    activeIndexRef.current = nextIndex;
+    setTransitionSign(sign);
+    setActiveIndex(nextIndex);
+    if (animationTimerRef.current !== null) {
+      window.clearTimeout(animationTimerRef.current);
+    }
+    animationTimerRef.current = window.setTimeout(() => {
+      isAnimatingRef.current = false;
+      if (targetIndexRef.current !== activeIndexRef.current) {
+        startTransition(targetIndexRef.current);
+      }
+    }, ANIMATION_LOCKOUT_MS);
+  };
   useEffect(() => {
     if (typeof window === "undefined") return;
     const check = () => setIsDesktop(window.innerWidth >= 768);
@@ -279,18 +301,29 @@ function AssurancePillars({ content }) {
       const stickyTravel = wrapper.offsetHeight - window.innerHeight;
       if (stickyTravel <= 0) return;
       const scrolled = -rect.top;
+      let next;
       if (scrolled <= 0) {
-        setActiveIndex(0);
-        return;
+        next = 0;
+      } else {
+        const stepSize = stickyTravel / pillars.length;
+        next = Math.min(pillars.length - 1, Math.floor(scrolled / stepSize));
       }
-      const stepSize = stickyTravel / pillars.length;
-      const next = Math.min(pillars.length - 1, Math.floor(scrolled / stepSize));
-      setActiveIndex(next);
+      targetIndexRef.current = next;
+      if (!isAnimatingRef.current && next !== activeIndexRef.current) {
+        startTransition(next);
+      }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isDesktop, pillars.length]);
+  useEffect(() => {
+    return () => {
+      if (animationTimerRef.current !== null) {
+        window.clearTimeout(animationTimerRef.current);
+      }
+    };
+  }, []);
   const direction = isRTL ? -1 : 1;
   const active = pillars[activeIndex] ?? pillars[0];
   return /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -298,18 +331,40 @@ function AssurancePillars({ content }) {
       "section",
       {
         ref: wrapperRef,
-        className: "hidden md:block relative h-[300vh] bg-surface",
+        className: "hidden md:block relative h-[240vh] bg-surface",
         "aria-label": "Sky Amman assurance pillars",
-        children: /* @__PURE__ */ jsx("div", { className: "sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center", children: /* @__PURE__ */ jsx(PillarStage, { active, activeIndex, direction }) })
+        children: /* @__PURE__ */ jsx("div", { className: "sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center", children: /* @__PURE__ */ jsx(
+          PillarStage,
+          {
+            active,
+            activeIndex,
+            direction,
+            transitionSign
+          }
+        ) })
       }
     ),
     /* @__PURE__ */ jsx("section", { className: "md:hidden bg-surface py-12", "aria-label": "Sky Amman assurance pillars", children: /* @__PURE__ */ jsxs("div", { className: "px-4", children: [
-      /* @__PURE__ */ jsx(PillarStage, { active, activeIndex, direction, compact: true }),
+      /* @__PURE__ */ jsx(
+        PillarStage,
+        {
+          active,
+          activeIndex,
+          direction,
+          transitionSign,
+          compact: true
+        }
+      ),
       /* @__PURE__ */ jsx("div", { className: "mt-6 flex items-center justify-center gap-2", children: pillars.map((p, i) => /* @__PURE__ */ jsx(
         "button",
         {
           type: "button",
-          onClick: () => setActiveIndex(i),
+          onClick: () => {
+            targetIndexRef.current = i;
+            if (!isAnimatingRef.current && i !== activeIndexRef.current) {
+              startTransition(i);
+            }
+          },
           "aria-label": `Show pillar ${p.number}`,
           "aria-current": i === activeIndex,
           className: `h-2.5 rounded-full transition-all ${i === activeIndex ? "w-8 bg-primary" : "w-2.5 bg-primary/30"}`
@@ -319,13 +374,72 @@ function AssurancePillars({ content }) {
     ] }) })
   ] });
 }
-function PillarStage({ active, activeIndex, direction, compact = false }) {
+function PillarStage({ active, activeIndex, direction, transitionSign, compact = false }) {
   const innerSize = compact ? "w-40 h-40" : "w-56 h-56 lg:w-64 lg:h-64";
   const stageMaxWidth = compact ? "100%" : "min(900px, 90vw)";
-  const sweepX = compact ? 36 : 60;
-  const sweepY = compact ? -10 : -16;
+  const halfCircleRef = useRef(null);
+  const [orbitR, setOrbitR] = useState(compact ? 130 : 450);
+  useEffect(() => {
+    const el = halfCircleRef.current;
+    if (!el || typeof window === "undefined") return;
+    const update = (h) => {
+      setOrbitR(compact ? Math.min(150, h * 0.85) : h);
+    };
+    update(el.getBoundingClientRect().height);
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) update(entry.contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [compact]);
+  const SAMPLES = 12;
+  const ANGLE_RANGE_DEG = 120;
+  const times = Array.from({ length: SAMPLES + 1 }, (_, i) => i / SAMPLES);
+  const xSign = direction * transitionSign;
+  const customData = { xSign, orbitR };
+  const variants = {
+    // Static start position for the entering circle: the first sample of
+    // the incoming arc (bottom-left in LTR-forward, mirrored otherwise).
+    initial: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const startRad = -ANGLE_RANGE_DEG * Math.PI / 180;
+      return {
+        x: orbitR2 * Math.sin(startRad) * xSign2,
+        y: orbitR2 * (1 - Math.cos(startRad)),
+        opacity: 0
+      };
+    },
+    // Entering arc: from -ANGLE_RANGE → 0° (riding up the orbit to top).
+    enter: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const xs = [];
+      const ys = [];
+      const ops = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const t = i / SAMPLES;
+        const inRad = (-ANGLE_RANGE_DEG + ANGLE_RANGE_DEG * t) * Math.PI / 180;
+        xs.push(orbitR2 * Math.sin(inRad) * xSign2);
+        ys.push(orbitR2 * (1 - Math.cos(inRad)));
+        ops.push(Math.max(0, Math.min(1, (t - 0.35) / 0.55)));
+      }
+      return { x: xs, y: ys, opacity: ops };
+    },
+    // Exiting arc: from top (0°) → +ANGLE_RANGE (riding down the orbit
+    // into the fade zone).
+    exit: ({ xSign: xSign2, orbitR: orbitR2 }) => {
+      const xs = [];
+      const ys = [];
+      const ops = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const t = i / SAMPLES;
+        const outRad = ANGLE_RANGE_DEG * t * Math.PI / 180;
+        xs.push(orbitR2 * Math.sin(outRad) * xSign2);
+        ys.push(orbitR2 * (1 - Math.cos(outRad)));
+        ops.push(Math.max(0, Math.min(1, 1 - (t - 0.35) / 0.55)));
+      }
+      return { x: xs, y: ys, opacity: ops };
+    }
+  };
   return /* @__PURE__ */ jsxs("div", { className: "relative w-full mx-auto", style: { maxWidth: stageMaxWidth }, children: [
-    /* @__PURE__ */ jsxs("div", { className: "relative w-full aspect-[2/1]", children: [
+    /* @__PURE__ */ jsxs("div", { ref: halfCircleRef, className: "relative w-full aspect-2/1", children: [
       /* @__PURE__ */ jsx(
         "div",
         {
@@ -342,53 +456,37 @@ function PillarStage({ active, activeIndex, direction, compact = false }) {
           initial: { opacity: 0, y: 10 },
           animate: { opacity: 1, y: 0 },
           exit: { opacity: 0, y: -10 },
-          transition: { duration: 0.4, ease: "easeInOut" },
+          transition: { duration: 0.5, ease: "easeInOut" },
           className: "space-y-1.5 text-white text-center text-sm sm:text-base lg:text-lg max-w-2xl",
           children: active.bullets.map((b, i) => /* @__PURE__ */ jsx("li", { children: b }, i))
         },
         `bullets-${activeIndex}`
       ) }) })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: `absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 ${innerSize}`, children: /* @__PURE__ */ jsxs(
+    /* @__PURE__ */ jsx("div", { className: `absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 ${innerSize}`, children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "popLayout", initial: false, custom: customData, children: /* @__PURE__ */ jsxs(
       motion.div,
       {
         className: "absolute inset-0",
-        initial: { x: 0, y: 0 },
-        animate: {
-          x: [0, sweepX * direction, 0],
-          y: [0, sweepY, 0]
+        custom: customData,
+        variants,
+        initial: "initial",
+        animate: "enter",
+        exit: "exit",
+        transition: {
+          duration: 1.6,
+          ease: "easeInOut",
+          times
         },
-        transition: { duration: 0.95, ease: "easeInOut", times: [0, 0.5, 1] },
         children: [
-          /* @__PURE__ */ jsx(
-            motion.div,
-            {
-              className: "absolute inset-0 rounded-full bg-white shadow-xl border-2 border-primary",
-              initial: { rotate: 0 },
-              animate: { rotate: 360 * direction },
-              transition: { duration: 0.95, ease: "easeInOut" }
-            },
-            `disc-${activeIndex}`
-          ),
-          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none", children: /* @__PURE__ */ jsx(AnimatePresence, { mode: "wait", children: /* @__PURE__ */ jsxs(
-            motion.div,
-            {
-              initial: { opacity: 0, scale: 0.92 },
-              animate: { opacity: 1, scale: 1 },
-              exit: { opacity: 0, scale: 1.04 },
-              transition: { duration: 0.4, delay: 0.3, ease: "easeInOut" },
-              className: "flex flex-col items-center",
-              children: [
-                /* @__PURE__ */ jsx("span", { className: "text-2xl sm:text-3xl font-bold text-primary", children: active.number }),
-                /* @__PURE__ */ jsx("span", { className: "mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight", children: active.title })
-              ]
-            },
-            `label-${activeIndex}`
-          ) }) })
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 rounded-full bg-white shadow-xl border-4 border-primary" }),
+          /* @__PURE__ */ jsxs("div", { className: "absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-2xl sm:text-3xl font-bold text-primary", children: active.number }),
+            /* @__PURE__ */ jsx("span", { className: "mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight", children: active.title })
+          ] })
         ]
       },
-      `orbit-${activeIndex}`
-    ) })
+      `pillar-${activeIndex}`
+    ) }) })
   ] });
 }
 function ProjectShowcase({ content, projects }) {
