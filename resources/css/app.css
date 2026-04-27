@@ -3,9 +3,45 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
-@source '../**/*.js';
+@source '../**/*.tsx';
+@source '../**/*.ts';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    /* Sky Amman brand palette — sky-blue primary tones, light theme only. */
+    --color-primary: #94C4EE;
+    --color-primary-deep: #78AFCE;
+    --color-primary-light: #C8DEF1;
+    --color-primary-dark: #5C92B8;
+    --color-surface: #FFFFFF;
+    --color-surface-muted: #F5F8FB;
+    --color-ink: #1A2433;
+    --color-ink-muted: #5C6B82;
+
+    --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-arabic: 'IBM Plex Sans Arabic', var(--font-sans);
+}
+
+html[dir="rtl"] body {
+    font-family: var(--font-arabic);
+}
+
+@keyframes toast-slide-in {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-toast-in {
+    animation: toast-slide-in 200ms ease-out;
+}
+
+/* Slow horizontal drift for the footer cloud layer. The image is sized to 200%
+   width so a 50% horizontal shift loops seamlessly back to start. */
+@keyframes cloud-drift {
+    from { background-position-x: 0%; }
+    to { background-position-x: -50%; }
+}
+
+.animate-cloud-drift {
+    animation: cloud-drift 90s linear infinite;
 }

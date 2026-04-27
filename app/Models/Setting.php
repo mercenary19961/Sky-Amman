@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Setting extends Model
+{
+    protected $fillable = [
+        'key',
+        'value',
+        'type',
+        'group',
+        'updated_by',
+    ];
+
+    public function updatedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $row = static::where('key', $key)->first();
+        return $row ? $row->value : $default;
+    }
+
+    public static function set(string $key, mixed $value, ?int $userId = null): self
+    {
+        return static::updateOrCreate(
+            ['key' => $key],
+            ['value' => $value, 'updated_by' => $userId],
+        );
+    }
+
+    public static function getGroup(string $group): array
+    {
+        return static::where('group', $group)
+            ->pluck('value', 'key')
+            ->toArray();
+    }
+
+    /**
+     * Decode a JSON-typed setting (e.g. the lead-routing map). Returns
+     * an empty array if the key is missing or unparsable.
+     */
+    public static function getJson(string $key): array
+    {
+        $raw = static::get($key);
+        if (! $raw) {
+            return [];
+        }
+        $decoded = json_decode($raw, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+}

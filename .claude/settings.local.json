@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \"^$\")",
+      "Bash(npm ls *)",
+      "Bash(composer show *)",
+      "Bash(npm install *)",
+      "Bash(composer update *)",
+      "Bash(npx vite *)",
+      "Bash(rm -f database/migrations/2026_04_26_000006_create_properties_table.php database/migrations/2026_04_26_000007_create_property_images_table.php database/migrations/2026_04_26_000008_create_investment_opportunities_table.php database/migrations/2026_04_26_000009_create_self_build_packages_table.php database/migrations/2026_04_26_000010_create_contact_submissions_table.php database/migrations/2026_04_26_000011_create_change_logs_table.php)",
+      "Read(//c/c/Users/sabba/Desktop/projects/sky-amman/database/**)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -o /tmp/home.html -w \"HTTP %{http_code}\\\\nSize: %{size_download} bytes\\\\n\" http://127.0.0.1:8000/)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="p5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#A8CDF0"/>
+      <stop offset="100%" stop-color="#5C92B8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#p5)"/>
+  <text x="400" y="300" font-family="system-ui, sans-serif" font-size="42" fill="#FFFFFF" text-anchor="middle" font-weight="700" opacity="0.9">DABOUQ 5</text>
+  <text x="400" y="350" font-family="system-ui, sans-serif" font-size="22" fill="#FFFFFF" text-anchor="middle" opacity="0.75">850 m²</text>
+</svg>

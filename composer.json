@@ -10,6 +10,7 @@
         "inertiajs/inertia-laravel": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "resend/resend-laravel": "^0.17",
         "tightenco/ziggy": "^2.6"
     },
     "require-dev": {
