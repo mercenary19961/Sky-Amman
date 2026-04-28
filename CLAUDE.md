@@ -83,7 +83,7 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 - Flash messages: server `->with('success', '...')` → client reads via `usePage().props.flash`. `ToastContext` auto-shows them.
 
 ### CSRF / Session Handling (CRITICAL)
-- Global `router.on('invalid')` handler in [resources/js/app.tsx](resources/js/app.tsx) auto-reloads on 419
+- Global `router.on('httpException')` handler in [resources/js/app.tsx](resources/js/app.tsx) auto-reloads on 419. **Note:** Inertia v3 renamed v2's `'invalid'` event to `'httpException'`; same payload shape (`event.detail.response.status`).
 - Language/locale toggle uses POST (CSRF-protected) — the 419 handler ensures graceful recovery
 - Production MUST use `SESSION_DRIVER=database` (Railway's filesystem is ephemeral)
 
@@ -111,8 +111,9 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 ### Theme
 - **Light only.** Do not write `dark:` Tailwind variants. Do not create a `ThemeProvider`. No localStorage theme key.
 - Brand colors via Tailwind v4 `@theme` tokens in [resources/css/app.css](resources/css/app.css):
-  `--color-primary` (sky blue #5BA4D8), `--color-primary-dark`, `--color-primary-light`, `--color-surface`, `--color-surface-muted`, `--color-ink`, `--color-ink-muted`.
-- RTL font swap: `Cairo` for Arabic via `html[dir="rtl"] body` selector.
+  `--color-primary` (sky blue #94C4EE), `--color-primary-deep` (#78AFCE — used for footer / dark sections), `--color-primary-dark` (#5C92B8), `--color-primary-light` (#C8DEF1), `--color-surface`, `--color-surface-muted`, `--color-ink`, `--color-ink-muted`.
+- Fonts: `Outfit` (Latin / EN) + `IBM Plex Sans Arabic` (AR), both loaded from Google Fonts via `<link rel="preconnect">` in [resources/views/app.blade.php](resources/views/app.blade.php). RTL font swap via `html[dir="rtl"] body` selector.
+- Custom keyframes in [resources/css/app.css](resources/css/app.css): `toast-slide-in` for ToastContext, `cloud-drift` for the Footer parallax cloud layer (90s linear infinite, 200% bg-width for seamless loop).
 
 ### File Storage
 - Use [`Media::storeFile()`](app/Models/Media.php) — randomizes filename, stores under `storage/app/private/media/{folder}/`, creates the model row. Never bypass.
@@ -182,9 +183,9 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 - **Framework**: Inertia.js — bridges Laravel controllers to React page components
 - **Rendering**: SSR via `@inertiajs/react/server` + `hydrateRoot` on client. SSR + client wrap pages with `LanguageProvider` + `ToastProvider` so SSR markup matches client hydration.
 - **Data flow**: Controllers pass data as props via `Inertia::render('Page/Name', [...props])`
-- **Styling**: TailwindCSS v4 (`@import 'tailwindcss'`) with custom `@theme` tokens, Inter (EN) + Cairo (AR), light theme only
+- **Styling**: TailwindCSS v4 (`@import 'tailwindcss'`) with custom `@theme` tokens, Outfit (EN) + IBM Plex Sans Arabic (AR), light theme only
 - **Icons**: `lucide-react` for generic UI icons. **NOT for brand icons** — see Foundation Gotchas below.
-- **Animations**: framer-motion (installed, not yet used)
+- **Animations**: framer-motion (used by [AssurancePillars](resources/js/Components/Home/AssurancePillars.tsx) for scroll-driven scrollytelling — pinned section with orbital arc transitions between three pillars; single-flight transition gate to prevent overlapping animations on fast scroll)
 - **i18n**: react-i18next with EN/AR translation files (bundled, not HTTP-loaded). Init at 'en'; `LanguageContext` drives `i18n.changeLanguage()` post-hydrate based on session locale.
 - **Build**: `npm run build` runs both client AND SSR (`vite build && vite build --ssr`). Outputs client to `public/build/`, SSR to `bootstrap/ssr/`.
 - **SSR safety**: All `window`/`document`/`localStorage` access guarded with `typeof window !== 'undefined'`
@@ -194,30 +195,34 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 ## Key File Locations
 
 ```
-resources/js/Pages/Public/         → Public page components (Welcome.tsx)
+resources/js/Pages/Public/         → Public page components (Home.tsx)
 resources/js/Pages/Admin/          → Admin page components (Login.tsx, Dashboard.tsx)
 resources/js/Layouts/              → PublicLayout, AdminLayout
-resources/js/Components/Layout/    → Header, Footer, AdminSidebar, SocialIcons (inline brand SVGs)
+resources/js/Components/Layout/    → Header (transparent + color-aware), Footer (parallax villa+clouds), AdminSidebar, SocialIcons (inline brand SVGs)
+resources/js/Components/Home/      → HomeHero, InvestmentBanner, AssurancePillars (scrollytelling), ProjectShowcase, ValueProposition, MediaRoom, LocationMap
 resources/js/Components/Public/    → Turnstile widget (and future shared public components)
-resources/js/types/                → PageProps, User, SiteSettings, Flash interfaces
+resources/js/types/                → PageProps, User, SiteSettings, Flash interfaces (index.ts) + per-page prop types (home.ts: HomePageProps, FeaturedProject, SiteContentBundle)
 resources/js/i18n/                 → en.ts, ar.ts, index.ts (i18next init)
 resources/js/contexts/             → LanguageContext, ToastContext (no ThemeContext)
 resources/js/lib/                  → cn helper (clsx + tailwind-merge)
-resources/js/app.tsx               → Client entry — wraps with Providers, hydrateRoot/createRoot, 419 handler
-resources/js/ssr.tsx               → SSR entry — same provider tree as client
+resources/js/app.tsx               → Client entry — wraps with Providers, hydrateRoot/createRoot, 'httpException' (419) handler, v3 resolver unwrap
+resources/js/ssr.tsx               → SSR entry — same provider tree as client, same v3 resolver unwrap
 resources/js/bootstrap.ts          → axios global setup
-resources/views/app.blade.php      → Root Blade template (@inertia, @vite, lang/dir on <html>)
-resources/css/app.css              → Tailwind import + @theme tokens + RTL font swap
+resources/views/app.blade.php      → Root Blade template (@inertia, @vite, lang/dir on <html>, Google Fonts preconnect for Outfit + IBM Plex Sans Arabic)
+resources/css/app.css              → Tailwind import + @theme tokens + RTL font swap + cloud-drift / toast-slide-in keyframes
+
+public/images/home/                → Seeded SVGs: hero-villa, footer-villa, footer-clouds, buy-early-strip
+public/images/projects/            → Seeded SVGs: dabouq-3..6 (placeholder renders until Media Library is live)
 
 app/Models/                        → User, Page, SiteContent, Media, Setting, Project, ProjectImage, ContactSubmission, ChangeLog
-app/Http/Controllers/              → LocaleController (POST /locale/{lang})
+app/Http/Controllers/              → HomeController (homepage with both EN/AR content bundles + featured projects + media embeds), LocaleController (POST /locale/{lang})
 app/Http/Controllers/Auth/         → LoginController (login/logout + per-email throttle)
 app/Http/Middleware/               → HandleInertiaRequests, SetLocale, SecurityHeaders, AdminMiddleware
 app/Services/                      → TurnstileVerifier
 app/Mail/                          → Mailable classes (none yet)
 
 database/migrations/2026_04_26_*   → 9 foundation migrations
-database/seeders/                  → AdminUserSeeder, DefaultSettingsSeeder, PagesSeeder, SiteContentSeeder, DatabaseSeeder
+database/seeders/                  → AdminUserSeeder, DefaultSettingsSeeder, PagesSeeder, SiteContentSeeder, ProjectsSeeder, DatabaseSeeder
 
 routes/web.php                     → All routes (public + admin)
 bootstrap/app.php                  → Middleware registration, trustProxies CIDRs, admin alias
@@ -277,6 +282,7 @@ These extend the Nuor playbook for real-estate-specific needs.
 3. **Lead routing by request type** — Contact form has a `request_type` enum (Buy / Rent / Build / Investment / General). Settings page maps each type → recipient email(s) via the `lead_routing` JSON setting. The Mailable picks recipients dynamically at send time.
 4. **Per-project inquiries** — Contact submissions can carry an optional `project_id` FK. "Contact about this project" CTAs pre-fill the form. Admin project listings show an inquiries count badge per row.
 5. **Section show/hide toggles** — `site_content` rows have an `is_visible` boolean. Admin can hide an entire homepage section (e.g. "Stats") without a code deploy. Public pages skip rendering when `is_visible=false`. Page-level visibility lives on `pages.is_visible`.
+6. **Color-aware transparent navbar** — [Header](resources/js/Components/Layout/Header.tsx) is `position: fixed` and overlays section content. Sections opt into a navbar tone by setting `data-nav-bg="dark"` (or `"light"`) on their root element. The header samples the section currently overlapping its centerline (32px down) on scroll/resize and swaps logo + link + toggle colors accordingly. Adding a section with a dark hero? Add `data-nav-bg="dark"` to its wrapper. Pages without a top hero must add their own top padding for the navbar height.
 
 ### CMS Approach
 
@@ -311,9 +317,12 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 
 `DefaultSettingsSeeder` seeds empty social URL settings. The [Footer](resources/js/Components/Layout/Footer.tsx) only renders icons for configured platforms — empty values are filtered out. Fill them in via Settings before launch (LinkedIn, Instagram are the priorities).
 
-### Inertia version
+### Inertia v3 differences vs Nuor Steel's v2
 
-`inertiajs/inertia-laravel` is on `^3.0` (v3.0.4 currently installed). Nuor Steel uses `^2.0`. Both work; v3 has slightly different middleware shape but the API used in this codebase is identical.
+`inertiajs/inertia-laravel` is on `^3.0` (Nuor Steel uses `^2.0`). Two real differences bit during the homepage build — don't blindly copy snippets from Nuor:
+
+1. **Event renamed:** The 419/CSRF auto-reload listener is `router.on('httpException', ...)` in v3, not `router.on('invalid', ...)`. Same payload shape (`event.detail.response.status`), same `event.preventDefault()` pattern. Applied in [resources/js/app.tsx](resources/js/app.tsx).
+2. **Page resolver must unwrap `.default`:** v3's `resolve` callback expects `Promise<Component>`, but `resolvePageComponent` returns `Promise<{ default: Component }>`. Chain `.then((m) => m.default)` in both [app.tsx](resources/js/app.tsx) and [ssr.tsx](resources/js/ssr.tsx). Without the unwrap you get a runtime "page is not a function" error during hydration.
 
 ---
 
@@ -343,12 +352,13 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 
 ### Seeders (DONE)
 - [x] AdminUserSeeder — admin@skyamman.com
-- [x] DefaultSettingsSeeder — 18 rows (contact, social, map, SEO, lead_routing JSON)
+- [x] DefaultSettingsSeeder — 21 rows (contact, social, map, media_room embeds, SEO, lead_routing JSON)
 - [x] PagesSeeder — 7 pages
-- [x] SiteContentSeeder — 63 rows covering all pages
+- [x] SiteContentSeeder — 68 rows covering all pages
+- [x] ProjectsSeeder — 4 DABOUQ villa projects (mix of under_development / ready / investment) — featured for the homepage Project Showcase carousel
 
 ### Public Pages (vertical builds, one at a time — TODO)
-- [ ] Homepage — content from `site_content` + Project Showcase carousel
+- [x] Homepage — 8 sections (Hero, InvestmentBanner, AssurancePillars scrollytelling, ProjectShowcase, ValueProposition, MediaRoom, LocationMap) wired through HomeController with EN+AR bundles, featured projects from `projects` table, and Settings-driven map / media-room embeds. Transparent color-aware navbar + parallax villa-and-clouds footer.
 - [ ] Properties (listings + detail) — pulls from `projects` filtered by category
 - [ ] Investment (content-only editorial)
 - [ ] Self Build (content-only with 7-step Process Flow timeline)
@@ -382,7 +392,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-04-26 — foundation complete (Waves 1–9), end-to-end verified
+> **Last updated:** 2026-04-28 — homepage shipped (8 sections, scrollytelling, color-aware navbar, parallax footer); Inertia v3 quirks documented
 
 ---
 
@@ -404,6 +414,11 @@ Rules:
 - Keep under 72 characters
 - Use present tense ("add" not "added")
 - Be specific about what changed, not generic ("fix: resolve 419 CSRF error on language toggle" not "fix: fix bug")
+
+## Collaboration — Commit Message Suggestions
+
+After completing any task that touches code, end the reply with a one-line suggested commit message in the project's conventional style (`type(scope): summary`, lowercase subject, imperative mood — e.g. `feat(admin/applications): mark new applications viewed on open`). Do NOT run the commit — just suggest the message so the user can copy/paste it. Skip this when the task was purely exploratory (reading, answering questions) or when no files changed.
+
 
 ---
 
