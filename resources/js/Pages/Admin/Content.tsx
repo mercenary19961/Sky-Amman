@@ -1,7 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-    Eye, EyeOff, Save, Maximize2, Minimize2,
+    AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
     ExternalLink, MousePointerClick, ChevronRight,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -75,6 +75,15 @@ export default function ContentEditor() {
 
     // Which page accordion is open — only one at a time
     const [expandedPage, setExpandedPage] = useState<string | null>(orderedPages[0] ?? null);
+
+    useEffect(() => {
+        const hash = window.location.hash.slice(1);
+        if (!hash || !orderedPages.includes(hash)) return;
+        setExpandedPage(hash);
+        setTimeout(() => {
+            document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+    }, []);
 
     // Which page is currently saving
     const [processing, setProcessing] = useState<string | null>(null);
@@ -239,6 +248,7 @@ export default function ContentEditor() {
                         return (
                             <div
                                 key={slug}
+                                id={slug}
                                 className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
                             >
                                 {/* Accordion header */}
@@ -263,6 +273,12 @@ export default function ContentEditor() {
                                     {!seo.is_visible && (
                                         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
                                             Hidden
+                                        </span>
+                                    )}
+                                    {seo.is_visible && !seo.seo_title_en.trim() && (
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
+                                            <AlertTriangle size={10} />
+                                            No SEO title
                                         </span>
                                     )}
                                     {isOpen && (

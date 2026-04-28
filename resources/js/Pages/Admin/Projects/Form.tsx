@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertTriangle, ArrowLeft, Save } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
@@ -84,9 +84,9 @@ function SectionHeader({ title, description, warning }: { title: string; descrip
     );
 }
 
-function Section({ children }: { children: React.ReactNode }) {
+function Section({ children, id }: { children: React.ReactNode; id?: string }) {
     return (
-        <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5 mb-4">
+        <div id={id} className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5 mb-4">
             {children}
         </div>
     );
@@ -134,6 +134,13 @@ export default function ProjectForm() {
     const [data, setData] = useState<FormData>(() => initialData(item));
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
+
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (!hash) return;
+        const el = document.getElementById(hash.slice(1));
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    }, []);
 
     // Gallery state lives here so the form can read og_image_id / featured_image_id
     // from the gallery's "set as OG / set as featured" buttons.
@@ -339,7 +346,7 @@ export default function ProjectForm() {
                 </Section>
 
                 {/* ── SEO ── */}
-                <Section>
+                <Section id="section-seo">
                     <SectionHeader
                         title="SEO"
                         description={isEdit ? 'OG image is picked from the gallery below.' : 'Save the project first, then upload images and set the OG image from the gallery.'}
@@ -387,7 +394,7 @@ export default function ProjectForm() {
 
             {/* ── Gallery (edit only) ── */}
             {isEdit && (
-                <Section>
+                <Section id="section-gallery">
                     <SectionHeader
                         title="Gallery"
                         description="Drag to reorder. First image is the card thumbnail. Set one as OG to use it for social sharing previews."

@@ -146,7 +146,7 @@ function BarRow({ label, count, max, colorClass }: { label: string; count: numbe
     );
 }
 
-function HealthItem({ items, editPath, label }: { items: ContentHealthItem[]; editPath: string; label: string }) {
+function HealthItem({ items, editPath, label, hash }: { items: ContentHealthItem[]; editPath: string; label: string; hash?: string }) {
     if (items.length === 0) return null;
     return (
         <div>
@@ -156,7 +156,7 @@ function HealthItem({ items, editPath, label }: { items: ContentHealthItem[]; ed
                     <li key={item.id} className="flex items-center justify-between gap-2">
                         <span className="text-sm text-ink truncate flex-1">{item.title_en}</span>
                         <Link
-                            href={`${editPath}${item.id}/edit`}
+                            href={`${editPath}${item.id}/edit${hash ?? ''}`}
                             className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5"
                         >
                             Fix <ExternalLink size={10} />
@@ -386,6 +386,7 @@ export default function Dashboard() {
                                         items={contentHealth.projectsMissingImages}
                                         editPath="/admin/projects/"
                                         label=""
+                                        hash="#section-gallery"
                                     />
                                 </div>
                             )}
@@ -401,6 +402,7 @@ export default function Dashboard() {
                                         items={contentHealth.projectsMissingSeo}
                                         editPath="/admin/projects/"
                                         label=""
+                                        hash="#section-seo"
                                     />
                                 </div>
                             )}
@@ -416,7 +418,7 @@ export default function Dashboard() {
                                         {contentHealth.emptySocialKeys.map(key => (
                                             <Link
                                                 key={key}
-                                                href="/admin/settings"
+                                                href="/admin/settings#section-social"
                                                 className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-ink-muted hover:text-primary transition-colors"
                                             >
                                                 {SOCIAL_LABELS[key] ?? key}
@@ -437,7 +439,7 @@ export default function Dashboard() {
                                         {contentHealth.hiddenPages.map(p => (
                                             <div key={p.slug} className="flex items-center justify-between gap-2">
                                                 <span className="text-sm text-ink">{p.title_en} <span className="text-xs text-ink-muted">(page)</span></span>
-                                                <Link href="/admin/content" className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5">
+                                                <Link href={`/admin/content#${p.slug}`} className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5">
                                                     Fix <ExternalLink size={10} />
                                                 </Link>
                                             </div>
@@ -445,7 +447,7 @@ export default function Dashboard() {
                                         {contentHealth.hiddenSections.map(s => (
                                             <div key={`${s.page}-${s.section}`} className="flex items-center justify-between gap-2">
                                                 <span className="text-sm text-ink capitalize">{s.section.replace(/_/g, ' ')} <span className="text-xs text-ink-muted">on {s.page}</span></span>
-                                                <Link href="/admin/content" className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5">
+                                                <Link href={`/admin/content#${s.page}`} className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5">
                                                     Fix <ExternalLink size={10} />
                                                 </Link>
                                             </div>

@@ -1,6 +1,6 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { AlertTriangle, Save } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import type { SettingsPageProps, SettingRow } from '@/types/admin/settings';
 
@@ -16,6 +16,9 @@ const GROUP_LABELS: Record<string, string> = {
 };
 
 const GROUP_ORDER = ['contact', 'social', 'map', 'media_room', 'seo', 'leads'];
+
+const SOCIAL_KEYS = ['linkedin_url', 'instagram_url', 'facebook_url', 'twitter_url', 'youtube_url', 'tiktok_url'];
+const CONTACT_REQUIRED_KEYS = ['company_phone', 'company_email'];
 
 const SETTING_LABELS: Record<string, string> = {
     company_phone:        'Phone',
@@ -63,6 +66,13 @@ function Label({ children }: { children: React.ReactNode }) {
 export default function Settings() {
     const { settings } = usePage<SettingsPageProps>().props;
     const [processing, setProcessing] = useState(false);
+
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (!hash) return;
+        const el = document.getElementById(hash.slice(1));
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    }, []);
 
     // Flat key→value for all settings
     const [values, setValues] = useState<Record<string, string>>(() => {
@@ -128,11 +138,32 @@ export default function Settings() {
                     return (
                         <div
                             key={group}
+                            id={`section-${group}`}
                             className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5"
                         >
-                            <h2 className="text-sm font-semibold text-ink mb-4">
-                                {GROUP_LABELS[group] ?? group}
-                            </h2>
+                                {(() => {
+                                let warning: string | null = null;
+                                if (group === 'social') {
+                                    const empty = SOCIAL_KEYS.filter(k => !(values[k] ?? '').trim()).length;
+                                    warning = empty > 0 ? `${empty} not set` : null;
+                                } else if (group === 'contact') {
+                                    const missing = CONTACT_REQUIRED_KEYS.filter(k => !(values[k] ?? '').trim());
+                                    warning = missing.length > 0 ? `${missing.length === 1 ? (missing[0] === 'company_phone' ? 'phone' : 'email') : 'phone & email'} missing` : null;
+                                } else if (group === 'seo') {
+                                    warning = !(values['seo_title_en'] ?? '').trim() ? 'Default title missing' : null;
+                                }
+                                return (
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <h2 className="text-sm font-semibold text-ink">{GROUP_LABELS[group] ?? group}</h2>
+                                        {warning && (
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                                                <AlertTriangle size={10} />
+                                                {warning}
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            })()}
 
                             {group === 'leads' ? (
                                 // Lead routing — special UI: 5 email fields
