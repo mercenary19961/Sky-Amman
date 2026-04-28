@@ -210,7 +210,7 @@ export default function ContentEditor() {
                         className={cn(
                             'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
                             expandedPage === slug
-                                ? 'bg-primary text-white'
+                                ? 'bg-primary text-zinc-900'
                                 : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
                         )}
                     >
@@ -275,7 +275,7 @@ export default function ContentEditor() {
                                                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors',
                                                 isSaving
                                                     ? 'bg-primary/50 text-white cursor-not-allowed'
-                                                    : 'bg-primary text-white hover:bg-primary-dark',
+                                                    : 'bg-primary text-zinc-900 hover:bg-primary-dark',
                                             )}
                                         >
                                             <Save size={12} />
@@ -401,13 +401,21 @@ export default function ContentEditor() {
                                             );
                                         })}
 
-                                        {/* Bottom save */}
-                                        <div className="flex justify-end px-5 py-4">
+                                        {/* Bottom save + collapse */}
+                                        <div className="flex items-center justify-between px-5 py-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedPage(null)}
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-700 border border-ink/10 dark:border-white/10 text-ink-muted rounded text-sm font-medium hover:text-ink transition-colors"
+                                            >
+                                                <ChevronRight size={14} className="-rotate-90" />
+                                                Collapse
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => savePage(slug)}
                                                 disabled={isSaving}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
                                             >
                                                 <Save size={14} />
                                                 {isSaving ? 'Saving…' : 'Save Changes'}

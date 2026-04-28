@@ -156,7 +156,7 @@ export default function ProjectsTrash() {
                                     className={cn(
                                         'px-3 py-1.5 rounded border text-xs transition-colors',
                                         link.active
-                                            ? 'bg-primary text-white border-primary'
+                                            ? 'bg-primary text-zinc-900 border-primary'
                                             : 'bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted',
                                     )}
                                 />

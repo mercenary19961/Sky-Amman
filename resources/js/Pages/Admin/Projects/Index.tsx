@@ -108,7 +108,7 @@ export default function ProjectsIndex() {
             <div className="flex flex-wrap items-center gap-3 mb-6">
                 <Link
                     href="/admin/projects/create"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark transition-colors"
                 >
                     <Plus size={16} />
                     Add Project
@@ -308,7 +308,7 @@ export default function ProjectsIndex() {
                                     className={cn(
                                         'px-3 py-1.5 rounded border text-xs transition-colors',
                                         link.active
-                                            ? 'bg-primary text-white border-primary'
+                                            ? 'bg-primary text-zinc-900 border-primary'
                                             : 'bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted',
                                     )}
                                 />

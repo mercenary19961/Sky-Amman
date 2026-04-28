@@ -182,7 +182,7 @@ export default function ProjectForm() {
                     form="project-form"
                     onClick={submit}
                     disabled={processing}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
                 >
                     <Save size={15} />
                     {processing ? 'Saving…' : 'Save Changes'}
@@ -414,7 +414,7 @@ export default function ProjectForm() {
                     type="button"
                     onClick={submit}
                     disabled={processing}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
                 >
                     <Save size={15} />
                     {processing ? 'Saving…' : 'Save Changes'}

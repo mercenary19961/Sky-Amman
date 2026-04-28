@@ -95,7 +95,7 @@ function SortableImage({
             {/* Badges */}
             <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
                 {isFeatured && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary text-white">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary text-zinc-900">
                         Featured
                     </span>
                 )}

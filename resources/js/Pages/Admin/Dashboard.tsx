@@ -204,7 +204,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 mb-6 flex-wrap">
                 <Link
                     href="/admin/projects/create"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark transition-colors"
                 >
                     <Plus size={15} />
                     Add Project
