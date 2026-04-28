@@ -1,11 +1,14 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Eye, EyeOff, Save } from 'lucide-react';
+import {
+    Eye, EyeOff, Save, Maximize2, Minimize2,
+    ExternalLink, MousePointerClick, ChevronRight,
+} from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
 import type { ContentPageProps, SiteContentRow } from '@/types/admin/content';
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function toLabel(str: string): string {
     return str
@@ -16,14 +19,20 @@ function toLabel(str: string): string {
 
 const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact'];
 
+const PAGE_URLS: Record<string, string> = {
+    home:       '/',
+    properties: '/properties',
+    investment: '/investment',
+    self_build: '/self-build',
+    security:   '/security',
+    about:      '/about',
+    contact:    '/contact',
+};
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function RowInput({
-    type,
-    value,
-    onChange,
-    dir,
-    placeholder,
+    type, value, onChange, dir, placeholder,
 }: {
     type: SiteContentRow['type'];
     value: string;
@@ -46,7 +55,6 @@ function RowInput({
             />
         );
     }
-
     return (
         <textarea
             value={value}
@@ -63,11 +71,18 @@ function RowInput({
 
 export default function ContentEditor() {
     const { grouped, pages } = usePage<ContentPageProps>().props;
-
     const orderedPages = PAGE_ORDER.filter(slug => pages[slug]);
 
-    const [activePage, setActivePage] = useState(orderedPages[0] ?? 'home');
-    const [processing, setProcessing] = useState(false);
+    // Which page accordion is open — only one at a time
+    const [expandedPage, setExpandedPage] = useState<string | null>(orderedPages[0] ?? null);
+
+    // Which page is currently saving
+    const [processing, setProcessing] = useState<string | null>(null);
+
+    // Preview state
+    const [iframeKey, setIframeKey] = useState(0);
+    const [previewExpanded, setPreviewExpanded] = useState(false);
+    const [previewInteractive, setPreviewInteractive] = useState(false);
 
     // Row values keyed by id
     const [rowValues, setRowValues] = useState<Record<number, { content_en: string; content_ar: string }>>(() => {
@@ -80,7 +95,7 @@ export default function ContentEditor() {
         return v;
     });
 
-    // Section visibility per page: [pageSlug][sectionName] = boolean
+    // Section visibility per page
     const [sectionVisible, setSectionVisible] = useState<Record<string, Record<string, boolean>>>(() => {
         const v: Record<string, Record<string, boolean>> = {};
         Object.entries(grouped).forEach(([page, sections]) => {
@@ -100,7 +115,13 @@ export default function ContentEditor() {
         seo_description_en: string;
         seo_description_ar: string;
     }>>(() => {
-        const v: Record<string, { is_visible: boolean; seo_title_en: string; seo_title_ar: string; seo_description_en: string; seo_description_ar: string }> = {};
+        const v: Record<string, {
+            is_visible: boolean;
+            seo_title_en: string;
+            seo_title_ar: string;
+            seo_description_en: string;
+            seo_description_ar: string;
+        }> = {};
         Object.values(pages).forEach(p => {
             v[p.slug] = {
                 is_visible: p.is_visible,
@@ -124,14 +145,29 @@ export default function ContentEditor() {
         }));
     }
 
-    function setSeo<K extends keyof typeof pageSeo[string]>(pageSlug: string, key: K, value: typeof pageSeo[string][K]) {
+    function setSeo<K extends keyof typeof pageSeo[string]>(
+        pageSlug: string,
+        key: K,
+        value: typeof pageSeo[string][K],
+    ) {
         setPageSeo(prev => ({ ...prev, [pageSlug]: { ...prev[pageSlug], [key]: value } }));
     }
 
-    function savePage() {
-        const sections = grouped[activePage] ?? {};
+    function toggleAccordion(slug: string) {
+        const opening = expandedPage !== slug;
+        setExpandedPage(opening ? slug : null);
+        if (opening) setPreviewInteractive(false);
+    }
+
+    function openPage(slug: string) {
+        setExpandedPage(slug);
+        setPreviewInteractive(false);
+    }
+
+    function savePage(slug: string) {
+        const sections = grouped[slug] ?? {};
         const rows = Object.entries(sections).flatMap(([section, sectionRows]) => {
-            const visible = sectionVisible[activePage]?.[section] ?? true;
+            const visible = sectionVisible[slug]?.[section] ?? true;
             return sectionRows.map(r => ({
                 id: r.id,
                 content_en: rowValues[r.id]?.content_en ?? '',
@@ -140,10 +176,9 @@ export default function ContentEditor() {
             }));
         });
 
-        const seo = pageSeo[activePage] ?? {};
-
-        setProcessing(true);
-        router.put(`/admin/content/${activePage}`, {
+        const seo = pageSeo[slug] ?? {};
+        setProcessing(slug);
+        router.put(`/admin/content/${slug}`, {
             page_is_visible: seo.is_visible,
             seo_title_en: seo.seo_title_en,
             seo_title_ar: seo.seo_title_ar,
@@ -152,169 +187,305 @@ export default function ContentEditor() {
             rows,
         } as any, {
             preserveScroll: true,
-            onFinish: () => setProcessing(false),
+            onSuccess: () => setIframeKey(k => k + 1),
+            onFinish: () => setProcessing(null),
         });
     }
 
-    const currentSections = grouped[activePage] ?? {};
-    const currentSeo = pageSeo[activePage] ?? { is_visible: true, seo_title_en: '', seo_title_ar: '', seo_description_en: '', seo_description_ar: '' };
+    const previewSlug = expandedPage ?? orderedPages[0] ?? 'home';
+    const previewUrl = PAGE_URLS[previewSlug] ?? '/';
+    const previewLabel = pages[previewSlug]?.title_en ?? toLabel(previewSlug);
 
     return (
         <AdminLayout title="Site Content">
             <Head title="Site Content" />
 
-            {/* Page tabs */}
-            <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1">
-                {orderedPages.map(slug => {
-                    const page = pages[slug];
-                    return (
-                        <button
-                            key={slug}
-                            type="button"
-                            onClick={() => setActivePage(slug)}
-                            className={cn(
-                                'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
-                                activePage === slug
-                                    ? 'bg-primary text-white'
-                                    : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
-                            )}
-                        >
-                            {page?.title_en ?? toLabel(slug)}
-                        </button>
-                    );
-                })}
-
-                <button
-                    type="button"
-                    onClick={savePage}
-                    disabled={processing}
-                    className="ms-auto inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors whitespace-nowrap"
-                >
-                    <Save size={15} />
-                    {processing ? 'Saving…' : 'Save Changes'}
-                </button>
-            </div>
-
-            {/* SEO + page visibility card */}
-            <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5 mb-4">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-ink">Page SEO &amp; Visibility</h2>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={currentSeo.is_visible}
-                            onChange={e => setSeo(activePage, 'is_visible', e.target.checked)}
-                            className="w-4 h-4 accent-primary"
-                        />
-                        Page visible on site
-                    </label>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-xs font-medium text-ink-muted mb-1">SEO Title (EN)</label>
-                        <input
-                            type="text"
-                            value={currentSeo.seo_title_en}
-                            onChange={e => setSeo(activePage, 'seo_title_en', e.target.value)}
-                            placeholder="Defaults to site-wide setting if empty"
-                            className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-ink-muted mb-1">SEO Title (AR)</label>
-                        <input
-                            type="text"
-                            value={currentSeo.seo_title_ar}
-                            onChange={e => setSeo(activePage, 'seo_title_ar', e.target.value)}
-                            dir="rtl"
-                            className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-ink-muted mb-1">SEO Description (EN)</label>
-                        <textarea
-                            value={currentSeo.seo_description_en}
-                            onChange={e => setSeo(activePage, 'seo_description_en', e.target.value)}
-                            rows={2}
-                            placeholder="Max 500 characters"
-                            className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-ink-muted mb-1">SEO Description (AR)</label>
-                        <textarea
-                            value={currentSeo.seo_description_ar}
-                            onChange={e => setSeo(activePage, 'seo_description_ar', e.target.value)}
-                            rows={2}
-                            dir="rtl"
-                            className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Content sections */}
-            {Object.entries(currentSections).map(([section, rows]) => {
-                const visible = sectionVisible[activePage]?.[section] ?? true;
-
-                return (
-                    <div
-                        key={section}
-                        className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg mb-4 overflow-hidden"
+            {/* Quick-nav page selector */}
+            <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-1">
+                {orderedPages.map(slug => (
+                    <button
+                        key={slug}
+                        type="button"
+                        onClick={() => openPage(slug)}
+                        className={cn(
+                            'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
+                            expandedPage === slug
+                                ? 'bg-primary text-white'
+                                : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
+                        )}
                     >
-                        {/* Section header */}
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-ink/5 dark:border-white/10 bg-surface-muted dark:bg-zinc-900/50">
-                            <h3 className="text-sm font-semibold text-ink">{toLabel(section)}</h3>
-                            <button
-                                type="button"
-                                onClick={() => toggleSection(activePage, section)}
-                                title={visible ? 'Hide section' : 'Show section'}
-                                className={cn(
-                                    'flex items-center gap-1.5 text-xs font-medium transition-colors',
-                                    visible ? 'text-ink-muted hover:text-ink' : 'text-amber-500 hover:text-amber-600',
-                                )}
-                            >
-                                {visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                                {visible ? 'Visible' : 'Hidden'}
-                            </button>
-                        </div>
+                        {pages[slug]?.title_en ?? toLabel(slug)}
+                    </button>
+                ))}
+            </div>
 
-                        {/* Rows */}
-                        <div className={cn('divide-y divide-ink/5 dark:divide-white/5', !visible && 'opacity-50')}>
-                            {rows.map((row: SiteContentRow) => (
-                                <div key={row.id} className="grid grid-cols-[160px_1fr_1fr] items-start gap-3 px-5 py-3">
-                                    <div className="pt-2 text-xs font-medium text-ink-muted">{toLabel(row.key)}</div>
-                                    <RowInput
-                                        type={row.type}
-                                        value={rowValues[row.id]?.content_en ?? ''}
-                                        onChange={v => setRow(row.id, 'content_en', v)}
-                                        placeholder="EN"
+            {/* Split layout */}
+            <div className="flex gap-4 items-start">
+
+                {/* ── Left: accordion list ── */}
+                <div className={cn(
+                    'min-w-0 transition-all duration-300 space-y-2',
+                    previewExpanded ? 'w-full xl:w-[30%]' : 'w-full xl:w-[55%]',
+                )}>
+                    {orderedPages.map(slug => {
+                        const page = pages[slug];
+                        const isOpen = expandedPage === slug;
+                        const sections = grouped[slug] ?? {};
+                        const sectionCount = Object.keys(sections).length;
+                        const rowCount = Object.values(sections).flat().length;
+                        const seo = pageSeo[slug] ?? { is_visible: true, seo_title_en: '', seo_title_ar: '', seo_description_en: '', seo_description_ar: '' };
+                        const isSaving = processing === slug;
+
+                        return (
+                            <div
+                                key={slug}
+                                className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
+                            >
+                                {/* Accordion header */}
+                                <button
+                                    type="button"
+                                    onClick={() => toggleAccordion(slug)}
+                                    className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-surface-muted dark:hover:bg-zinc-700/50 transition-colors"
+                                >
+                                    <ChevronRight
+                                        size={16}
+                                        className={cn(
+                                            'shrink-0 text-ink-muted transition-transform duration-200',
+                                            isOpen && 'rotate-90',
+                                        )}
                                     />
-                                    <RowInput
-                                        type={row.type}
-                                        value={rowValues[row.id]?.content_ar ?? ''}
-                                        onChange={v => setRow(row.id, 'content_ar', v)}
-                                        dir="rtl"
-                                        placeholder="AR"
-                                    />
+                                    <span className="font-semibold text-ink text-sm flex-1 text-start">
+                                        {page?.title_en ?? toLabel(slug)}
+                                    </span>
+                                    <span className="text-xs text-ink-muted">
+                                        {sectionCount} section{sectionCount !== 1 ? 's' : ''} · {rowCount} fields
+                                    </span>
+                                    {!seo.is_visible && (
+                                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
+                                            Hidden
+                                        </span>
+                                    )}
+                                    {isOpen && (
+                                        <div
+                                            onClick={e => { e.stopPropagation(); savePage(slug); }}
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={e => e.key === 'Enter' && savePage(slug)}
+                                            className={cn(
+                                                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors',
+                                                isSaving
+                                                    ? 'bg-primary/50 text-white cursor-not-allowed'
+                                                    : 'bg-primary text-white hover:bg-primary-dark',
+                                            )}
+                                        >
+                                            <Save size={12} />
+                                            {isSaving ? 'Saving…' : 'Save'}
+                                        </div>
+                                    )}
+                                </button>
+
+                                {/* Accordion body */}
+                                {isOpen && (
+                                    <div className="border-t border-ink/5 dark:border-white/10">
+                                        {/* SEO + visibility */}
+                                        <div className="p-5 border-b border-ink/5 dark:border-white/10">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                                                    Page SEO &amp; Visibility
+                                                </h3>
+                                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={seo.is_visible}
+                                                        onChange={e => setSeo(slug, 'is_visible', e.target.checked)}
+                                                        className="w-4 h-4 accent-primary"
+                                                    />
+                                                    Page visible on site
+                                                </label>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-xs font-medium text-ink-muted mb-1">SEO Title (EN)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={seo.seo_title_en}
+                                                        onChange={e => setSeo(slug, 'seo_title_en', e.target.value)}
+                                                        placeholder="Defaults to site-wide setting if empty"
+                                                        className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-ink-muted mb-1">SEO Title (AR)</label>
+                                                    <input
+                                                        type="text"
+                                                        value={seo.seo_title_ar}
+                                                        onChange={e => setSeo(slug, 'seo_title_ar', e.target.value)}
+                                                        dir="rtl"
+                                                        className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-ink-muted mb-1">SEO Description (EN)</label>
+                                                    <textarea
+                                                        value={seo.seo_description_en}
+                                                        onChange={e => setSeo(slug, 'seo_description_en', e.target.value)}
+                                                        rows={2}
+                                                        placeholder="Max 500 characters"
+                                                        className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-medium text-ink-muted mb-1">SEO Description (AR)</label>
+                                                    <textarea
+                                                        value={seo.seo_description_ar}
+                                                        onChange={e => setSeo(slug, 'seo_description_ar', e.target.value)}
+                                                        rows={2}
+                                                        dir="rtl"
+                                                        className="w-full px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-700 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Content sections */}
+                                        {Object.entries(sections).map(([section, rows]) => {
+                                            const visible = sectionVisible[slug]?.[section] ?? true;
+                                            return (
+                                                <div
+                                                    key={section}
+                                                    className="border-b border-ink/5 dark:border-white/10 last:border-b-0"
+                                                >
+                                                    <div className="flex items-center justify-between px-5 py-2.5 bg-surface-muted dark:bg-zinc-900/40">
+                                                        <h4 className="text-xs font-semibold text-ink">{toLabel(section)}</h4>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleSection(slug, section)}
+                                                            className={cn(
+                                                                'flex items-center gap-1.5 text-xs font-medium transition-colors',
+                                                                visible ? 'text-ink-muted hover:text-ink' : 'text-amber-500 hover:text-amber-600',
+                                                            )}
+                                                        >
+                                                            {visible ? <Eye size={13} /> : <EyeOff size={13} />}
+                                                            {visible ? 'Visible' : 'Hidden'}
+                                                        </button>
+                                                    </div>
+                                                    <div className={cn(
+                                                        'divide-y divide-ink/5 dark:divide-white/5',
+                                                        !visible && 'opacity-50',
+                                                    )}>
+                                                        {rows.map((row: SiteContentRow) => (
+                                                            <div
+                                                                key={row.id}
+                                                                className="grid grid-cols-[110px_1fr_1fr] items-start gap-3 px-5 py-2.5"
+                                                            >
+                                                                <div className="pt-2 text-xs font-medium text-ink-muted">
+                                                                    {toLabel(row.key)}
+                                                                </div>
+                                                                <RowInput
+                                                                    type={row.type}
+                                                                    value={rowValues[row.id]?.content_en ?? ''}
+                                                                    onChange={v => setRow(row.id, 'content_en', v)}
+                                                                    placeholder="EN"
+                                                                />
+                                                                <RowInput
+                                                                    type={row.type}
+                                                                    value={rowValues[row.id]?.content_ar ?? ''}
+                                                                    onChange={v => setRow(row.id, 'content_ar', v)}
+                                                                    dir="rtl"
+                                                                    placeholder="AR"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* Bottom save */}
+                                        <div className="flex justify-end px-5 py-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => savePage(slug)}
+                                                disabled={isSaving}
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                                            >
+                                                <Save size={14} />
+                                                {isSaving ? 'Saving…' : 'Save Changes'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* ── Right: live preview ── */}
+                <div className={cn(
+                    'hidden xl:block shrink-0 transition-all duration-300',
+                    previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
+                )}>
+                    <div className="sticky top-4">
+                        <div
+                            className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
+                            style={{ height: 'calc(100vh - 6rem)' }}
+                        >
+                            {/* Preview chrome */}
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-ink/5 dark:border-white/10 bg-surface-muted dark:bg-zinc-900/50">
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <Eye size={14} className="text-ink-muted shrink-0" />
+                                    <span className="text-sm font-medium text-ink truncate">{previewLabel}</span>
+                                    <span className="text-xs text-ink-muted shrink-0">{previewUrl}</span>
                                 </div>
-                            ))}
+                                <div className="flex items-center gap-3 shrink-0 ms-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewExpanded(v => !v)}
+                                        title={previewExpanded ? 'Collapse preview' : 'Expand preview'}
+                                        className="text-ink-muted hover:text-ink transition-colors"
+                                    >
+                                        {previewExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                                    </button>
+                                    <a
+                                        href={previewUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="Open in new tab"
+                                        className="text-ink-muted hover:text-ink transition-colors"
+                                    >
+                                        <ExternalLink size={14} />
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* iframe + scroll-trap overlay */}
+                            <div
+                                className="relative"
+                                style={{ height: 'calc(100% - 2.875rem)' }}
+                                onMouseLeave={() => setPreviewInteractive(false)}
+                            >
+                                {!previewInteractive && (
+                                    <div
+                                        className="absolute inset-0 z-10 cursor-pointer"
+                                        onClick={() => setPreviewInteractive(true)}
+                                    >
+                                        <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 text-amber-400 text-xs font-medium rounded-full whitespace-nowrap">
+                                            <MousePointerClick size={12} />
+                                            Click to interact with preview
+                                        </div>
+                                    </div>
+                                )}
+                                <iframe
+                                    key={iframeKey}
+                                    src={previewUrl}
+                                    className="w-full h-full border-0"
+                                    title={`Preview: ${previewLabel}`}
+                                />
+                            </div>
                         </div>
                     </div>
-                );
-            })}
+                </div>
 
-            {/* Bottom save */}
-            <div className="flex justify-end mt-2 mb-8">
-                <button
-                    type="button"
-                    onClick={savePage}
-                    disabled={processing}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
-                >
-                    <Save size={15} />
-                    {processing ? 'Saving…' : 'Save Changes'}
-                </button>
             </div>
         </AdminLayout>
     );
