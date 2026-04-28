@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Save } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
 import { cn } from '@/lib/cn';
@@ -67,10 +67,18 @@ function Textarea({
     );
 }
 
-function SectionHeader({ title, description }: { title: string; description?: string }) {
+function SectionHeader({ title, description, warning }: { title: string; description?: string; warning?: string }) {
     return (
         <div className="mb-4">
-            <h2 className="text-sm font-semibold text-ink">{title}</h2>
+            <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-ink">{title}</h2>
+                {warning && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                        <AlertTriangle size={10} />
+                        {warning}
+                    </span>
+                )}
+            </div>
             {description && <p className="text-xs text-ink-muted mt-0.5">{description}</p>}
         </div>
     );
@@ -335,6 +343,7 @@ export default function ProjectForm() {
                     <SectionHeader
                         title="SEO"
                         description={isEdit ? 'OG image is picked from the gallery below.' : 'Save the project first, then upload images and set the OG image from the gallery.'}
+                        warning={isEdit && !(data.seo_title_en ?? '').trim() ? 'Missing SEO title' : undefined}
                     />
                     <div className="space-y-3">
                         <BilingualRow>
@@ -382,6 +391,7 @@ export default function ProjectForm() {
                     <SectionHeader
                         title="Gallery"
                         description="Drag to reorder. First image is the card thumbnail. Set one as OG to use it for social sharing previews."
+                        warning={images.length === 0 ? 'No images uploaded' : undefined}
                     />
                     <ProjectGallery
                         projectId={item.id}
