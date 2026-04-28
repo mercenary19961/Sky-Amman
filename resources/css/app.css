@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Class-based dark mode — used exclusively by the admin panel.
+   Public pages never carry the .dark class so this never leaks. */
+@variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -20,6 +24,15 @@
     --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-arabic: 'IBM Plex Sans Arabic', var(--font-sans);
+}
+
+/* Admin dark theme — overrides brand tokens inside the .dark wrapper.
+   Primary/accent colors stay the same; only neutral surfaces + text flip. */
+.dark {
+    --color-surface: #18181b;
+    --color-surface-muted: #27272a;
+    --color-ink: #f4f4f5;
+    --color-ink-muted: #a1a1aa;
 }
 
 html[dir="rtl"] body {
