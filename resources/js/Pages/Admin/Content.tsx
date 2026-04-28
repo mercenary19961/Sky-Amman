@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
     ExternalLink, MousePointerClick, ChevronRight,
+    Home, Building2, TrendingUp, Hammer, Shield, Info, Mail,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
@@ -18,6 +19,16 @@ function toLabel(str: string): string {
 }
 
 const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact'];
+
+const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+    home:       Home,
+    properties: Building2,
+    investment: TrendingUp,
+    self_build: Hammer,
+    security:   Shield,
+    about:      Info,
+    contact:    Mail,
+};
 
 const PAGE_URLS: Record<string, string> = {
     home:       '/',
@@ -264,6 +275,7 @@ export default function ContentEditor() {
                                             isOpen && 'rotate-90',
                                         )}
                                     />
+                                    {(() => { const SlugIcon = PAGE_ICONS[slug]; return SlugIcon ? <SlugIcon size={14} className="shrink-0 text-ink-muted" /> : null; })()}
                                     <span className="font-semibold text-ink text-sm flex-1 text-start">
                                         {page?.title_en ?? toLabel(slug)}
                                     </span>

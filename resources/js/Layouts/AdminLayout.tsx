@@ -1,7 +1,28 @@
 import type { ReactNode } from 'react';
-import { router } from '@inertiajs/react';
-import { LogOut } from 'lucide-react';
+import { router, usePage } from '@inertiajs/react';
+import {
+    LogOut,
+    LayoutDashboard,
+    FileText,
+    Building2,
+    MessageSquare,
+    Settings as SettingsIcon,
+    Users as UsersIcon,
+    History,
+} from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
+import type { PageProps } from '@/types';
+
+// Ordered longest-first so more-specific paths match before shorter prefixes.
+const PAGE_ICONS: Array<[path: string, icon: React.ComponentType<{ size?: number }>, exact?: boolean]> = [
+    ['/admin',           LayoutDashboard, true],
+    ['/admin/content',   FileText],
+    ['/admin/projects',  Building2],
+    ['/admin/contacts',  MessageSquare],
+    ['/admin/settings',  SettingsIcon],
+    ['/admin/users',     UsersIcon],
+    ['/admin/change-log', History],
+];
 
 interface AdminLayoutProps {
     children: ReactNode;
@@ -9,16 +30,27 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
-    const logout = () => {
-        router.post('/admin/logout');
-    };
+    const { url } = usePage<PageProps>();
+
+    const PageIcon = PAGE_ICONS.find(([path, , exact]) =>
+        exact ? url === path : url.startsWith(path),
+    )?.[1];
+
+    const logout = () => { router.post('/admin/logout'); };
 
     return (
         <div className="dark min-h-screen flex bg-surface-muted text-ink" dir="ltr">
             <AdminSidebar />
             <div className="flex-1 flex flex-col min-w-0">
                 <header className="h-16 bg-white dark:bg-zinc-800 border-b border-ink/5 dark:border-white/10 flex items-center justify-between px-6">
-                    <h1 className="text-lg font-semibold">{title}</h1>
+                    <div className="flex items-center gap-3">
+                        {PageIcon && (
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                <PageIcon size={16} />
+                            </div>
+                        )}
+                        <h1 className="text-lg font-semibold">{title}</h1>
+                    </div>
                     <button
                         type="button"
                         onClick={logout}

@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Trash2, Pencil, Search, Archive } from 'lucide-react';
+import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
 import type { ProjectIndexProps, ProjectListItem, ProjectCategory, ProjectListingStatus } from '@/types/admin/project';
@@ -192,12 +192,24 @@ export default function ProjectsIndex() {
                         <thead className="bg-surface-muted border-b border-ink/5">
                             <tr>
                                 <th className="text-start px-4 py-3 font-medium text-ink-muted w-12"></th>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Title</th>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Category</th>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Status</th>
-                                <th className="text-center px-4 py-3 font-medium text-ink-muted">Active</th>
-                                <th className="text-center px-4 py-3 font-medium text-ink-muted">Images</th>
-                                <th className="text-center px-4 py-3 font-medium text-ink-muted">Inquiries</th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><AlignLeft size={12} />Title</span>
+                                </th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><Tag size={12} />Category</span>
+                                </th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><Activity size={12} />Status</span>
+                                </th>
+                                <th className="text-center px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><ToggleRight size={12} />Active</span>
+                                </th>
+                                <th className="text-center px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><ImageIcon size={12} />Images</span>
+                                </th>
+                                <th className="text-center px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><MessageSquare size={12} />Inquiries</span>
+                                </th>
                                 <th className="text-end px-4 py-3 font-medium text-ink-muted">Actions</th>
                             </tr>
                         </thead>

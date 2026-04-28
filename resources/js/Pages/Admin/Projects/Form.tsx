@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { AlertTriangle, ArrowLeft, Save } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
 import { cn } from '@/lib/cn';
@@ -67,10 +67,11 @@ function Textarea({
     );
 }
 
-function SectionHeader({ title, description, warning }: { title: string; description?: string; warning?: string }) {
+function SectionHeader({ title, description, warning, icon: Icon }: { title: string; description?: string; warning?: string; icon?: React.ComponentType<{ size?: number; className?: string }> }) {
     return (
         <div className="mb-4">
             <div className="flex items-center gap-2">
+                {Icon && <Icon size={14} className="text-ink-muted shrink-0" />}
                 <h2 className="text-sm font-semibold text-ink">{title}</h2>
                 {warning && (
                     <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
@@ -208,7 +209,7 @@ export default function ProjectForm() {
 
                 {/* ── Basic Info ── */}
                 <Section>
-                    <SectionHeader title="Basic Info" />
+                    <SectionHeader title="Basic Info" icon={FileText} />
                     <div className="space-y-3">
                         <BilingualRow>
                             <Field label="Title (EN)" error={errors.title_en}>
@@ -239,7 +240,7 @@ export default function ProjectForm() {
 
                 {/* ── Listing Details ── */}
                 <Section>
-                    <SectionHeader title="Listing Details" />
+                    <SectionHeader title="Listing Details" icon={Tag} />
                     <div className="space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <Field label="Category" error={errors.category}>
@@ -302,7 +303,7 @@ export default function ProjectForm() {
 
                 {/* ── Location ── */}
                 <Section>
-                    <SectionHeader title="Location" description="Location shows on the project card. Address shows on the detail page." />
+                    <SectionHeader title="Location" icon={MapPin} description="Location shows on the project card. Address shows on the detail page." />
                     <div className="space-y-3">
                         <BilingualRow>
                             <Field label="Location (EN)" error={errors.location_en}>
@@ -325,7 +326,7 @@ export default function ProjectForm() {
 
                 {/* ── Property Specs ── */}
                 <Section>
-                    <SectionHeader title="Property Specs" description="Leave blank for investment opportunities or land plots." />
+                    <SectionHeader title="Property Specs" icon={SlidersHorizontal} description="Leave blank for investment opportunities or land plots." />
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                         <Field label="Area (m²)" error={errors.area_sqm}>
                             <Input type="number" value={data.area_sqm} onChange={v => set('area_sqm', v ? parseInt(v, 10) : null)} placeholder="850" />
@@ -349,6 +350,7 @@ export default function ProjectForm() {
                 <Section id="section-seo">
                     <SectionHeader
                         title="SEO"
+                        icon={Search}
                         description={isEdit ? 'OG image is picked from the gallery below.' : 'Save the project first, then upload images and set the OG image from the gallery.'}
                         warning={isEdit && !(data.seo_title_en ?? '').trim() ? 'Missing SEO title' : undefined}
                     />
@@ -397,6 +399,7 @@ export default function ProjectForm() {
                 <Section id="section-gallery">
                     <SectionHeader
                         title="Gallery"
+                        icon={ImageIcon}
                         description="Drag to reorder. First image is the card thumbnail. Set one as OG to use it for social sharing previews."
                         warning={images.length === 0 ? 'No images uploaded' : undefined}
                     />

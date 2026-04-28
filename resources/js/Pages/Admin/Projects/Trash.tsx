@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trash2, AlignLeft, Tag, Clock } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
 import type { ProjectTrashProps, ProjectListItem, ProjectCategory } from '@/types/admin/project';
@@ -87,9 +87,15 @@ export default function ProjectsTrash() {
                     <table className="w-full text-sm">
                         <thead className="bg-surface-muted border-b border-ink/5">
                             <tr>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Title</th>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Category</th>
-                                <th className="text-start px-4 py-3 font-medium text-ink-muted">Deleted</th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><AlignLeft size={12} />Title</span>
+                                </th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><Tag size={12} />Category</span>
+                                </th>
+                                <th className="text-start px-4 py-3 font-medium text-ink-muted">
+                                    <span className="inline-flex items-center gap-1.5"><Clock size={12} />Deleted</span>
+                                </th>
                                 <th className="text-end px-4 py-3 font-medium text-ink-muted">Actions</th>
                             </tr>
                         </thead>
