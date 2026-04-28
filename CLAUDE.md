@@ -254,19 +254,20 @@ Single-language (English), single-theme (light). Sidebar groups mirror Nuor Stee
 - Dashboard
 
 **Content**
-- Site Content (bilingual side-by-side EN/AR key-value editor)
-- Media Library
+- Site Content (bilingual side-by-side EN/AR key-value editor — **text only, no image picker**)
 
 **Business** (CRUD listings)
-- **Projects** — single unified CRUD (gallery, category, listing_status, location, area, bedrooms, bathrooms, floors, completion_year, per-listing SEO, inquiries counter)
+- **Projects** — single unified CRUD (gallery upload + reorder + delete, category, listing_status, location, area, bedrooms, bathrooms, floors, completion_year, per-listing SEO with OG image picked from gallery, inquiries counter). **All admin-controlled imagery lives here.**
 
 **Communication**
 - Contact Submissions (single inbox, optional project linkage)
 
 **System**
-- Settings (admin-only) — contact info, social links, default SEO meta, lead routing map, site-wide OG defaults
+- Settings (admin-only) — contact info, social links, default SEO meta, lead routing map, site-wide OG defaults (URL field)
 - Users (admin-only) — admin / editor roles
 - Change Log + Undo (admin-only) — port the `UndoService` + `ChangeLogService` from Nuor Steel when ready
+
+**Image strategy:** Page-structural / decorative imagery (`hero-villa`, `footer-villa`, `footer-clouds`, `buy-early-strip`, etc.) stays committed under [public/images/home/](public/images/home/) — code-managed, never admin-managed. There is **no standalone Media Library** in the sidebar. Project gallery uploads use [`Media::storeFile()`](app/Models/Media.php) inside the project edit form. The `site_content.media_id` and `pages.og_image_id` columns remain in the schema as nullable but stay unused (cheap optionality if the policy ever changes).
 
 ### Admin roles
 
@@ -277,8 +278,8 @@ Single-language (English), single-theme (light). Sidebar groups mirror Nuor Stee
 
 These extend the Nuor playbook for real-estate-specific needs.
 
-1. **Image-aware Site Content** — `site_content` rows have an optional `media_id` FK so a single content row carries text **and** a linked image (hero bg, section illustration). Admin edits both side by side.
-2. **SEO per page + per project** — every public page (via `pages` table) and every project (via `projects` table) has editable `seo_title_en/ar`, `seo_description_en/ar`, `og_image_id`. Defaults fall back to site-wide Settings.
+1. **Text-only Site Content editor** — `site_content` is bilingual key-value rows with per-row visibility. The schema has an optional `media_id` FK (carried over from initial design) but the admin UI does **not** expose it: structural/decorative imagery is code-managed under `public/images/home/`, not CMS-managed.
+2. **SEO per page + per project** — every public page (via `pages` table) and every project (via `projects` table) has editable `seo_title_en/ar`, `seo_description_en/ar`. OG image policy is split: **per-project OG is picked from the project's own gallery** (no separate upload step), while site-wide and per-page OG are plain URL fields (paste a hosted/CDN image URL). Defaults fall back to site-wide Settings.
 3. **Lead routing by request type** — Contact form has a `request_type` enum (Buy / Rent / Build / Investment / General). Settings page maps each type → recipient email(s) via the `lead_routing` JSON setting. The Mailable picks recipients dynamically at send time.
 4. **Per-project inquiries** — Contact submissions can carry an optional `project_id` FK. "Contact about this project" CTAs pre-fill the form. Admin project listings show an inquiries count badge per row.
 5. **Section show/hide toggles** — `site_content` rows have an `is_visible` boolean. Admin can hide an entire homepage section (e.g. "Stats") without a code deploy. Public pages skip rendering when `is_visible=false`. Page-level visibility lives on `pages.is_visible`.
@@ -366,16 +367,15 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] About Us (content-only)
 - [ ] Contact Us (with Turnstile + lead routing)
 
-### Admin Panel (TODO)
+### Admin Panel (TODO — in build order)
 - [x] Login page (with Turnstile)
 - [x] Dashboard (skeleton — needs stats)
-- [ ] Site Content editor (bilingual side-by-side, image-aware, per-row SEO + visibility)
-- [ ] Media Library
-- [ ] Projects CRUD (gallery, category, status, SEO)
-- [ ] Contact Submissions inbox (with per-project linkage)
-- [ ] Settings (contact info, social, SEO defaults, lead routing map)
+- [ ] **Projects CRUD** (gallery upload + reorder + delete, category, listing_status, per-listing SEO with OG picked from gallery, soft-delete + restore) — first because it owns all admin-controlled imagery
+- [ ] **Site Content editor** — bilingual side-by-side, text-only, per-row visibility, per-page SEO
+- [ ] **Settings** — contact info, social, map, media-room embeds, SEO defaults (OG as URL field), lead routing JSON
+- [ ] Contact Submissions inbox (with per-project linkage) — depends on public Contact form being live
 - [ ] Users (admin-only)
-- [ ] Change Log + Undo (admin-only) — port `UndoService` + `ChangeLogService` from Nuor
+- [ ] Change Log + Undo (admin-only) — port `UndoService` + `ChangeLogService` from Nuor (last)
 
 ### Infrastructure (TODO)
 - [x] SSR setup (build-time + runtime toggle via `INERTIA_SSR_ENABLED`)
@@ -392,7 +392,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-04-28 — homepage shipped (8 sections, scrollytelling, color-aware navbar, parallax footer); Inertia v3 quirks documented
+> **Last updated:** 2026-04-28 — homepage shipped; admin plan revised: no standalone Media Library, image management lives inside Projects CRUD only, Site Content is text-only
 
 ---
 
