@@ -14,10 +14,10 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     };
 
     return (
-        <div className="min-h-screen flex bg-surface-muted text-ink" dir="ltr">
+        <div className="dark min-h-screen flex bg-surface-muted text-ink" dir="ltr">
             <AdminSidebar />
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="h-16 bg-white border-b border-ink/5 flex items-center justify-between px-6">
+                <header className="h-16 bg-white dark:bg-zinc-800 border-b border-ink/5 dark:border-white/10 flex items-center justify-between px-6">
                     <h1 className="text-lg font-semibold">{title}</h1>
                     <button
                         type="button"

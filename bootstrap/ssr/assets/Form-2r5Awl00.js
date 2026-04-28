@@ -2,7 +2,7 @@ import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head, Link, router } from "@inertiajs/react";
 import { useState, useCallback } from "react";
 import { Upload, GripVertical, Star, ImageIcon, Trash2, ArrowLeft, Save } from "lucide-react";
-import { A as AdminLayout } from "./AdminLayout-zP93-eAg.js";
+import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
 import { useDropzone } from "react-dropzone";
 import { useSensors, useSensor, PointerSensor, DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
@@ -37,7 +37,7 @@ function SortableImage({
         isFeatured && "ring-2 ring-primary"
       ),
       children: [
-        /* @__PURE__ */ jsx("div", { className: "aspect-[4/3]", children: /* @__PURE__ */ jsx(
+        /* @__PURE__ */ jsx("div", { className: "aspect-4/3", children: /* @__PURE__ */ jsx(
           "img",
           {
             src: image.media.url,
@@ -273,7 +273,7 @@ function Input({
       onChange: (e) => onChange(e.target.value),
       placeholder,
       className: cn(
-        "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white",
+        "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100",
         className
       )
     }
@@ -292,7 +292,7 @@ function Textarea({
       onChange: (e) => onChange(e.target.value),
       placeholder,
       rows,
-      className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white resize-y"
+      className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100 resize-y"
     }
   );
 }
@@ -303,7 +303,7 @@ function SectionHeader({ title, description }) {
   ] });
 }
 function Section({ children }) {
-  return /* @__PURE__ */ jsx("div", { className: "bg-white border border-ink/5 rounded-lg p-5 mb-4", children });
+  return /* @__PURE__ */ jsx("div", { className: "bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5 mb-4", children });
 }
 function BilingualRow({ children }) {
   return /* @__PURE__ */ jsx("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-3", children });
@@ -436,7 +436,7 @@ function ProjectForm() {
               {
                 value: data.category,
                 onChange: (e) => set("category", e.target.value),
-                className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white",
+                className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100",
                 children: [
                   /* @__PURE__ */ jsx("option", { value: "under_development", children: "Under Development" }),
                   /* @__PURE__ */ jsx("option", { value: "ready", children: "Ready" }),
@@ -449,7 +449,7 @@ function ProjectForm() {
               {
                 value: data.listing_status ?? "",
                 onChange: (e) => set("listing_status", e.target.value || null),
-                className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white",
+                className: "w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100",
                 children: [
                   /* @__PURE__ */ jsx("option", { value: "", children: "— None —" }),
                   /* @__PURE__ */ jsx("option", { value: "for_sale", children: "For Sale" }),
@@ -494,7 +494,7 @@ function ProjectForm() {
                   value: data.sort_order,
                   onChange: (e) => set("sort_order", parseInt(e.target.value, 10) || 0),
                   min: 0,
-                  className: "w-20 px-2 py-1.5 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                  className: "w-20 px-2 py-1.5 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
                 }
               )
             ] })

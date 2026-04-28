@@ -72,7 +72,7 @@ function SortableImage({
                 isFeatured && 'ring-2 ring-primary',
             )}
         >
-            <div className="aspect-[4/3]">
+            <div className="aspect-4/3">
                 <img
                     src={image.media.url}
                     alt={image.media.alt_text_en ?? image.media.original_filename}

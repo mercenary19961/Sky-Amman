@@ -1,6 +1,6 @@
 import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head } from "@inertiajs/react";
-import { A as AdminLayout } from "./AdminLayout-zP93-eAg.js";
+import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
 import "lucide-react";
 import "./cn-H80jjgLf.js";
 import "clsx";
@@ -9,7 +9,7 @@ function Dashboard() {
   const { auth } = usePage().props;
   return /* @__PURE__ */ jsxs(AdminLayout, { title: "Dashboard", children: [
     /* @__PURE__ */ jsx(Head, { title: "Dashboard" }),
-    /* @__PURE__ */ jsxs("div", { className: "bg-white border border-ink/5 rounded-lg p-6", children: [
+    /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-6", children: [
       /* @__PURE__ */ jsxs("h2", { className: "text-xl font-semibold mb-2", children: [
         "Welcome, ",
         auth.user?.name,

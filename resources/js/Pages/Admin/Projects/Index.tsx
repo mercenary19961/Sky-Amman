@@ -123,10 +123,10 @@ export default function ProjectsIndex() {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search by title…"
-                            className="pl-8 pr-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                            className="pl-8 pr-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-800 dark:text-zinc-100"
                         />
                     </div>
-                    <button type="submit" className="px-3 py-2 text-sm bg-white border border-ink/10 rounded hover:bg-surface-muted transition-colors">
+                    <button type="submit" className="px-3 py-2 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-100 border border-ink/10 rounded hover:bg-surface-muted transition-colors">
                         Search
                     </button>
                 </form>
@@ -135,7 +135,7 @@ export default function ProjectsIndex() {
                 <select
                     value={filters.category ?? ''}
                     onChange={e => applyFilter('category', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                     <option value="">All Categories</option>
                     <option value="under_development">Under Development</option>
@@ -147,7 +147,7 @@ export default function ProjectsIndex() {
                 <select
                     value={filters.listing_status ?? ''}
                     onChange={e => applyFilter('listing_status', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                     <option value="">All Statuses</option>
                     <option value="for_sale">For Sale</option>
@@ -160,7 +160,7 @@ export default function ProjectsIndex() {
                 <select
                     value={filters.active ?? ''}
                     onChange={e => applyFilter('active', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                     <option value="">Active & Inactive</option>
                     <option value="1">Active only</option>
@@ -179,7 +179,7 @@ export default function ProjectsIndex() {
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-ink/5 rounded-lg overflow-hidden">
+            <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden">
                 {projects.data.length === 0 ? (
                     <div className="py-16 text-center text-ink-muted text-sm">
                         No projects found.{' '}
@@ -309,14 +309,14 @@ export default function ProjectsIndex() {
                                         'px-3 py-1.5 rounded border text-xs transition-colors',
                                         link.active
                                             ? 'bg-primary text-white border-primary'
-                                            : 'bg-white border-ink/10 hover:bg-surface-muted',
+                                            : 'bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted',
                                     )}
                                 />
                             ) : (
                                 <span
                                     key={i}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
-                                    className="px-3 py-1.5 rounded border text-xs bg-white border-ink/10 text-ink/30 cursor-default"
+                                    className="px-3 py-1.5 rounded border text-xs bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 text-ink/30 cursor-default"
                                 />
                             )
                         ))}

@@ -1,7 +1,7 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "resources/js/Components/Admin/ProjectGallery.tsx": [
-    "/build/assets/Form-DsnbGxH-.js"
+    "/build/assets/Form-2r5Awl00.js"
   ],
   "resources/js/Components/Home/AssurancePillars.tsx": [
     "/build/assets/Home-CGTfc6lS.js"
@@ -25,7 +25,7 @@
     "/build/assets/Home-CGTfc6lS.js"
   ],
   "resources/js/Components/Layout/AdminSidebar.tsx": [
-    "/build/assets/AdminLayout-zP93-eAg.js"
+    "/build/assets/AdminLayout-BmjI_BP2.js"
   ],
   "resources/js/Components/Layout/Footer.tsx": [
     "/build/assets/Home-CGTfc6lS.js"
@@ -40,25 +40,25 @@
     "/build/assets/Login-CmcIwHqM.js"
   ],
   "resources/js/Layouts/AdminLayout.tsx": [
-    "/build/assets/AdminLayout-zP93-eAg.js"
+    "/build/assets/AdminLayout-BmjI_BP2.js"
   ],
   "resources/js/Layouts/PublicLayout.tsx": [
     "/build/assets/Home-CGTfc6lS.js"
   ],
   "resources/js/Pages/Admin/Dashboard.tsx": [
-    "/build/assets/Dashboard-CX6u6iUS.js"
+    "/build/assets/Dashboard-DoWubPtw.js"
   ],
   "resources/js/Pages/Admin/Login.tsx": [
     "/build/assets/Login-CmcIwHqM.js"
   ],
   "resources/js/Pages/Admin/Projects/Form.tsx": [
-    "/build/assets/Form-DsnbGxH-.js"
+    "/build/assets/Form-2r5Awl00.js"
   ],
   "resources/js/Pages/Admin/Projects/Index.tsx": [
-    "/build/assets/Index-CDT3SXJO.js"
+    "/build/assets/Index-Bs7fTgOS.js"
   ],
   "resources/js/Pages/Admin/Projects/Trash.tsx": [
-    "/build/assets/Trash-DFjtMqo6.js"
+    "/build/assets/Trash-DiRet1hY.js"
   ],
   "resources/js/Pages/Public/Home.tsx": [
     "/build/assets/Home-CGTfc6lS.js"

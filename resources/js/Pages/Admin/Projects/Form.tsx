@@ -38,7 +38,7 @@ function Input({
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             className={cn(
-                'w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white',
+                'w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100',
                 className,
             )}
         />
@@ -62,7 +62,7 @@ function Textarea({
             onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
             rows={rows}
-            className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white resize-y"
+            className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100 resize-y"
         />
     );
 }
@@ -78,7 +78,7 @@ function SectionHeader({ title, description }: { title: string; description?: st
 
 function Section({ children }: { children: React.ReactNode }) {
     return (
-        <div className="bg-white border border-ink/5 rounded-lg p-5 mb-4">
+        <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-5 mb-4">
             {children}
         </div>
     );
@@ -231,7 +231,7 @@ export default function ProjectForm() {
                                 <select
                                     value={data.category}
                                     onChange={e => set('category', e.target.value as FormData['category'])}
-                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
                                 >
                                     <option value="under_development">Under Development</option>
                                     <option value="ready">Ready</option>
@@ -242,7 +242,7 @@ export default function ProjectForm() {
                                 <select
                                     value={data.listing_status ?? ''}
                                     onChange={e => set('listing_status', (e.target.value || null) as FormData['listing_status'])}
-                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
                                 >
                                     <option value="">— None —</option>
                                     <option value="for_sale">For Sale</option>
@@ -278,7 +278,7 @@ export default function ProjectForm() {
                                     value={data.sort_order}
                                     onChange={e => set('sort_order', parseInt(e.target.value, 10) || 0)}
                                     min={0}
-                                    className="w-20 px-2 py-1.5 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                                    className="w-20 px-2 py-1.5 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
                                 />
                             </div>
                         </div>

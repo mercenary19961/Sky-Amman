@@ -8,7 +8,7 @@ export default function Dashboard() {
     return (
         <AdminLayout title="Dashboard">
             <Head title="Dashboard" />
-            <div className="bg-white border border-ink/5 rounded-lg p-6">
+            <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-2">Welcome, {auth.user?.name}.</h2>
                 <p className="text-ink-muted">
                     The admin panel will gain its content sections in upcoming work.

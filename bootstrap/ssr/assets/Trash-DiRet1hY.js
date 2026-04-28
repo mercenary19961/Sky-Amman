@@ -2,7 +2,7 @@ import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
 import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
-import { A as AdminLayout } from "./AdminLayout-zP93-eAg.js";
+import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
 import { c as cn } from "./cn-H80jjgLf.js";
 import "clsx";
 import "tailwind-merge";
@@ -74,7 +74,7 @@ function ProjectsTrash() {
         projects.total !== 1 ? "s" : ""
       ] })
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "bg-white border border-ink/5 rounded-lg overflow-hidden", children: projects.data.length === 0 ? /* @__PURE__ */ jsx("div", { className: "py-16 text-center text-ink-muted text-sm", children: "Trash is empty." }) : /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
+    /* @__PURE__ */ jsx("div", { className: "bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden", children: projects.data.length === 0 ? /* @__PURE__ */ jsx("div", { className: "py-16 text-center text-ink-muted text-sm", children: "Trash is empty." }) : /* @__PURE__ */ jsxs("table", { className: "w-full text-sm", children: [
       /* @__PURE__ */ jsx("thead", { className: "bg-surface-muted border-b border-ink/5", children: /* @__PURE__ */ jsxs("tr", { children: [
         /* @__PURE__ */ jsx("th", { className: "text-start px-4 py-3 font-medium text-ink-muted", children: "Title" }),
         /* @__PURE__ */ jsx("th", { className: "text-start px-4 py-3 font-medium text-ink-muted", children: "Category" }),
@@ -134,7 +134,7 @@ function ProjectsTrash() {
           dangerouslySetInnerHTML: { __html: link.label },
           className: cn(
             "px-3 py-1.5 rounded border text-xs transition-colors",
-            link.active ? "bg-primary text-white border-primary" : "bg-white border-ink/10 hover:bg-surface-muted"
+            link.active ? "bg-primary text-white border-primary" : "bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted"
           )
         },
         i
@@ -142,7 +142,7 @@ function ProjectsTrash() {
         "span",
         {
           dangerouslySetInnerHTML: { __html: link.label },
-          className: "px-3 py-1.5 rounded border text-xs bg-white border-ink/10 text-ink/30 cursor-default"
+          className: "px-3 py-1.5 rounded border text-xs bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 text-ink/30 cursor-default"
         },
         i
       )) })

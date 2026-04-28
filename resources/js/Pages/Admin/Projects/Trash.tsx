@@ -78,7 +78,7 @@ export default function ProjectsTrash() {
                 <span className="text-sm text-ink-muted">{projects.total} trashed project{projects.total !== 1 ? 's' : ''}</span>
             </div>
 
-            <div className="bg-white border border-ink/5 rounded-lg overflow-hidden">
+            <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden">
                 {projects.data.length === 0 ? (
                     <div className="py-16 text-center text-ink-muted text-sm">
                         Trash is empty.
@@ -157,14 +157,14 @@ export default function ProjectsTrash() {
                                         'px-3 py-1.5 rounded border text-xs transition-colors',
                                         link.active
                                             ? 'bg-primary text-white border-primary'
-                                            : 'bg-white border-ink/10 hover:bg-surface-muted',
+                                            : 'bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted',
                                     )}
                                 />
                             ) : (
                                 <span
                                     key={i}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
-                                    className="px-3 py-1.5 rounded border text-xs bg-white border-ink/10 text-ink/30 cursor-default"
+                                    className="px-3 py-1.5 rounded border text-xs bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 text-ink/30 cursor-default"
                                 />
                             )
                         ))}

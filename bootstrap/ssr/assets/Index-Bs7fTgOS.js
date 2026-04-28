@@ -2,7 +2,7 @@ import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
 import { Plus, Search, Archive, Pencil, Trash2 } from "lucide-react";
-import { A as AdminLayout } from "./AdminLayout-zP93-eAg.js";
+import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
 import { c as cn } from "./cn-H80jjgLf.js";
 import "clsx";
 import "tailwind-merge";
@@ -105,18 +105,18 @@ function ProjectsIndex() {
               value: search,
               onChange: (e) => setSearch(e.target.value),
               placeholder: "Search by title…",
-              className: "pl-8 pr-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+              className: "pl-8 pr-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-800 dark:text-zinc-100"
             }
           )
         ] }),
-        /* @__PURE__ */ jsx("button", { type: "submit", className: "px-3 py-2 text-sm bg-white border border-ink/10 rounded hover:bg-surface-muted transition-colors", children: "Search" })
+        /* @__PURE__ */ jsx("button", { type: "submit", className: "px-3 py-2 text-sm bg-white dark:bg-zinc-800 dark:text-zinc-100 border border-ink/10 rounded hover:bg-surface-muted transition-colors", children: "Search" })
       ] }),
       /* @__PURE__ */ jsxs(
         "select",
         {
           value: filters.category ?? "",
           onChange: (e) => applyFilter("category", e.target.value),
-          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30",
+          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30",
           children: [
             /* @__PURE__ */ jsx("option", { value: "", children: "All Categories" }),
             /* @__PURE__ */ jsx("option", { value: "under_development", children: "Under Development" }),
@@ -130,7 +130,7 @@ function ProjectsIndex() {
         {
           value: filters.listing_status ?? "",
           onChange: (e) => applyFilter("listing_status", e.target.value),
-          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30",
+          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30",
           children: [
             /* @__PURE__ */ jsx("option", { value: "", children: "All Statuses" }),
             /* @__PURE__ */ jsx("option", { value: "for_sale", children: "For Sale" }),
@@ -145,7 +145,7 @@ function ProjectsIndex() {
         {
           value: filters.active ?? "",
           onChange: (e) => applyFilter("active", e.target.value),
-          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white focus:outline-none focus:ring-2 focus:ring-primary/30",
+          className: "px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30",
           children: [
             /* @__PURE__ */ jsx("option", { value: "", children: "Active & Inactive" }),
             /* @__PURE__ */ jsx("option", { value: "1", children: "Active only" }),
@@ -167,7 +167,7 @@ function ProjectsIndex() {
         }
       )
     ] }),
-    /* @__PURE__ */ jsx("div", { className: "bg-white border border-ink/5 rounded-lg overflow-hidden", children: projects.data.length === 0 ? /* @__PURE__ */ jsxs("div", { className: "py-16 text-center text-ink-muted text-sm", children: [
+    /* @__PURE__ */ jsx("div", { className: "bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden", children: projects.data.length === 0 ? /* @__PURE__ */ jsxs("div", { className: "py-16 text-center text-ink-muted text-sm", children: [
       "No projects found.",
       " ",
       /* @__PURE__ */ jsx(Link, { href: "/admin/projects/create", className: "text-primary hover:underline", children: "Add the first one." })
@@ -256,7 +256,7 @@ function ProjectsIndex() {
           dangerouslySetInnerHTML: { __html: link.label },
           className: cn(
             "px-3 py-1.5 rounded border text-xs transition-colors",
-            link.active ? "bg-primary text-white border-primary" : "bg-white border-ink/10 hover:bg-surface-muted"
+            link.active ? "bg-primary text-white border-primary" : "bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 hover:bg-surface-muted"
           )
         },
         i
@@ -264,7 +264,7 @@ function ProjectsIndex() {
         "span",
         {
           dangerouslySetInnerHTML: { __html: link.label },
-          className: "px-3 py-1.5 rounded border text-xs bg-white border-ink/10 text-ink/30 cursor-default"
+          className: "px-3 py-1.5 rounded border text-xs bg-white dark:bg-zinc-800 border-ink/10 dark:border-white/10 text-ink/30 cursor-default"
         },
         i
       )) })
