@@ -2,7 +2,6 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutDashboard,
     FileText,
-    Image as ImageIcon,
     Building2,
     MessageSquare,
     Settings as SettingsIcon,
@@ -33,7 +32,6 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Content',
         items: [
             { label: 'Site Content', path: '/admin/content', icon: <FileText size={18} /> },
-            { label: 'Media Library', path: '/admin/media', icon: <ImageIcon size={18} /> },
         ],
     },
     {

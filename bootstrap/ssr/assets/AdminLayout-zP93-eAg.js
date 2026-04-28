@@ -1,9 +1,7 @@
 import { jsxs, jsx } from "react/jsx-runtime";
-import { usePage, Link, router, Head } from "@inertiajs/react";
-import { LayoutDashboard, FileText, Image, Building2, MessageSquare, Settings, Users, History, LogOut } from "lucide-react";
+import { usePage, Link, router } from "@inertiajs/react";
+import { LayoutDashboard, FileText, Building2, MessageSquare, Settings, Users, History, LogOut } from "lucide-react";
 import { c as cn } from "./cn-H80jjgLf.js";
-import "clsx";
-import "tailwind-merge";
 const NAV_GROUPS = [
   {
     label: "Overview",
@@ -12,8 +10,7 @@ const NAV_GROUPS = [
   {
     label: "Content",
     items: [
-      { label: "Site Content", path: "/admin/content", icon: /* @__PURE__ */ jsx(FileText, { size: 18 }) },
-      { label: "Media Library", path: "/admin/media", icon: /* @__PURE__ */ jsx(Image, { size: 18 }) }
+      { label: "Site Content", path: "/admin/content", icon: /* @__PURE__ */ jsx(FileText, { size: 18 }) }
     ]
   },
   {
@@ -97,20 +94,6 @@ function AdminLayout({ children, title }) {
     ] })
   ] });
 }
-function Dashboard() {
-  const { auth } = usePage().props;
-  return /* @__PURE__ */ jsxs(AdminLayout, { title: "Dashboard", children: [
-    /* @__PURE__ */ jsx(Head, { title: "Dashboard" }),
-    /* @__PURE__ */ jsxs("div", { className: "bg-white border border-ink/5 rounded-lg p-6", children: [
-      /* @__PURE__ */ jsxs("h2", { className: "text-xl font-semibold mb-2", children: [
-        "Welcome, ",
-        auth.user?.name,
-        "."
-      ] }),
-      /* @__PURE__ */ jsx("p", { className: "text-ink-muted", children: "The admin panel will gain its content sections in upcoming work. For now, the foundation is in place: auth, locale, settings, site content, projects, and contact submissions are wired up." })
-    ] })
-  ] });
-}
 export {
-  Dashboard as default
+  AdminLayout as A
 };

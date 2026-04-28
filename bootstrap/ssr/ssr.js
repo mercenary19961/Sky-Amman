@@ -550,7 +550,7 @@ createServer(
     // Promise<{ default: Component }>; Inertia wants Promise<Component>.
     resolve: (name) => resolvePageComponent(
       `./Pages/${name}.tsx`,
-      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-J11GGOwg.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-CGTfc6lS.js") })
+      /* @__PURE__ */ Object.assign({ "./Pages/Admin/Dashboard.tsx": () => import("./assets/Dashboard-CX6u6iUS.js"), "./Pages/Admin/Login.tsx": () => import("./assets/Login-CmcIwHqM.js"), "./Pages/Admin/Projects/Form.tsx": () => import("./assets/Form-DsnbGxH-.js"), "./Pages/Admin/Projects/Index.tsx": () => import("./assets/Index-CDT3SXJO.js"), "./Pages/Admin/Projects/Trash.tsx": () => import("./assets/Trash-DFjtMqo6.js"), "./Pages/Public/Home.tsx": () => import("./assets/Home-CGTfc6lS.js") })
     ).then((m) => m.default),
     setup: ({ App, props }) => /* @__PURE__ */ jsx(App, { ...props, children: ({ Component, props: pageProps, key }) => /* @__PURE__ */ jsx(Providers, { children: /* @__PURE__ */ jsx(Component, { ...pageProps }, key) }) })
   })
