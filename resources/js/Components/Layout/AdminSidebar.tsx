@@ -34,7 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'Content',
         items: [
-            { label: 'Site Content', path: '/admin/content', icon: <FileText size={18} />, built: false },
+            { label: 'Site Content', path: '/admin/content', icon: <FileText size={18} />, built: true },
         ],
     },
     {
@@ -52,7 +52,7 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'System',
         items: [
-            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: false },
+            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: true },
             { label: 'Users', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: false },
             { label: 'Change Log', path: '/admin/change-log', icon: <History size={18} />, adminOnly: true, built: false },
         ],

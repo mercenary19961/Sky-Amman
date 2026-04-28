@@ -2,7 +2,7 @@ import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
 import { Plus, Search, Archive, Pencil, Trash2 } from "lucide-react";
-import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
+import { A as AdminLayout } from "./AdminLayout-DnPfbuel.js";
 import { c as cn } from "./cn-H80jjgLf.js";
 import "clsx";
 import "tailwind-merge";

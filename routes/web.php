@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
@@ -36,6 +38,16 @@ Route::post('/admin/logout', [LoginController::class, 'logout'])
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => Inertia::render('Admin/Dashboard'))->name('dashboard');
+
+    // Site Content — editors and admins can manage content.
+    Route::get('/content', [SiteContentController::class, 'index'])->name('content.index');
+    Route::put('/content/{page}', [SiteContentController::class, 'update'])->name('content.update');
+
+    // Settings — admin only.
+    Route::middleware('admin')->group(function () {
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+    });
 
     // Projects — literal paths (trash, create) must come before the {id} wildcard.
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');

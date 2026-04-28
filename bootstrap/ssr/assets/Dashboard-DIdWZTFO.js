@@ -1,6 +1,6 @@
 import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head } from "@inertiajs/react";
-import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
+import { A as AdminLayout } from "./AdminLayout-DnPfbuel.js";
 import "lucide-react";
 import "./cn-H80jjgLf.js";
 import "clsx";

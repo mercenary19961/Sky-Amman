@@ -12,7 +12,7 @@ const NAV_GROUPS = [
   {
     label: "Content",
     items: [
-      { label: "Site Content", path: "/admin/content", icon: /* @__PURE__ */ jsx(FileText, { size: 18 }), built: false }
+      { label: "Site Content", path: "/admin/content", icon: /* @__PURE__ */ jsx(FileText, { size: 18 }), built: true }
     ]
   },
   {
@@ -30,7 +30,7 @@ const NAV_GROUPS = [
   {
     label: "System",
     items: [
-      { label: "Settings", path: "/admin/settings", icon: /* @__PURE__ */ jsx(Settings, { size: 18 }), adminOnly: true, built: false },
+      { label: "Settings", path: "/admin/settings", icon: /* @__PURE__ */ jsx(Settings, { size: 18 }), adminOnly: true, built: true },
       { label: "Users", path: "/admin/users", icon: /* @__PURE__ */ jsx(Users, { size: 18 }), adminOnly: true, built: false },
       { label: "Change Log", path: "/admin/change-log", icon: /* @__PURE__ */ jsx(History, { size: 18 }), adminOnly: true, built: false }
     ]

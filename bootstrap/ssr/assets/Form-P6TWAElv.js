@@ -2,7 +2,7 @@ import { jsxs, jsx } from "react/jsx-runtime";
 import { usePage, Head, Link, router } from "@inertiajs/react";
 import { useState, useCallback } from "react";
 import { Upload, GripVertical, Star, ImageIcon, Trash2, ArrowLeft, Save } from "lucide-react";
-import { A as AdminLayout } from "./AdminLayout-BmjI_BP2.js";
+import { A as AdminLayout } from "./AdminLayout-DnPfbuel.js";
 import { useDropzone } from "react-dropzone";
 import { useSensors, useSensor, PointerSensor, DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
