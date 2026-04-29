@@ -284,6 +284,8 @@ These extend the Nuor playbook for real-estate-specific needs.
 4. **Per-project inquiries** — Contact submissions can carry an optional `project_id` FK. "Contact about this project" CTAs pre-fill the form. Admin project listings show an inquiries count badge per row.
 5. **Section show/hide toggles** — `site_content` rows have an `is_visible` boolean. Admin can hide an entire homepage section (e.g. "Stats") without a code deploy. Public pages skip rendering when `is_visible=false`. Page-level visibility lives on `pages.is_visible`.
 6. **Color-aware transparent navbar** — [Header](resources/js/Components/Layout/Header.tsx) is `position: fixed` and overlays section content. Sections opt into a navbar tone by setting `data-nav-bg="dark"` (or `"light"`) on their root element. The header samples the section currently overlapping its centerline (32px down) on scroll/resize and swaps logo + link + toggle colors accordingly. Adding a section with a dark hero? Add `data-nav-bg="dark"` to its wrapper. Pages without a top hero must add their own top padding for the navbar height.
+7. **Health badges with deep-link Fix → links** — Dashboard surfaces content gaps (missing project images/SEO, hidden pages/sections, unset social URLs, missing contact info, missing default SEO title). Every "Fix" link carries a `#section-X` hash. Edit pages read the hash in `useEffect` on mount and call `scrollIntoView({ behavior: 'smooth' })`; the Site Content accordion additionally `setExpandedPage(slug)` so the hash both opens the correct page AND scrolls to it (200ms delay to let the accordion DOM expand first). Settings page has `id="section-{group}"` on each group card; project Form has `id="section-seo"` / `id="section-gallery"`.
+8. **Collapsible sidebar + mobile slide-in (ported from Nuor)** — Desktop chevron toggles between full-width (`w-64`) and icon-only (`w-16`); state persists across Inertia visits via a module-level `globalSidebarCollapsed` in [AdminLayout.tsx](resources/js/Layouts/AdminLayout.tsx). Mobile renders the sidebar `fixed` off-screen with a backdrop overlay; the layout's hamburger button slides it in. `useEffect` resets mobile state when the viewport hits `lg`. The page-icon next to the title is auto-resolved from a `PAGE_ICONS` URL→icon map in AdminLayout — adding a new admin route doesn't require touching every page component, just append one entry.
 
 ### CMS Approach
 
@@ -369,10 +371,11 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 
 ### Admin Panel (TODO — in build order)
 - [x] Login page (with Turnstile)
-- [x] Dashboard (skeleton — needs stats)
-- [ ] **Projects CRUD** (gallery upload + reorder + delete, category, listing_status, per-listing SEO with OG picked from gallery, soft-delete + restore) — first because it owns all admin-controlled imagery
-- [ ] **Site Content editor** — bilingual side-by-side, text-only, per-row visibility, per-page SEO
-- [ ] **Settings** — contact info, social, map, media-room embeds, SEO defaults (OG as URL field), lead routing JSON
+- [x] Dashboard with content-health badges (project image/SEO gaps, hidden pages/sections, unset social URLs, missing contact info, missing default SEO title) — every "Fix" link deep-links to its target section via `#section-X` hash anchor
+- [x] **Projects CRUD** — list with filters/search/active toggle, Form (Basic Info / Listing Details / Location / Property Specs / SEO / Gallery sections with icon-headed dividers), gallery upload + reorder + delete, per-listing SEO with OG picked from gallery, soft-delete + Trash with restore + force-delete
+- [x] **Site Content editor** — bilingual side-by-side accordion (one per public page), text-only, per-row visibility, per-page SEO with amber "No SEO title" badge, hash-anchor deep-linking opens + scrolls to the target page
+- [x] **Settings** — 2-column grid of group cards with icon headers + descriptions + group-specific field layouts; live amber warning badges for unset critical values (social URLs not set, phone/email missing, default SEO title missing); lead routing JSON; OG as URL field
+- [x] **AdminLayout + AdminSidebar** — collapsible desktop sidebar (chevron toggle, persistent across Inertia visits), mobile slide-in with backdrop, auto-resolved page icon next to title
 - [ ] Contact Submissions inbox (with per-project linkage) — depends on public Contact form being live
 - [ ] Users (admin-only)
 - [ ] Change Log + Undo (admin-only) — port `UndoService` + `ChangeLogService` from Nuor (last)
@@ -392,7 +395,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-04-28 — homepage shipped; admin plan revised: no standalone Media Library, image management lives inside Projects CRUD only, Site Content is text-only
+> **Last updated:** 2026-04-29 — admin panel core shipped (Projects CRUD, Site Content editor, Settings, Dashboard health badges) with collapsible sidebar + hash-anchor deep-linking patterns. Remaining admin work: Contact Submissions inbox (gated on public Contact form), Users, Change Log/Undo.
 
 ---
 
