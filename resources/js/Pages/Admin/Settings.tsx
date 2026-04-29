@@ -277,7 +277,7 @@ export default function Settings() {
                 <SaveButton />
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
                 {GROUP_ORDER.filter(g => settings[g]).map(group => {
                     const meta = GROUP_META[group];
                     const Icon = meta?.icon;

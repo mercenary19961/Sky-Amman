@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import {
     LogOut,
@@ -9,6 +9,7 @@ import {
     Settings as SettingsIcon,
     Users as UsersIcon,
     History,
+    Menu,
 } from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
 import type { PageProps } from '@/types';
@@ -29,8 +30,28 @@ interface AdminLayoutProps {
     title?: string;
 }
 
+// Persist sidebar collapsed state across Inertia navigations
+let globalSidebarCollapsed = false;
+
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
     const { url } = usePage<PageProps>();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(globalSidebarCollapsed);
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) setMobileOpen(false);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const handleToggle = () => {
+        const next = !sidebarCollapsed;
+        setSidebarCollapsed(next);
+        globalSidebarCollapsed = next;
+        setMobileOpen(false);
+    };
 
     const PageIcon = PAGE_ICONS.find(([path, , exact]) =>
         exact ? url === path : url.startsWith(path),
@@ -39,28 +60,44 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
     const logout = () => { router.post('/admin/logout'); };
 
     return (
-        <div className="dark min-h-screen flex bg-surface-muted text-ink" dir="ltr">
-            <AdminSidebar />
-            <div className="flex-1 flex flex-col min-w-0">
-                <header className="h-16 bg-white dark:bg-zinc-800 border-b border-ink/5 dark:border-white/10 flex items-center justify-between px-6">
-                    <div className="flex items-center gap-3">
+        <div className="dark min-h-screen bg-surface-muted text-ink" dir="ltr">
+            <AdminSidebar
+                collapsed={sidebarCollapsed}
+                mobileOpen={mobileOpen}
+                onToggle={handleToggle}
+                onMobileClose={() => setMobileOpen(false)}
+            />
+
+            <div
+                className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}
+            >
+                <header className="sticky top-0 z-20 h-16 bg-white dark:bg-zinc-800 border-b border-ink/5 dark:border-white/10 flex items-center justify-between px-4 sm:px-6">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <button
+                            type="button"
+                            onClick={() => setMobileOpen(true)}
+                            className="lg:hidden inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-ink/5 dark:hover:bg-white/5 transition-colors text-ink-muted"
+                            title="Open menu"
+                        >
+                            <Menu size={20} />
+                        </button>
                         {PageIcon && (
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <PageIcon size={16} />
                             </div>
                         )}
-                        <h1 className="text-lg font-semibold">{title}</h1>
+                        <h1 className="text-lg font-semibold truncate">{title}</h1>
                     </div>
                     <button
                         type="button"
                         onClick={logout}
-                        className="flex items-center gap-2 text-sm text-ink-muted hover:text-primary transition-colors"
+                        className="flex items-center gap-2 text-sm text-ink-muted hover:text-primary transition-colors shrink-0"
                     >
                         <LogOut size={16} />
-                        Sign out
+                        <span className="hidden sm:inline">Sign out</span>
                     </button>
                 </header>
-                <main className="flex-1 overflow-y-auto p-6">{children}</main>
+                <main className="p-6">{children}</main>
             </div>
         </div>
     );
