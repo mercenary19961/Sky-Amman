@@ -63,7 +63,7 @@ export function Header() {
         // the hero's gradient) instead of taking layout space. Pages without a
         // top hero need to add their own top padding for the navbar.
         <header className="fixed top-0 inset-x-0 z-40">
-            <div className="section-x h-16 flex items-center justify-between gap-6">
+            <div className="section-x h-20 flex items-center justify-between gap-6">
                 <Link
                     href="/"
                     className="flex items-center transition-opacity duration-200"
@@ -74,7 +74,7 @@ export function Header() {
                         <img
                             src="/images/logo-white.png"
                             alt="Sky Amman"
-                            className="h-9 w-auto select-none"
+                            className="h-14 sm:h-16 w-auto select-none"
                         />
                     ) : (
                         // TODO: swap to /images/logo-primary.png once the designer

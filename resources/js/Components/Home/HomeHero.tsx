@@ -14,8 +14,9 @@ export function HomeHero({ content }: HomeHeroProps) {
 
     return (
         <section className="relative overflow-hidden" data-nav-bg="dark">
-            {/* Sky gradient: primary → white, top to bottom */}
-            <div className="absolute inset-0 bg-linear-to-b from-primary to-surface" aria-hidden="true" />
+            {/* Sky gradient: deep sky blue at top, fading through primary into
+                white near the villa — matches the target picker (#5299CC). */}
+            <div className="absolute inset-0 bg-linear-to-b from-[#5299CC] via-primary to-surface" aria-hidden="true" />
 
             <div className="relative section-x pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight">
