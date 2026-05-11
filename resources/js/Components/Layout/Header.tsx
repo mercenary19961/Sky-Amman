@@ -80,7 +80,7 @@ export function Header() {
                         // TODO: swap to /images/logo-primary.png once the designer
                         // delivers the light-blue variant for white backgrounds.
                         <span className="font-bold text-lg tracking-wide text-primary">
-                            SKY AMMAN
+                            SkyAmman
                         </span>
                     )}
                 </Link>

@@ -54,7 +54,7 @@ export function Footer() {
                 {/* Top: 3-column links + socials */}
                 <div className="section-x pt-14 sm:pt-20 pb-10 grid gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <div className="text-xl font-bold tracking-wide">SKY AMMAN</div>
+                        <div className="text-xl font-bold tracking-wide">SkyAmman</div>
                         <p className="mt-2 text-sm text-white/85">{t('footer.tagline')}</p>
                     </div>
 
@@ -122,7 +122,7 @@ export function Footer() {
                 {/* Big logo lockup over the villa */}
                 <div className="relative section-x pt-8 pb-32 sm:pb-48 text-center select-none">
                     <div className="text-6xl sm:text-8xl lg:text-9xl font-extrabold tracking-tight text-white/95 leading-none">
-                        SKY<span className="font-light">AMMAN</span>
+                        Sky<span className="font-light">Amman</span>
                     </div>
                     <div className="mt-2 text-xs sm:text-sm uppercase tracking-[0.4em] text-white/80">
                         Real Estate Consultancy
