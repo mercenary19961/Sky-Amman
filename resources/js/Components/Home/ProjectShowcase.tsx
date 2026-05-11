@@ -120,7 +120,7 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     return (
         <article
             data-card
-            className="snap-start shrink-0 w-72 sm:w-80 bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
+            className="snap-start shrink-0 w-[clamp(15rem,20vw,19rem)] bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
         >
             <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
@@ -132,7 +132,7 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
             </div>
 
             <div className="px-2 pt-6 pb-4 flex flex-col items-center text-center flex-1">
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-ink uppercase tracking-wide whitespace-nowrap">
+                <h3 className="text-base sm:text-lg lg:text-xl 3xl:text-2xl font-semibold text-ink uppercase tracking-wide whitespace-nowrap">
                     {title}
                 </h3>
                 {location && (
