@@ -15,7 +15,7 @@ export function AboutUs({ content }: AboutUsProps) {
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
                 <div
-                    className="relative overflow-hidden rounded-3xl shadow-md bg-primary-light/40 bg-cover bg-center"
+                    className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl shadow-md bg-primary-light/40 bg-cover bg-center"
                     style={{ backgroundImage: 'url(/images/home/about-villa.jpg)' }}
                 >
                     {/* Light blue overlay so the copy stays legible over the photo */}
@@ -24,7 +24,7 @@ export function AboutUs({ content }: AboutUsProps) {
                         aria-hidden="true"
                     />
 
-                    <div className="relative px-6 sm:px-12 lg:px-20 py-14 sm:py-20 lg:py-24 text-center max-w-4xl mx-auto">
+                    <div className="relative px-6 sm:px-10 lg:px-14 py-20 sm:py-28 lg:py-32 text-center">
                         {title && (
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white drop-shadow-sm tracking-wide">
                                 {title}
