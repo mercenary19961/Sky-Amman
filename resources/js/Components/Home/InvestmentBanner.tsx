@@ -25,7 +25,7 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
         <section className="relative pt-20 sm:pt-28 pb-16 sm:pb-20 bg-surface">
             <div className="section-x text-center">
                 {/* Buy Early headline with inline strip image */}
-                <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-primary leading-tight">
+                <h2 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold text-primary leading-tight">
                     {taglineParts[0] ?? ''}
                 </h2>
 
