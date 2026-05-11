@@ -120,7 +120,7 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     return (
         <article
             data-card
-            className="snap-start shrink-0 w-64 sm:w-72 bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
+            className="snap-start shrink-0 w-72 sm:w-80 bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
         >
             <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
@@ -131,18 +131,20 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
                 />
             </div>
 
-            <div className="px-2 pt-5 pb-3 flex flex-col items-center text-center flex-1">
-                <h3 className="text-base sm:text-lg font-semibold text-ink uppercase tracking-wide">
+            <div className="px-2 pt-6 pb-4 flex flex-col items-center text-center flex-1">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-ink uppercase tracking-wide whitespace-nowrap">
                     {title}
                 </h3>
-                {location && <p className="mt-1 text-sm text-ink">{location}</p>}
+                {location && (
+                    <p className="mt-2 text-base sm:text-lg text-ink">{location}</p>
+                )}
                 {project.area_sqm != null && (
-                    <p className="text-sm text-ink">{areaLabel}</p>
+                    <p className="text-base sm:text-lg text-ink">{areaLabel}</p>
                 )}
 
                 <Link
                     href={`/properties/${project.slug}`}
-                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white text-primary px-6 py-2 text-xs sm:text-sm font-medium shadow-sm hover:bg-primary hover:text-white transition-colors"
+                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-9 py-3 text-base sm:text-lg font-medium shadow-sm hover:bg-primary hover:text-white transition-colors"
                 >
                     {ctaLabel}
                 </Link>
