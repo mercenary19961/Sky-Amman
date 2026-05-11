@@ -17,7 +17,7 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
     return (
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
-                <div className="relative mx-auto max-w-5xl rounded-3xl border-2 border-primary/40 bg-surface p-8 sm:p-12 lg:p-16">
+                <div className="relative mx-auto max-w-5xl rounded-3xl bg-surface p-8 sm:p-12 lg:p-16">
                     {/* Title block */}
                     <div className="text-center">
                         {label && (
