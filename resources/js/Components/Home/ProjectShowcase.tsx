@@ -57,7 +57,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         type="button"
                         onClick={() => scrollByOne(-1)}
                         aria-label="Previous"
-                        className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-11 h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors -translate-x-1/2 rtl:translate-x-1/2"
+                        className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors sm:-translate-x-1/2 sm:rtl:translate-x-1/2"
                     >
                         {isRTL ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
                     </button>
@@ -80,7 +80,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         type="button"
                         onClick={() => scrollByOne(1)}
                         aria-label="Next"
-                        className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-11 h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors translate-x-1/2 rtl:-translate-x-1/2"
+                        className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors sm:translate-x-1/2 sm:rtl:-translate-x-1/2"
                     >
                         {isRTL ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
                     </button>
@@ -120,7 +120,7 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     return (
         <article
             data-card
-            className="snap-start shrink-0 w-[clamp(15rem,20vw,19rem)] bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
+            className="snap-start shrink-0 w-[85vw] sm:w-72 md:w-60 lg:w-[clamp(12rem,20vw,19rem)] bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
         >
             <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
@@ -131,20 +131,20 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
                 />
             </div>
 
-            <div className="px-2 pt-6 pb-4 flex flex-col items-center text-center flex-1">
-                <h3 className="text-base sm:text-lg lg:text-xl 3xl:text-2xl font-semibold text-ink uppercase tracking-wide whitespace-nowrap">
+            <div className="px-2 pt-5 pb-4 flex flex-col items-center text-center flex-1">
+                <h3 className="text-sm sm:text-base md:text-sm lg:text-base xl:text-lg 3xl:text-2xl font-semibold text-ink uppercase tracking-wide whitespace-nowrap">
                     {title}
                 </h3>
                 {location && (
-                    <p className="mt-2 text-base sm:text-lg text-ink">{location}</p>
+                    <p className="mt-2 text-sm sm:text-base text-ink">{location}</p>
                 )}
                 {project.area_sqm != null && (
-                    <p className="text-base sm:text-lg text-ink">{areaLabel}</p>
+                    <p className="text-sm sm:text-base text-ink">{areaLabel}</p>
                 )}
 
                 <Link
                     href={`/properties/${project.slug}`}
-                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-9 py-3 text-base sm:text-lg font-medium shadow-sm hover:bg-primary hover:text-white transition-colors"
+                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white text-primary px-5 sm:px-6 lg:px-7 xl:px-9 py-2 sm:py-2.5 xl:py-3 text-sm sm:text-base xl:text-lg font-medium shadow-sm hover:bg-primary hover:text-white transition-colors whitespace-nowrap"
                 >
                     {ctaLabel}
                 </Link>
