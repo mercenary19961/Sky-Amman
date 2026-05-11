@@ -63,15 +63,26 @@ export function Header() {
         // the hero's gradient) instead of taking layout space. Pages without a
         // top hero need to add their own top padding for the navbar.
         <header className="fixed top-0 inset-x-0 z-40">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
+            <div className="section-x h-16 flex items-center justify-between gap-6">
                 <Link
                     href="/"
-                    className={cn(
-                        'font-bold text-lg tracking-wide transition-colors duration-200',
-                        isDark ? 'text-white' : 'text-primary',
-                    )}
+                    className="flex items-center transition-opacity duration-200"
+                    aria-label="Sky Amman"
                 >
-                    SKY AMMAN
+                    {isDark ? (
+                        // White logo for dark/blue sections (hero, footer overlap).
+                        <img
+                            src="/images/logo-white.png"
+                            alt="Sky Amman"
+                            className="h-9 w-auto select-none"
+                        />
+                    ) : (
+                        // TODO: swap to /images/logo-primary.png once the designer
+                        // delivers the light-blue variant for white backgrounds.
+                        <span className="font-bold text-lg tracking-wide text-primary">
+                            SKY AMMAN
+                        </span>
+                    )}
                 </Link>
 
                 <nav className="hidden lg:flex items-center gap-6 text-sm">

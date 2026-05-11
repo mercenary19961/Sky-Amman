@@ -15,7 +15,7 @@ export function MediaRoom({ content, embeds }: MediaRoomProps) {
 
     return (
         <section className="bg-surface py-16 sm:py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="section-x">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary text-center tracking-wide">
                     {room.title?.content ?? ''}
                 </h2>
@@ -32,7 +32,7 @@ export function MediaRoom({ content, embeds }: MediaRoomProps) {
                                     src={embeds.linkedin}
                                     title="LinkedIn"
                                     loading="lazy"
-                                    className="w-full h-[420px] border-0"
+                                    className="w-full h-105 border-0"
                                     sandbox="allow-scripts allow-same-origin allow-popups"
                                 />
                             </div>
@@ -50,7 +50,7 @@ export function MediaRoom({ content, embeds }: MediaRoomProps) {
                                     src={embeds.instagram}
                                     title="Instagram"
                                     loading="lazy"
-                                    className="w-full h-[420px] border-0"
+                                    className="w-full h-105 border-0"
                                     sandbox="allow-scripts allow-same-origin allow-popups"
                                 />
                             </div>

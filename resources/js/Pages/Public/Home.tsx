@@ -3,6 +3,7 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { HomeHero } from '@/Components/Home/HomeHero';
 import { InvestmentBanner } from '@/Components/Home/InvestmentBanner';
+import { AboutUs } from '@/Components/Home/AboutUs';
 import { AssurancePillars } from '@/Components/Home/AssurancePillars';
 import { ProjectShowcase } from '@/Components/Home/ProjectShowcase';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
@@ -32,6 +33,7 @@ export default function Home() {
 
             <HomeHero content={content} />
             <InvestmentBanner content={content} />
+            <AboutUs content={content} />
             <AssurancePillars content={content} />
             <ProjectShowcase content={content} projects={props.featuredProjects} />
             <ValueProposition content={content} />

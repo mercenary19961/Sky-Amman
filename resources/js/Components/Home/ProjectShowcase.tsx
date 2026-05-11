@@ -42,7 +42,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
 
     return (
         <section className="bg-surface-muted py-16 sm:py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="section-x">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary text-center tracking-wide">
                     {showcase.title?.content ?? ''}
                 </h2>
@@ -72,7 +72,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         type="button"
                         onClick={() => scrollByOne(-1)}
                         aria-label="Previous"
-                        className="absolute start-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors -translate-x-1/2 rtl:translate-x-1/2"
+                        className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors -translate-x-1/2 rtl:translate-x-1/2"
                     >
                         {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                     </button>
@@ -100,7 +100,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         type="button"
                         onClick={() => scrollByOne(1)}
                         aria-label="Next"
-                        className="absolute end-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors translate-x-1/2 rtl:-translate-x-1/2"
+                        className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors translate-x-1/2 rtl:-translate-x-1/2"
                     >
                         {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
                     </button>
@@ -124,9 +124,9 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     return (
         <article
             data-card
-            className="snap-start shrink-0 w-[280px] sm:w-[300px] bg-white rounded-3xl shadow-md overflow-hidden flex flex-col"
+            className="snap-start shrink-0 w-70 sm:w-75 bg-white rounded-3xl shadow-md overflow-hidden flex flex-col"
         >
-            <div className="aspect-[4/3] w-full overflow-hidden bg-primary-light/30">
+            <div className="aspect-4/3 w-full overflow-hidden bg-primary-light/30">
                 <img
                     src={project.image_url}
                     alt={title}

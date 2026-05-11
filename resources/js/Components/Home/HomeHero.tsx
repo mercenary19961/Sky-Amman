@@ -8,6 +8,7 @@ interface HomeHeroProps {
 export function HomeHero({ content }: HomeHeroProps) {
     const hero = content.hero ?? {};
     const title = hero.title?.content ?? '';
+    const location = hero.location?.content ?? '';
     const subtitle = hero.subtitle?.content ?? '';
     const cta = hero.cta?.content ?? '';
 
@@ -16,10 +17,15 @@ export function HomeHero({ content }: HomeHeroProps) {
             {/* Sky gradient: primary → white, top to bottom */}
             <div className="absolute inset-0 bg-linear-to-b from-primary to-surface" aria-hidden="true" />
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center">
+            <div className="relative section-x pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight">
                     {title}
                 </h1>
+                {location && (
+                    <p className="mt-2 sm:mt-3 text-xl sm:text-2xl lg:text-3xl font-semibold text-white drop-shadow-sm">
+                        {location}
+                    </p>
+                )}
                 <p className="mt-4 text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto">
                     {subtitle}
                 </p>

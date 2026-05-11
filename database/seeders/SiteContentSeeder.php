@@ -16,12 +16,16 @@ class SiteContentSeeder extends Seeder
     {
         $rows = [
             // ---------------- HOME ----------------
-            ['home', 'hero', 'title', 'Buy, Rent or Build a Property in Amman', 'اشترِ، استأجر أو ابنِ عقاراً في عمّان'],
+            ['home', 'hero', 'title', 'Real Estate Development', 'التطوير العقاري'],
+            ['home', 'hero', 'location', 'In Amman', 'في عمّان'],
             ['home', 'hero', 'subtitle', 'With Security, Credibility and Transparency', 'بأمان ومصداقية وشفافية'],
             ['home', 'hero', 'cta', 'Explore Projects', 'استكشف المشاريع'],
 
             ['home', 'investment_banner', 'tagline', 'Buy Early, Save More, Gain More', 'اشترِ مبكراً، وفّر أكثر، اربح أكثر'],
             ['home', 'investment_banner', 'cta', 'Investment Opportunities', 'فرص الاستثمار'],
+
+            ['home', 'about', 'title', 'Who We Are?', 'من نحن؟'],
+            ['home', 'about', 'body', 'Sky Amman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في المشاريع السكنية والتجارية والمكتبية والطبية. نُقدّم تطويرات عالية الجودة وحلولاً عقارية متكاملة، مع خيارات تملّك مرنة قائمة على الثقة والقيمة والرؤية بعيدة المدى.'],
 
             ['home', 'stats', 'clients_value', '+1500', '+1500'],
             ['home', 'stats', 'clients_label', 'Clients', 'عميل'],

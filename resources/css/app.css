@@ -24,6 +24,10 @@
     --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     --font-arabic: 'IBM Plex Sans Arabic', var(--font-sans);
+
+    /* Custom breakpoint above Tailwind's 2xl (1536px), so 1536px laptops still
+       render full-bleed and only larger monitors get the framed margin. */
+    --breakpoint-3xl: 1600px;
 }
 
 /* Admin dark theme — overrides brand tokens inside the .dark wrapper.
@@ -37,6 +41,25 @@
 
 html[dir="rtl"] body {
     font-family: var(--font-arabic);
+}
+
+/* Single horizontal-padding utility shared by every public section wrapper.
+   Edit padding values here and they apply across the homepage + header/footer.
+   Vertical padding stays per-section because rhythm varies by intent. */
+@utility section-x {
+    padding-inline: 1rem; /* 16px */
+
+    @media (width >= 40rem) { /* sm: 640px+ */
+        padding-inline: 1.5rem; /* 24px */
+    }
+
+    @media (width >= 64rem) { /* lg: 1024px+ */
+        padding-inline: 2rem; /* 32px */
+    }
+
+    @media (width >= 100rem) { /* 3xl: 1600px+ */
+        padding-inline: 8rem; /* 128px */
+    }
 }
 
 @keyframes toast-slide-in {

@@ -35,13 +35,18 @@ const en = {
     },
     home: {
         hero: {
-            title: 'Buy, Rent or Build a Property in Amman',
+            title: 'Real Estate Development',
+            location: 'In Amman',
             subtitle: 'With Security, Credibility and Transparency',
             cta: 'Explore Projects',
         },
         investmentBanner: {
             tagline: 'Buy Early, Save More, Gain More',
             cta: 'Investment Opportunities',
+        },
+        about: {
+            title: 'Who We Are?',
+            body: 'Sky Amman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
         },
         stats: {
             clients: 'Clients',

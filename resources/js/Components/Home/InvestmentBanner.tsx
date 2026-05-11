@@ -23,7 +23,7 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
 
     return (
         <section className="relative pt-20 sm:pt-28 pb-16 sm:pb-20 bg-surface">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+            <div className="section-x text-center">
                 {/* Buy Early headline with inline strip image */}
                 <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-primary leading-tight">
                     {taglineParts[0] ?? ''}
@@ -34,7 +34,7 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
                     <img
                         src="/images/home/buy-early-strip.svg"
                         alt=""
-                        className="h-10 sm:h-14 w-auto select-none pointer-events-none"
+                        className="h-12 sm:h-16 w-40 sm:w-56 select-none pointer-events-none"
                     />
                     <span>{taglineParts[2] ?? ''}</span>
                 </div>

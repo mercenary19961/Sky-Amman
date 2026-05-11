@@ -11,7 +11,9 @@
       "Read(//c/c/Users/sabba/Desktop/projects/sky-amman/database/**)",
       "Bash(npx tsc *)",
       "Bash(curl -s -o /tmp/home.html -w \"HTTP %{http_code}\\\\nSize: %{size_download} bytes\\\\n\" http://127.0.0.1:8000/)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\" --headless --disable-gpu --no-sandbox --hide-scrollbars --screenshot=\"$\\(pwd\\)/tmp/strip-test/out.png\" --window-size=900,160 \"file:///$\\(pwd\\)/tmp/strip-test/test.html\")",
+      "Bash(\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\" --headless --disable-gpu --no-sandbox --hide-scrollbars --screenshot=\"C:\\\\Users\\\\sabba\\\\Desktop\\\\projects\\\\sky-amman\\\\tmp\\\\strip-test\\\\out.png\" --window-size=900,160 \"file:///C:/Users/sabba/Desktop/projects/sky-amman/tmp/strip-test/test.html\")"
     ]
   }
 }
