@@ -19,7 +19,7 @@ export default function Home() {
     // client picks based on the active language without an HTTP round-trip.
     const content = language === 'ar' ? props.content_ar : props.content_en;
 
-    const seoTitle = props.siteSettings?.seo_title ?? 'Sky Amman';
+    const seoTitle = props.siteSettings?.seo_title ?? 'SkyAmman';
     const seoDescription = props.siteSettings?.seo_description ?? '';
 
     return (

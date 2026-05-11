@@ -67,13 +67,13 @@ export function Header() {
                 <Link
                     href="/"
                     className="flex items-center transition-opacity duration-200"
-                    aria-label="Sky Amman"
+                    aria-label="SkyAmman"
                 >
                     {isDark ? (
                         // White logo for dark/blue sections (hero, footer overlap).
                         <img
                             src="/images/logo-white.png"
-                            alt="Sky Amman"
+                            alt="SkyAmman"
                             className="h-16 sm:h-20 w-auto select-none"
                         />
                     ) : (

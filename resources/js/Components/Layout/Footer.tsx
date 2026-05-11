@@ -132,7 +132,7 @@ export function Footer() {
                 {/* Copyright strip */}
                 <div className="relative border-t border-white/15">
                     <div className="section-x py-4 text-xs text-white/85 text-center sm:text-start">
-                        © {year} Sky Amman. {t('footer.copyright')}
+                        © {year} SkyAmman. {t('footer.copyright')}
                     </div>
                 </div>
             </div>

@@ -20,7 +20,7 @@ export function LocationMap({ content, mapEmbedUrl }: LocationMapProps) {
                 <div className="mt-10 rounded-3xl overflow-hidden shadow-md">
                     <iframe
                         src={mapEmbedUrl}
-                        title="Sky Amman office location"
+                        title="SkyAmman office location"
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         allowFullScreen

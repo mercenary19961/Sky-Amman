@@ -25,7 +25,7 @@ const en = {
         properties: 'Properties',
         investment: 'Investment',
         selfBuild: 'Self Build',
-        security: 'Security With Sky Amman',
+        security: 'Security With SkyAmman',
         about: 'About Us',
         contact: 'Contact Us',
         login: 'Admin Login',
@@ -46,7 +46,7 @@ const en = {
         },
         about: {
             title: 'Who We Are?',
-            body: 'Sky Amman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
+            body: 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
         },
         stats: {
             clients: 'Clients',
@@ -149,7 +149,7 @@ const en = {
             body: 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.',
         },
         cta: {
-            heading: 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, Sky Amman Provides A Reliable Investment Environment.',
+            heading: 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.',
             button: 'Self Build Service',
         },
     },
@@ -172,7 +172,7 @@ const en = {
     },
     security: {
         hero: {
-            title: 'Security With Sky Amman',
+            title: 'Security With SkyAmman',
         },
     },
     about: {

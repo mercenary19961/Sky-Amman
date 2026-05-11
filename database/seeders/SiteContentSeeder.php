@@ -25,7 +25,7 @@ class SiteContentSeeder extends Seeder
             ['home', 'investment_banner', 'cta', 'Investment Opportunities', 'فرص الاستثمار'],
 
             ['home', 'about', 'title', 'Who We Are?', 'من نحن؟'],
-            ['home', 'about', 'body', 'Sky Amman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في المشاريع السكنية والتجارية والمكتبية والطبية. نُقدّم تطويرات عالية الجودة وحلولاً عقارية متكاملة، مع خيارات تملّك مرنة قائمة على الثقة والقيمة والرؤية بعيدة المدى.'],
+            ['home', 'about', 'body', 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في المشاريع السكنية والتجارية والمكتبية والطبية. نُقدّم تطويرات عالية الجودة وحلولاً عقارية متكاملة، مع خيارات تملّك مرنة قائمة على الثقة والقيمة والرؤية بعيدة المدى.'],
 
             ['home', 'stats', 'clients_value', '+1500', '+1500'],
             ['home', 'stats', 'clients_label', 'Clients', 'عميل'],
@@ -83,7 +83,7 @@ class SiteContentSeeder extends Seeder
             ['investment', 'hero', 'title', 'WHY TO INVEST IN AMMAN THROUGH PROPERTIES (BUY/ RENT OR BUILD)?', 'لماذا الاستثمار في عمّان عبر العقارات (شراء / إيجار / بناء)؟'],
             ['investment', 'editorial', 'heading', 'Amman Continues To Position Itself As One Of The Most Stable And Promising Real Estate Markets In The Region', 'تواصل عمّان ترسيخ موقعها كواحدة من أكثر أسواق العقارات استقراراً وواعدية في المنطقة'],
             ['investment', 'editorial', 'body', 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.', 'موقعها الاستراتيجي واستقرارها السياسي وبنيتها التحتية المتنامية تجعلها وجهة جاذبة للمستثمرين المحليين والدوليين على حدٍّ سواء.'],
-            ['investment', 'cta', 'heading', 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, Sky Amman Provides A Reliable Investment Environment.', 'للمستثمرين الباحثين عن سوق متوازن مع نمو مستقر ومخاطر متحكَّم بها، توفر سكاي عمان بيئة استثمارية موثوقة.'],
+            ['investment', 'cta', 'heading', 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.', 'للمستثمرين الباحثين عن سوق متوازن مع نمو مستقر ومخاطر متحكَّم بها، توفر سكاي عمان بيئة استثمارية موثوقة.'],
             ['investment', 'cta', 'button', 'Self Build Service', 'خدمة البناء الذاتي'],
 
             // ---------------- SELF BUILD ----------------
@@ -98,7 +98,7 @@ class SiteContentSeeder extends Seeder
             ['self_build', 'process', 'step_7', 'Handover', 'التسليم'],
 
             // ---------------- SECURITY ----------------
-            ['security', 'hero', 'title', 'Security With Sky Amman', 'الأمان مع سكاي عمان'],
+            ['security', 'hero', 'title', 'Security With SkyAmman', 'الأمان مع سكاي عمان'],
 
             // ---------------- ABOUT ----------------
             ['about', 'hero', 'title', 'About Us', 'من نحن'],

@@ -145,7 +145,7 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
             <section
                 ref={wrapperRef}
                 className="hidden md:block relative h-[240vh] bg-surface"
-                aria-label="Sky Amman assurance pillars"
+                aria-label="SkyAmman assurance pillars"
             >
                 <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
                     <PillarStage
@@ -158,7 +158,7 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
             </section>
 
             {/* Mobile: tab buttons advance the active pillar. */}
-            <section className="md:hidden bg-surface py-12" aria-label="Sky Amman assurance pillars">
+            <section className="md:hidden bg-surface py-12" aria-label="SkyAmman assurance pillars">
                 <div className="px-4">
                     <PillarStage
                         active={active}
