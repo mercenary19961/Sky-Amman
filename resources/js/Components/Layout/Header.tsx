@@ -63,7 +63,7 @@ export function Header() {
         // the hero's gradient) instead of taking layout space. Pages without a
         // top hero need to add their own top padding for the navbar.
         <header className="fixed top-0 inset-x-0 z-40">
-            <div className="section-x h-20 flex items-center justify-between gap-6">
+            <div className="section-x h-24 flex items-center justify-between gap-6">
                 <Link
                     href="/"
                     className="flex items-center transition-opacity duration-200"
@@ -74,7 +74,7 @@ export function Header() {
                         <img
                             src="/images/logo-white.png"
                             alt="Sky Amman"
-                            className="h-14 sm:h-16 w-auto select-none"
+                            className="h-16 sm:h-20 w-auto select-none"
                         />
                     ) : (
                         // TODO: swap to /images/logo-primary.png once the designer
@@ -85,7 +85,7 @@ export function Header() {
                     )}
                 </Link>
 
-                <nav className="hidden lg:flex items-center gap-6 text-sm">
+                <nav className="hidden lg:flex items-center gap-6 text-sm mb-3">
                     {NAV_ITEMS.map((item) => {
                         const active = url === item.href;
                         return (
@@ -113,7 +113,7 @@ export function Header() {
                     type="button"
                     onClick={toggleLanguage}
                     className={cn(
-                        'text-sm font-medium transition-colors duration-200',
+                        'text-sm font-medium transition-colors duration-200 mb-3',
                         isDark ? 'text-white hover:text-white/80' : 'text-ink hover:text-primary',
                     )}
                     aria-label="Toggle language"
