@@ -44,6 +44,17 @@ const en = {
             tagline: 'Buy Early, Save More, Gain More',
             cta: 'Investment Opportunities',
         },
+        departments: {
+            title: 'Head of Departments',
+            member1Name: 'Eng. Mahmoud Abu Sarhan',
+            member1Role: 'Chief Executive Officer',
+            member2Name: 'Eng. Hossam Salameh',
+            member2Role: 'Projects Director',
+            member3Name: 'Mr. Mohammad Makhl',
+            member3Role: 'Chief Financial Officer',
+            member4Name: 'Mr. Sadad Al Rawashdeh',
+            member4Role: 'Legal Director',
+        },
         managingPartner: {
             label: 'Managing Partner',
             name: 'MR. Jameel Abu Hajleh',

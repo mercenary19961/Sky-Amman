@@ -40,6 +40,17 @@ const ar = {
             tagline: 'اشترِ مبكراً، وفّر أكثر، اربح أكثر',
             cta: 'فرص الاستثمار',
         },
+        departments: {
+            title: 'رؤساء الأقسام',
+            member1Name: 'م. محمود أبو سرحان',
+            member1Role: 'الرئيس التنفيذي',
+            member2Name: 'م. حسام سلامة',
+            member2Role: 'مدير المشاريع',
+            member3Name: 'السيد محمد مخل',
+            member3Role: 'المدير المالي',
+            member4Name: 'السيد سداد الرواشدة',
+            member4Role: 'المدير القانوني',
+        },
         managingPartner: {
             label: 'الشريك الإداري',
             name: 'السيد جميل أبو هجلة',

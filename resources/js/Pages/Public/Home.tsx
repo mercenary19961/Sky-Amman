@@ -6,6 +6,7 @@ import { InvestmentBanner } from '@/Components/Home/InvestmentBanner';
 import { AboutUs } from '@/Components/Home/AboutUs';
 import { AssurancePillars } from '@/Components/Home/AssurancePillars';
 import { ManagingPartner } from '@/Components/Home/ManagingPartner';
+import { HeadOfDepartments } from '@/Components/Home/HeadOfDepartments';
 import { ProjectShowcase } from '@/Components/Home/ProjectShowcase';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
 import { MediaRoom } from '@/Components/Home/MediaRoom';
@@ -37,6 +38,7 @@ export default function Home() {
             <AboutUs content={content} />
             <AssurancePillars content={content} />
             <ManagingPartner content={content} />
+            <HeadOfDepartments content={content} />
             <ProjectShowcase content={content} projects={props.featuredProjects} />
             <ValueProposition content={content} />
             <MediaRoom content={content} embeds={props.mediaEmbeds} />
