@@ -101,7 +101,7 @@ const ar = {
             title: 'استثمار آمن',
         },
         showcase: {
-            title: 'معرض المشاريع',
+            title: 'العقارات للبيع',
             tabs: {
                 underDevelopment: 'مشاريع قيد التطوير',
                 ready: 'مشاريع جاهزة',

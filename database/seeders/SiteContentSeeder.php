@@ -73,7 +73,7 @@ class SiteContentSeeder extends Seeder
             ['home', 'assurance_safety', 'bullet_3', 'Strict adherence to approved technical specifications', 'الالتزام بالمواصفات الفنية المعتمدة'],
             ['home', 'assurance_safety', 'bullet_4', 'Materials sourced from trusted and verified suppliers', 'استخدام مواد من موردين موثوقين ومعتمدين'],
 
-            ['home', 'showcase', 'title', 'Project Showcase', 'معرض المشاريع'],
+            ['home', 'showcase', 'title', 'Properties for Sale', 'العقارات للبيع'],
             ['home', 'showcase', 'filter_under_development', 'Projects Under Development', 'مشاريع قيد التطوير'],
             ['home', 'showcase', 'filter_ready', 'Ready Projects', 'مشاريع جاهزة'],
             ['home', 'showcase', 'filter_investment', 'Investment Opportunities', 'فرص استثمارية'],

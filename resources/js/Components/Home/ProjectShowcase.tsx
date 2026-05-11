@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,83 +10,63 @@ interface ProjectShowcaseProps {
     projects: FeaturedProject[];
 }
 
-type CategoryFilter = 'under_development' | 'ready' | 'investment_opportunity';
-
 export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
     const { language, isRTL } = useLanguage();
     const showcase = content.showcase ?? {};
-
-    const [filter, setFilter] = useState<CategoryFilter>('under_development');
     const trackRef = useRef<HTMLDivElement>(null);
 
-    const filtered = useMemo(
-        () => projects.filter((p) => p.category === filter),
-        [projects, filter],
-    );
+    // Estimate "pages" of cards for the pagination dot count. We use 4 cards per
+    // page on desktop as a sensible default; the active dot updates from scroll.
+    const cardsPerPage = 4;
+    const pageCount = Math.max(1, Math.ceil(projects.length / cardsPerPage));
+    const [activePage, setActivePage] = useState(0);
+
+    useEffect(() => {
+        const track = trackRef.current;
+        if (!track) return;
+        const onScroll = () => {
+            const card = track.querySelector<HTMLElement>('[data-card]');
+            const step = card ? card.offsetWidth + 24 : 280;
+            const page = Math.round(track.scrollLeft / (step * cardsPerPage));
+            setActivePage(Math.min(pageCount - 1, Math.max(0, page)));
+        };
+        track.addEventListener('scroll', onScroll, { passive: true });
+        return () => track.removeEventListener('scroll', onScroll);
+    }, [pageCount]);
 
     const scrollByOne = (dir: -1 | 1) => {
         const track = trackRef.current;
         if (!track) return;
         const card = track.querySelector<HTMLElement>('[data-card]');
-        const step = card ? card.offsetWidth + 24 : 320;
-        // Flip the visual direction in RTL so "next" still feels like "forward".
+        const step = card ? card.offsetWidth + 24 : 280;
         const visualDir = isRTL ? -dir : dir;
         track.scrollBy({ left: step * visualDir, behavior: 'smooth' });
     };
 
-    const filterPills: { key: CategoryFilter; labelKey: string }[] = [
-        { key: 'under_development', labelKey: 'filter_under_development' },
-        { key: 'ready', labelKey: 'filter_ready' },
-        { key: 'investment_opportunity', labelKey: 'filter_investment' },
-    ];
+    if (projects.length === 0) return null;
 
     return (
-        <section className="bg-surface-muted py-16 sm:py-24">
+        <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary text-center tracking-wide">
+                <h2 className="text-center text-3xl sm:text-4xl lg:text-5xl font-bold text-primary tracking-wide uppercase">
                     {showcase.title?.content ?? ''}
                 </h2>
 
-                {/* Filter pills */}
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                    {filterPills.map(({ key, labelKey }) => (
-                        <button
-                            key={key}
-                            type="button"
-                            onClick={() => setFilter(key)}
-                            className={cn(
-                                'rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors',
-                                filter === key
-                                    ? 'bg-primary text-white'
-                                    : 'bg-primary/15 text-primary-dark hover:bg-primary/25',
-                            )}
-                        >
-                            {showcase[labelKey]?.content ?? ''}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Carousel */}
-                <div className="relative mt-10">
+                <div className="relative mt-12">
                     <button
                         type="button"
                         onClick={() => scrollByOne(-1)}
                         aria-label="Previous"
-                        className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors -translate-x-1/2 rtl:translate-x-1/2"
+                        className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-11 h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors -translate-x-1/2 rtl:translate-x-1/2"
                     >
-                        {isRTL ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                        {isRTL ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
                     </button>
 
                     <div
                         ref={trackRef}
-                        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        className="flex justify-center gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
-                        {filtered.length === 0 && (
-                            <div className="w-full text-center text-ink-muted py-12">
-                                — no projects in this category yet —
-                            </div>
-                        )}
-                        {filtered.map((p) => (
+                        {projects.map((p) => (
                             <ProjectCard
                                 key={p.id}
                                 project={p}
@@ -100,11 +80,27 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         type="button"
                         onClick={() => scrollByOne(1)}
                         aria-label="Next"
-                        className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-md text-primary hover:bg-primary hover:text-white transition-colors translate-x-1/2 rtl:-translate-x-1/2"
+                        className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex items-center justify-center w-11 h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors translate-x-1/2 rtl:-translate-x-1/2"
                     >
-                        {isRTL ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                        {isRTL ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
                     </button>
                 </div>
+
+                {/* Pagination dots */}
+                {pageCount > 1 && (
+                    <div className="mt-8 flex justify-center gap-2">
+                        {Array.from({ length: pageCount }).map((_, i) => (
+                            <span
+                                key={i}
+                                className={cn(
+                                    'w-2.5 h-2.5 rounded-full transition-colors',
+                                    i === activePage ? 'bg-primary' : 'bg-primary/25',
+                                )}
+                                aria-hidden="true"
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -124,9 +120,9 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     return (
         <article
             data-card
-            className="snap-start shrink-0 w-70 sm:w-75 bg-white rounded-3xl shadow-md overflow-hidden flex flex-col"
+            className="snap-start shrink-0 w-64 sm:w-72 bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
         >
-            <div className="aspect-4/3 w-full overflow-hidden bg-primary-light/30">
+            <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
                     src={project.image_url}
                     alt={title}
@@ -135,16 +131,18 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
                 />
             </div>
 
-            <div className="p-4 sm:p-5 flex flex-col items-center text-center flex-1">
-                <h3 className="text-base sm:text-lg font-semibold text-ink">{title}</h3>
-                {location && <p className="mt-1 text-sm text-ink-muted">{location}</p>}
+            <div className="px-2 pt-5 pb-3 flex flex-col items-center text-center flex-1">
+                <h3 className="text-base sm:text-lg font-semibold text-ink uppercase tracking-wide">
+                    {title}
+                </h3>
+                {location && <p className="mt-1 text-sm text-ink">{location}</p>}
                 {project.area_sqm != null && (
-                    <p className="text-sm text-ink-muted">{areaLabel}</p>
+                    <p className="text-sm text-ink">{areaLabel}</p>
                 )}
 
                 <Link
                     href={`/properties/${project.slug}`}
-                    className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-5 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-primary-deep transition-colors"
+                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white text-primary px-6 py-2 text-xs sm:text-sm font-medium shadow-sm hover:bg-primary hover:text-white transition-colors"
                 >
                     {ctaLabel}
                 </Link>

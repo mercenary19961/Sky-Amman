@@ -105,7 +105,7 @@ const en = {
             title: 'Secure Investment',
         },
         showcase: {
-            title: 'Project Showcase',
+            title: 'Properties for Sale',
             tabs: {
                 underDevelopment: 'Projects Under Development',
                 ready: 'Ready Projects',
