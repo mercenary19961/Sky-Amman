@@ -44,6 +44,13 @@ const en = {
             tagline: 'Buy Early, Save More, Gain More',
             cta: 'Investment Opportunities',
         },
+        managingPartner: {
+            label: 'Managing Partner',
+            name: 'MR. Jameel Abu Hajleh',
+            body1: 'At SkyAmman, we believe that successful real estate investment begins with stability, vision, and trust. Jordan today stands as a strong example of security, urban growth, and promising investment opportunities, making it an ideal environment for modern real estate development.',
+            body2: 'From the beginning, our focus has been on delivering projects that combine quality, contemporary design, and long-term value while ensuring that every development reflects the needs and expectations of our clients.',
+            body3: 'Our mission at SkyAmman goes beyond developing properties, we aim to contribute to a modern urban future that reflects the true potential of Jordan and creates lasting value for generations to come.',
+        },
         about: {
             title: 'Who We Are?',
             body: 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
