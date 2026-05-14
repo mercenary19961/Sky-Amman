@@ -17,10 +17,10 @@ class HomeController extends Controller
      */
     public function index(): Response
     {
-        $featuredProjects = Project::active()
+        $featured = Project::active()
             ->featured()
             ->ordered()
-            ->take(12)
+            ->take(24)
             ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'location_en', 'location_ar', 'area_sqm'])
             ->map(fn (Project $p) => [
                 'id' => $p->id,
@@ -35,13 +35,18 @@ class HomeController extends Controller
                 // Placeholder image path — falls back to /images/projects/{slug}.svg
                 // until the Media Library is live and admin can attach real renders.
                 'image_url' => "/images/projects/{$p->slug}.svg",
-            ])
-            ->values();
+            ]);
+
+        // Split featured listings by status so each homepage carousel pulls from
+        // its own slice of the unified projects table.
+        $featuredProjects = $featured->where('listing_status', 'for_sale')->values();
+        $featuredRentals = $featured->where('listing_status', 'for_rent')->values();
 
         return Inertia::render('Public/Home', [
             'content_en' => SiteContent::getPage('home', 'en'),
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
+            'featuredRentals' => $featuredRentals,
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
                 'instagram' => Setting::get('instagram_embed_url', ''),

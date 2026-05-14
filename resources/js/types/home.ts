@@ -25,6 +25,7 @@ export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
     featuredProjects: FeaturedProject[];
+    featuredRentals: FeaturedProject[];
     mediaEmbeds: {
         linkedin: string;
         instagram: string;

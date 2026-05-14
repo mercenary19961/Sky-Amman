@@ -39,7 +39,16 @@ export default function Home() {
             <AssurancePillars content={content} />
             <ManagingPartner content={content} />
             <HeadOfDepartments content={content} />
-            <ProjectShowcase content={content} projects={props.featuredProjects} />
+            <ProjectShowcase
+                title={content.showcase?.title?.content ?? ''}
+                ctaLabel={content.showcase?.card_cta?.content ?? ''}
+                projects={props.featuredProjects}
+            />
+            <ProjectShowcase
+                title={content.rentals?.title?.content ?? ''}
+                ctaLabel={content.rentals?.card_cta?.content ?? ''}
+                projects={props.featuredRentals}
+            />
             <ValueProposition content={content} />
             <MediaRoom content={content} embeds={props.mediaEmbeds} />
             <LocationMap

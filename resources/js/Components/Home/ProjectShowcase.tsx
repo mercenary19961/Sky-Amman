@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
-import type { FeaturedProject, SiteContentBundle } from '@/types/home';
+import type { FeaturedProject } from '@/types/home';
 
 interface ProjectShowcaseProps {
-    content: SiteContentBundle;
+    title: string;
+    ctaLabel: string;
     projects: FeaturedProject[];
 }
 
-export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
+export function ProjectShowcase({ title, ctaLabel, projects }: ProjectShowcaseProps) {
     const { language, isRTL } = useLanguage();
-    const showcase = content.showcase ?? {};
 
     const N = projects.length;
     const [activeIndex, setActiveIndex] = useState(0);
@@ -40,7 +40,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
                 <h2 className="text-center text-3xl sm:text-4xl lg:text-5xl font-bold text-primary tracking-wide uppercase">
-                    {showcase.title?.content ?? ''}
+                    {title}
                 </h2>
 
                 <div className="relative mt-12">
@@ -63,7 +63,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                                 <ProjectCard
                                     project={p}
                                     language={language}
-                                    ctaLabel={showcase.card_cta?.content ?? ''}
+                                    ctaLabel={ctaLabel}
                                 />
                             </motion.div>
                         ))}

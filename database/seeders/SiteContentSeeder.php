@@ -79,6 +79,9 @@ class SiteContentSeeder extends Seeder
             ['home', 'showcase', 'filter_investment', 'Investment Opportunities', 'فرص استثمارية'],
             ['home', 'showcase', 'card_cta', 'Explore More', 'استكشف المزيد'],
 
+            ['home', 'rentals', 'title', 'Properties for Rent', 'العقارات للإيجار'],
+            ['home', 'rentals', 'card_cta', 'Explore More', 'استكشف المزيد'],
+
             ['home', 'value_prop', 'title', 'Value Proposition', 'القيمة المضافة'],
             ['home', 'value_prop', 'item_1', 'Over 30 Years Of Experience In Real Estate', 'أكثر من 30 عاماً من الخبرة في العقارات'],
             ['home', 'value_prop', 'item_2', 'Legally, Financially, And Structurally Secured Projects', 'مشاريع آمنة قانونياً ومالياً وإنشائياً'],
