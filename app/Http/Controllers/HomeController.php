@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Services\InstagramService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,10 @@ class HomeController extends Controller
      * client can swap languages without an HTTP round-trip (instant-language
      * pattern from CLAUDE.md).
      */
+    public function __construct(private readonly InstagramService $instagram)
+    {
+    }
+
     public function index(): Response
     {
         $featured = Project::active()
@@ -49,8 +54,10 @@ class HomeController extends Controller
             'featuredRentals' => $featuredRentals,
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
-                'instagram' => Setting::get('instagram_embed_url', ''),
             ],
+            // Instagram grid is now driven by the Graph API via InstagramService
+            // (cached 1h); the old instagram_embed_url setting is no longer used.
+            'instagramPosts' => $this->instagram->getRecentMedia(9),
         ]);
     }
 }

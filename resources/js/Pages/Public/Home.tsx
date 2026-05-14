@@ -52,7 +52,11 @@ export default function Home() {
             />
             <Testimonials content={content} />
             <ValueProposition content={content} />
-            <MediaRoom content={content} embeds={props.mediaEmbeds} />
+            <MediaRoom
+                content={content}
+                linkedinUrl={props.mediaEmbeds?.linkedin ?? ''}
+                instagramPosts={props.instagramPosts ?? []}
+            />
             <LocationMap
                 content={content}
                 mapEmbedUrl={props.siteSettings?.google_maps_embed_url ?? ''}
