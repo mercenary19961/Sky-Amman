@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
@@ -13,37 +14,27 @@ interface ProjectShowcaseProps {
 export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
     const { language, isRTL } = useLanguage();
     const showcase = content.showcase ?? {};
-    const trackRef = useRef<HTMLDivElement>(null);
 
-    // Estimate "pages" of cards for the pagination dot count. We use 4 cards per
-    // page on desktop as a sensible default; the active dot updates from scroll.
-    const cardsPerPage = 4;
-    const pageCount = Math.max(1, Math.ceil(projects.length / cardsPerPage));
-    const [activePage, setActivePage] = useState(0);
+    const N = projects.length;
+    const [activeIndex, setActiveIndex] = useState(0);
 
-    useEffect(() => {
-        const track = trackRef.current;
-        if (!track) return;
-        const onScroll = () => {
-            const card = track.querySelector<HTMLElement>('[data-card]');
-            const step = card ? card.offsetWidth + 24 : 280;
-            const page = Math.round(track.scrollLeft / (step * cardsPerPage));
-            setActivePage(Math.min(pageCount - 1, Math.max(0, page)));
-        };
-        track.addEventListener('scroll', onScroll, { passive: true });
-        return () => track.removeEventListener('scroll', onScroll);
-    }, [pageCount]);
+    // Wrap around in both directions so prev at index 0 lands on the last
+    // card and next at the last card lands back on the first.
+    const goTo = (i: number) => setActiveIndex(((i % N) + N) % N);
+    const next = () => goTo(activeIndex + 1);
+    const prev = () => goTo(activeIndex - 1);
 
-    const scrollByOne = (dir: -1 | 1) => {
-        const track = trackRef.current;
-        if (!track) return;
-        const card = track.querySelector<HTMLElement>('[data-card]');
-        const step = card ? card.offsetWidth + 24 : 280;
-        const visualDir = isRTL ? -dir : dir;
-        track.scrollBy({ left: step * visualDir, behavior: 'smooth' });
-    };
+    // Rotate the array so the active project sits first, then keep only the
+    // first 4 cards visible on big screens. framer-motion's `layout` prop on
+    // each card animates the positional shift; cards entering/leaving the
+    // visible window fade in/out via `AnimatePresence`.
+    const VISIBLE_MAX = 4;
+    const visibleProjects = useMemo(() => {
+        const rotated = [...projects.slice(activeIndex), ...projects.slice(0, activeIndex)];
+        return rotated.slice(0, Math.min(VISIBLE_MAX, N));
+    }, [projects, activeIndex, N]);
 
-    if (projects.length === 0) return null;
+    if (N === 0) return null;
 
     return (
         <section className="bg-surface py-16 sm:py-24">
@@ -55,30 +46,32 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                 <div className="relative mt-12">
                     <button
                         type="button"
-                        onClick={() => scrollByOne(-1)}
+                        onClick={prev}
                         aria-label="Previous"
                         className="absolute inset-s-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors sm:-translate-x-1/2 sm:rtl:translate-x-1/2"
                     >
                         {isRTL ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
                     </button>
 
-                    <div
-                        ref={trackRef}
-                        className="flex justify-center gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                    >
-                        {projects.map((p) => (
-                            <ProjectCard
+                    <div className="flex justify-center gap-6 pb-4 overflow-hidden">
+                        {visibleProjects.map((p) => (
+                            <motion.div
                                 key={p.id}
-                                project={p}
-                                language={language}
-                                ctaLabel={showcase.card_cta?.content ?? ''}
-                            />
+                                layout
+                                transition={{ type: 'spring', stiffness: 280, damping: 32 }}
+                            >
+                                <ProjectCard
+                                    project={p}
+                                    language={language}
+                                    ctaLabel={showcase.card_cta?.content ?? ''}
+                                />
+                            </motion.div>
                         ))}
                     </div>
 
                     <button
                         type="button"
-                        onClick={() => scrollByOne(1)}
+                        onClick={next}
                         aria-label="Next"
                         className="absolute inset-e-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white shadow-sm hover:bg-primary hover:text-white transition-colors sm:translate-x-1/2 sm:rtl:-translate-x-1/2"
                     >
@@ -86,17 +79,21 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                     </button>
                 </div>
 
-                {/* Pagination dots */}
-                {pageCount > 1 && (
-                    <div className="mt-8 flex justify-center gap-2">
-                        {Array.from({ length: pageCount }).map((_, i) => (
-                            <span
+                {/* Clickable pagination dots (one per card). */}
+                {N > 1 && (
+                    <div className="mt-8 flex justify-center items-center gap-3">
+                        {projects.map((_, i) => (
+                            <button
                                 key={i}
+                                type="button"
+                                onClick={() => goTo(i)}
+                                aria-label={`Go to project ${i + 1}`}
                                 className={cn(
-                                    'w-2.5 h-2.5 rounded-full transition-colors',
-                                    i === activePage ? 'bg-primary' : 'bg-primary/25',
+                                    'rounded-full transition-all cursor-pointer',
+                                    i === activeIndex
+                                        ? 'w-3 h-3 bg-primary'
+                                        : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
                                 )}
-                                aria-hidden="true"
                             />
                         ))}
                     </div>
@@ -118,10 +115,7 @@ function ProjectCard({ project, language, ctaLabel }: ProjectCardProps) {
     const areaLabel = language === 'ar' ? `${project.area_sqm} م²` : `${project.area_sqm} M²`;
 
     return (
-        <article
-            data-card
-            className="snap-start shrink-0 w-[85vw] sm:w-72 md:w-60 lg:w-[clamp(12rem,20vw,19rem)] bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col"
-        >
+        <article className="shrink-0 w-[85vw] sm:w-72 md:w-60 lg:w-[clamp(12rem,20vw,19rem)] bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col">
             <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
                     src={project.image_url}

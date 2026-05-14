@@ -29,7 +29,7 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
                     </h2>
                 )}
 
-                <div className="mt-20 sm:mt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-24 gap-x-6 max-w-6xl mx-auto">
+                <div className="mt-14 sm:mt-16 lg:mt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 sm:gap-y-16 lg:gap-y-24 gap-x-6 max-w-6xl mx-auto">
                     {members.map(
                         (member, idx) =>
                             member.name && <DeptCard key={idx} member={member} />,
@@ -42,24 +42,24 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
 
 function DeptCard({ member }: { member: Member }) {
     return (
-        <div className="relative">
+        <div className="relative mx-auto w-full max-w-44 sm:max-w-52 lg:max-w-none">
             {/* Avatar circle — half above the card. Solid primary fill for now;
                 swap to <img> when portraits are delivered. */}
             <div
-                className="absolute left-1/2 -translate-x-1/2 -top-16 sm:-top-20 w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-primary shadow-md z-10"
+                className="absolute left-1/2 -translate-x-1/2 -top-10 sm:-top-12 lg:-top-20 w-20 h-20 sm:w-24 sm:h-24 lg:w-36 lg:h-36 rounded-full bg-primary shadow-md z-10"
                 aria-hidden="true"
             />
 
             {/* Asymmetric rounded card from Rectangle 54.svg */}
             <div
-                className="relative aspect-[257/199] w-full bg-no-repeat bg-contain bg-top"
+                className="relative aspect-257/199 w-full bg-no-repeat bg-contain bg-top"
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 sm:pb-8 px-4 text-center">
-                    <div className="font-bold text-sm sm:text-base text-ink">
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 sm:pb-6 lg:pb-8 px-3 sm:px-4 text-center">
+                    <div className="font-bold text-xs sm:text-sm lg:text-base text-ink">
                         {member.name}
                     </div>
-                    <div className="mt-1 text-xs sm:text-sm text-primary">
+                    <div className="mt-1 text-[10px] sm:text-xs lg:text-sm text-primary">
                         {member.role}
                     </div>
                 </div>
