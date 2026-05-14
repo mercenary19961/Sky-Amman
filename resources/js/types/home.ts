@@ -21,12 +21,21 @@ export interface FeaturedProject {
     image_url: string;
 }
 
+export interface InstagramPost {
+    id: string;
+    caption: string;
+    media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+    media_url: string;
+    permalink: string;
+}
+
 export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
     featuredProjects: FeaturedProject[];
+    featuredRentals: FeaturedProject[];
     mediaEmbeds: {
         linkedin: string;
-        instagram: string;
     };
+    instagramPosts: InstagramPost[];
 }

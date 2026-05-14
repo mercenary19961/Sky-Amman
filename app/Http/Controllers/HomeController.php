@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Services\InstagramService;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,12 +16,16 @@ class HomeController extends Controller
      * client can swap languages without an HTTP round-trip (instant-language
      * pattern from CLAUDE.md).
      */
+    public function __construct(private readonly InstagramService $instagram)
+    {
+    }
+
     public function index(): Response
     {
-        $featuredProjects = Project::active()
+        $featured = Project::active()
             ->featured()
             ->ordered()
-            ->take(12)
+            ->take(24)
             ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'location_en', 'location_ar', 'area_sqm'])
             ->map(fn (Project $p) => [
                 'id' => $p->id,
@@ -35,17 +40,24 @@ class HomeController extends Controller
                 // Placeholder image path — falls back to /images/projects/{slug}.svg
                 // until the Media Library is live and admin can attach real renders.
                 'image_url' => "/images/projects/{$p->slug}.svg",
-            ])
-            ->values();
+            ]);
+
+        // Split featured listings by status so each homepage carousel pulls from
+        // its own slice of the unified projects table.
+        $featuredProjects = $featured->where('listing_status', 'for_sale')->values();
+        $featuredRentals = $featured->where('listing_status', 'for_rent')->values();
 
         return Inertia::render('Public/Home', [
             'content_en' => SiteContent::getPage('home', 'en'),
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
+            'featuredRentals' => $featuredRentals,
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
-                'instagram' => Setting::get('instagram_embed_url', ''),
             ],
+            // Instagram grid is now driven by the Graph API via InstagramService
+            // (cached 1h); the old instagram_embed_url setting is no longer used.
+            'instagramPosts' => $this->instagram->getRecentMedia(9),
         ]);
     }
 }

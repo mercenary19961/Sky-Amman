@@ -1,38 +1,71 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
-import type { FeaturedProject, SiteContentBundle } from '@/types/home';
+import type { FeaturedProject } from '@/types/home';
 
 interface ProjectShowcaseProps {
-    content: SiteContentBundle;
+    title: string;
+    ctaLabel: string;
     projects: FeaturedProject[];
 }
 
-export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
+export function ProjectShowcase({ title, ctaLabel, projects }: ProjectShowcaseProps) {
     const { language, isRTL } = useLanguage();
-    const showcase = content.showcase ?? {};
 
     const N = projects.length;
     const [activeIndex, setActiveIndex] = useState(0);
+    // +1 = forward (card slides in from the right), -1 = backward (from the left).
+    // AnimatePresence reads this to pick the correct enter/exit direction.
+    const [direction, setDirection] = useState(1);
 
     // Wrap around in both directions so prev at index 0 lands on the last
     // card and next at the last card lands back on the first.
-    const goTo = (i: number) => setActiveIndex(((i % N) + N) % N);
-    const next = () => goTo(activeIndex + 1);
-    const prev = () => goTo(activeIndex - 1);
+    const goTo = (i: number) => {
+        const target = ((i % N) + N) % N;
+        if (target !== activeIndex) {
+            // Pick the shorter way around the ring so a dot click feels natural.
+            const forwardDist = (target - activeIndex + N) % N;
+            const backwardDist = (activeIndex - target + N) % N;
+            setDirection(forwardDist <= backwardDist ? 1 : -1);
+        }
+        setActiveIndex(target);
+    };
+    const next = () => {
+        setDirection(1);
+        setActiveIndex((activeIndex + 1) % N);
+    };
+    const prev = () => {
+        setDirection(-1);
+        setActiveIndex((activeIndex - 1 + N) % N);
+    };
+
+    // Number of cards visible at once depends on viewport:
+    //   < 768px  → 1 (mobile shows a single card with swipe/buttons)
+    //   < 1024px → 2 (tablet shows two side-by-side)
+    //   ≥ 1024px → 4 (desktop default)
+    // Default to 4 for SSR; client refines on mount + resize.
+    const [visibleCount, setVisibleCount] = useState(4);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const update = () => {
+            const w = window.innerWidth;
+            setVisibleCount(w >= 1024 ? 4 : w >= 768 ? 2 : 1);
+        };
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
 
     // Rotate the array so the active project sits first, then keep only the
-    // first 4 cards visible on big screens. framer-motion's `layout` prop on
-    // each card animates the positional shift; cards entering/leaving the
-    // visible window fade in/out via `AnimatePresence`.
-    const VISIBLE_MAX = 4;
+    // first N cards visible on the current viewport. framer-motion's `layout`
+    // prop on each card animates the positional shift when activeIndex changes.
     const visibleProjects = useMemo(() => {
         const rotated = [...projects.slice(activeIndex), ...projects.slice(0, activeIndex)];
-        return rotated.slice(0, Math.min(VISIBLE_MAX, N));
-    }, [projects, activeIndex, N]);
+        return rotated.slice(0, Math.min(visibleCount, N));
+    }, [projects, activeIndex, N, visibleCount]);
 
     if (N === 0) return null;
 
@@ -40,7 +73,7 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
                 <h2 className="text-center text-3xl sm:text-4xl lg:text-5xl font-bold text-primary tracking-wide uppercase">
-                    {showcase.title?.content ?? ''}
+                    {title}
                 </h2>
 
                 <div className="relative mt-12">
@@ -53,21 +86,40 @@ export function ProjectShowcase({ content, projects }: ProjectShowcaseProps) {
                         {isRTL ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
                     </button>
 
-                    <div className="flex justify-center gap-6 pb-4 overflow-hidden">
-                        {visibleProjects.map((p) => (
-                            <motion.div
-                                key={p.id}
-                                layout
-                                transition={{ type: 'spring', stiffness: 280, damping: 32 }}
-                            >
-                                <ProjectCard
-                                    project={p}
-                                    language={language}
-                                    ctaLabel={showcase.card_cta?.content ?? ''}
-                                />
-                            </motion.div>
-                        ))}
-                    </div>
+                    <motion.div
+                        className="flex justify-center gap-6 pb-4 overflow-hidden touch-pan-y cursor-grab active:cursor-grabbing"
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.25}
+                        onDragEnd={(_, info) => {
+                            // Threshold combines distance and velocity so a fast
+                            // flick counts even when the offset is small.
+                            const swipe = info.offset.x + info.velocity.x * 0.2;
+                            const visualDir = isRTL ? -1 : 1;
+                            if (swipe < -60 * visualDir) next();
+                            else if (swipe > 60 * visualDir) prev();
+                        }}
+                    >
+                        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+                            {visibleProjects.map((p) => (
+                                <motion.div
+                                    key={p.id}
+                                    layout
+                                    custom={direction}
+                                    initial={(d: number) => ({ opacity: 0, x: (isRTL ? -1 : 1) * d * 80 })}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={(d: number) => ({ opacity: 0, x: (isRTL ? -1 : 1) * -d * 80 })}
+                                    transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+                                >
+                                    <ProjectCard
+                                        project={p}
+                                        language={language}
+                                        ctaLabel={ctaLabel}
+                                    />
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
 
                     <button
                         type="button"

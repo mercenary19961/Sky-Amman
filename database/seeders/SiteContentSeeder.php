@@ -79,6 +79,20 @@ class SiteContentSeeder extends Seeder
             ['home', 'showcase', 'filter_investment', 'Investment Opportunities', 'فرص استثمارية'],
             ['home', 'showcase', 'card_cta', 'Explore More', 'استكشف المزيد'],
 
+            ['home', 'rentals', 'title', 'Properties for Rent', 'العقارات للإيجار'],
+            ['home', 'rentals', 'card_cta', 'Explore More', 'استكشف المزيد'],
+
+            ['home', 'testimonials', 'title', 'Testimonials', 'آراء العملاء'],
+            ['home', 'testimonials', 'video_url', '', ''],
+            ['home', 'testimonials', 'client_1_name', 'Client Name', 'اسم العميل'],
+            ['home', 'testimonials', 'client_1_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
+            ['home', 'testimonials', 'client_2_name', 'Client Name', 'اسم العميل'],
+            ['home', 'testimonials', 'client_2_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
+            ['home', 'testimonials', 'client_3_name', 'Client Name', 'اسم العميل'],
+            ['home', 'testimonials', 'client_3_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
+            ['home', 'testimonials', 'client_4_name', 'Client Name', 'اسم العميل'],
+            ['home', 'testimonials', 'client_4_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
+
             ['home', 'value_prop', 'title', 'Value Proposition', 'القيمة المضافة'],
             ['home', 'value_prop', 'item_1', 'Over 30 Years Of Experience In Real Estate', 'أكثر من 30 عاماً من الخبرة في العقارات'],
             ['home', 'value_prop', 'item_2', 'Legally, Financially, And Structurally Secured Projects', 'مشاريع آمنة قانونياً ومالياً وإنشائياً'],

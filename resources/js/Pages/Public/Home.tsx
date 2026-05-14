@@ -8,6 +8,7 @@ import { AssurancePillars } from '@/Components/Home/AssurancePillars';
 import { ManagingPartner } from '@/Components/Home/ManagingPartner';
 import { HeadOfDepartments } from '@/Components/Home/HeadOfDepartments';
 import { ProjectShowcase } from '@/Components/Home/ProjectShowcase';
+import { Testimonials } from '@/Components/Home/Testimonials';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
 import { MediaRoom } from '@/Components/Home/MediaRoom';
 import { LocationMap } from '@/Components/Home/LocationMap';
@@ -39,9 +40,23 @@ export default function Home() {
             <AssurancePillars content={content} />
             <ManagingPartner content={content} />
             <HeadOfDepartments content={content} />
-            <ProjectShowcase content={content} projects={props.featuredProjects} />
+            <ProjectShowcase
+                title={content.showcase?.title?.content ?? ''}
+                ctaLabel={content.showcase?.card_cta?.content ?? ''}
+                projects={props.featuredProjects}
+            />
+            <ProjectShowcase
+                title={content.rentals?.title?.content ?? ''}
+                ctaLabel={content.rentals?.card_cta?.content ?? ''}
+                projects={props.featuredRentals}
+            />
+            <Testimonials content={content} />
             <ValueProposition content={content} />
-            <MediaRoom content={content} embeds={props.mediaEmbeds} />
+            <MediaRoom
+                content={content}
+                linkedinUrl={props.mediaEmbeds?.linkedin ?? ''}
+                instagramPosts={props.instagramPosts ?? []}
+            />
             <LocationMap
                 content={content}
                 mapEmbedUrl={props.siteSettings?.google_maps_embed_url ?? ''}

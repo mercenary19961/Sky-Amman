@@ -286,6 +286,11 @@ These extend the Nuor playbook for real-estate-specific needs.
 6. **Color-aware transparent navbar** — [Header](resources/js/Components/Layout/Header.tsx) is `position: fixed` and overlays section content. Sections opt into a navbar tone by setting `data-nav-bg="dark"` (or `"light"`) on their root element. The header samples the section currently overlapping its centerline (32px down) on scroll/resize and swaps logo + link + toggle colors accordingly. Adding a section with a dark hero? Add `data-nav-bg="dark"` to its wrapper. Pages without a top hero must add their own top padding for the navbar height.
 7. **Health badges with deep-link Fix → links** — Dashboard surfaces content gaps (missing project images/SEO, hidden pages/sections, unset social URLs, missing contact info, missing default SEO title). Every "Fix" link carries a `#section-X` hash. Edit pages read the hash in `useEffect` on mount and call `scrollIntoView({ behavior: 'smooth' })`; the Site Content accordion additionally `setExpandedPage(slug)` so the hash both opens the correct page AND scrolls to it (200ms delay to let the accordion DOM expand first). Settings page has `id="section-{group}"` on each group card; project Form has `id="section-seo"` / `id="section-gallery"`.
 8. **Collapsible sidebar + mobile slide-in (ported from Nuor)** — Desktop chevron toggles between full-width (`w-64`) and icon-only (`w-16`); state persists across Inertia visits via a module-level `globalSidebarCollapsed` in [AdminLayout.tsx](resources/js/Layouts/AdminLayout.tsx). Mobile renders the sidebar `fixed` off-screen with a backdrop overlay; the layout's hamburger button slides it in. `useEffect` resets mobile state when the viewport hits `lg`. The page-icon next to the title is auto-resolved from a `PAGE_ICONS` URL→icon map in AdminLayout — adding a new admin route doesn't require touching every page component, just append one entry.
+9. **`section-x` utility for centralized side-padding** — every public section wrapper (Header, Footer, and all homepage sections) uses the single `section-x` utility defined as `@utility` in [resources/css/app.css](resources/css/app.css). It uses `padding-inline` (RTL-safe) with explicit media queries — `1rem` mobile, `1.5rem` sm, `2rem` lg, `8rem` at the custom `3xl` breakpoint (`1600px`). Edit the four values in one place to change side-padding site-wide. Custom `3xl` breakpoint exists because the user's laptop is exactly `1536px` (Tailwind's `2xl`) and they wanted margin only on anything *larger* than that.
+10. **Brand SVG shapes via path/radius literals** — designer-delivered SVGs like `Rectangle 11.svg` (project cards), `Rectangle 22.svg` (value-prop cards), `Rectangle 54.svg` (dept cards), `Rectangle 59.svg` (testimonial cards), `buy-early-strip.svg`, `quote-open.png` / `quote-close.png` etc. live under [public/images/home/](public/images/home/). For simple rounded rects we replicate the shape in CSS (`rounded-[62px]` matches `rx=62.39`) plus the exact fill color (`bg-[#E5EBF0]`) rather than loading the SVG as a background — one fewer HTTP request. For complex shapes (asymmetric corners on the dept card / testimonial card, leaf strip) the SVG itself is the background-image with `aspect-[w/h]` on the wrapper.
+11. **State-driven rotating carousel** — [`ProjectShowcase`](resources/js/Components/Home/ProjectShowcase.tsx) is reused for both Properties for Sale and Properties for Rent. Instead of native horizontal scroll, an `activeIndex` state rotates the projects array (`[...projects.slice(activeIndex), ...projects.slice(0, activeIndex)]`) and only the first N are rendered (visible count: 1 on mobile, 2 on tablet, 4 on lg+, derived from a resize listener). `prev`/`next` wrap modularly; `goTo(i)` picks the shorter ring distance so dot clicks feel natural. Each card is wrapped in a `motion.div` with `layout` inside `<AnimatePresence mode="popLayout">` for direction-aware slide transitions on every navigation. Whole row is also a `motion.div drag="x"` so swipe gestures call `next`/`prev` on dragEnd (threshold = `offset + velocity * 0.2 > 60`). To add another carousel, instantiate `<ProjectShowcase title=… ctaLabel=… projects=… />`.
+12. **Header logo dual-state** — [Header.tsx](resources/js/Components/Layout/Header.tsx) renders the white PNG logo when `isDark` (over hero / footer overlap) and falls back to a `SkyAmman` text wordmark in primary color on light sections. When the designer delivers a primary-blue logo variant, swap the `<span>` for an `<img src="/images/logo-primary.png">` — TODO comment marks the spot.
+13. **Instagram Graph API integration** — [`InstagramService`](app/Services/InstagramService.php) hits `graph.instagram.com/{user_id}/media` (fields: id, caption, media_type, media_url, thumbnail_url, permalink), normalizes the response (video posts fall back to `thumbnail_url`), caches for 1 hour via `Cache::remember`, and returns `[]` gracefully on missing creds / API failure. `HomeController` injects the service and passes `instagramPosts` to the view; `MediaRoom` renders a 3×3 grid linking each thumbnail to its permalink. Admin token + user ID live in Settings (group `media_room`). When credentials are empty the Instagram half of MediaRoom hides — no broken iframes, no console errors.
 
 ### CMS Approach
 
@@ -361,7 +366,18 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [x] ProjectsSeeder — 4 DABOUQ villa projects (mix of under_development / ready / investment) — featured for the homepage Project Showcase carousel
 
 ### Public Pages (vertical builds, one at a time — TODO)
-- [x] Homepage — 8 sections (Hero, InvestmentBanner, AssurancePillars scrollytelling, ProjectShowcase, ValueProposition, MediaRoom, LocationMap) wired through HomeController with EN+AR bundles, featured projects from `projects` table, and Settings-driven map / media-room embeds. Transparent color-aware navbar + parallax villa-and-clouds footer.
+- [x] Homepage — 12 sections wired through HomeController with EN+AR bundles, featured projects from `projects` table split by `listing_status`, Settings-driven map embed, Instagram Graph API for Media Room. Transparent color-aware navbar + parallax villa-and-clouds footer.
+  - **Hero** — 3-tier headline (title / location / subtitle), sky gradient (`from-[#5299CC] via-primary to-surface`), villa SVG, CTA pill
+  - **InvestmentBanner** — "Buy Early" / "Save More" / "Gain More" with leaning leaf-shape strip SVG between segments
+  - **AboutUs** ("Who We Are?") — single rounded card, photo background slot (`/images/home/about-villa.jpg`), white heading + body
+  - **AssurancePillars** — scrollytelling scroll-pinned section (framer-motion orbital arc)
+  - **ManagingPartner** — testimonial-style card with quote marks from `quote-open.png` / `quote-close.png`
+  - **HeadOfDepartments** — 4-up team cards with avatar circle (placeholder until photos) + asymmetric card shape from `Rectangle 54.svg`
+  - **ProjectShowcase ×2** — same component rendered twice (Properties for Sale + Properties for Rent), state-driven rotating carousel from rotated array, framer-motion direction-aware slide transitions, swipe + arrow + click-dot navigation, wrap-around at edges, viewport-aware visible count (1/2/4)
+  - **Testimonials** — title + rounded video frame (rx=56 from `Screenshot...svg`) + 4 client cards using domed-top shape from `Rectangle 59.svg`
+  - **ValueProposition** — 4-up pillar cards with brand SVG icons + square card shape (`Rectangle 22.svg`, rx=62, `#E5EBF0/75`)
+  - **MediaRoom** — LinkedIn single-post iframe (left) + Instagram 3×3 grid (right) backed by [`InstagramService`](app/Services/InstagramService.php) hitting graph.instagram.com with a 1-hour cache
+  - **LocationMap** — Google Maps embed
 - [ ] Properties (listings + detail) — pulls from `projects` filtered by category
 - [ ] Investment (content-only editorial)
 - [ ] Self Build (content-only with 7-step Process Flow timeline)
@@ -389,13 +405,20 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] sitemap.xml + robots.txt routes
 - [ ] JSON-LD structured data (Organization, RealEstateListing, BreadcrumbList)
 - [ ] Hreflang tags
+- [ ] **Instagram Graph API provisioning** — the homepage Media Room 3×3 grid is driven by [`InstagramService`](app/Services/InstagramService.php) which reads `instagram_access_token` + `instagram_user_id` from Settings (group `media_room`). Until those are filled in, the Instagram half of Media Room silently hides. One-time admin setup:
+  1. Convert the SkyAmman IG account to **Business** or **Creator**
+  2. Link it to a **Facebook Page**
+  3. Create a Meta Developer App at developers.facebook.com/apps → add "Instagram Graph API" product → request `instagram_basic` permission
+  4. Use Graph API Explorer to mint a short-lived token, then exchange for a **long-lived (60-day) token**; note the IG user ID returned
+  5. Paste long-lived token into `instagram_access_token` and user ID into `instagram_user_id`
+- [ ] **Instagram long-lived token auto-refresh** — long-lived tokens expire after 60 days. Add a scheduled Laravel task that hits Meta's refresh endpoint nightly when the token is within ~7 days of expiry. Track expiration in a new `instagram_token_expires_at` setting; surface a warning badge on the admin Settings page when within the warning window.
 
 ### Remaining
 - [ ] Code splitting (verify `manualChunks` chunks under 500kB — already configured, currently vendor-react @ 213kB largest)
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-04-29 — admin panel core shipped (Projects CRUD, Site Content editor, Settings, Dashboard health badges) with collapsible sidebar + hash-anchor deep-linking patterns. Remaining admin work: Contact Submissions inbox (gated on public Contact form), Users, Change Log/Undo.
+> **Last updated:** 2026-05-14 — homepage filled out to 12 sections (added AboutUs, ManagingPartner, HeadOfDepartments, Testimonials, Properties for Sale + Rent carousels, redesigned ValueProposition + MediaRoom). New patterns documented: `section-x` utility + custom `3xl` breakpoint at 1600px, state-driven rotating carousel with framer-motion slide transitions and viewport-aware visible count, brand-supplied SVG shapes wired in via CSS-radius/fill mirroring, Instagram Graph API service for the Media Room 3×3 grid, dual-state Header logo. User-facing brand wordmark rebranded to `SkyAmman`. Pending: Instagram token provisioning + auto-refresh (see Infrastructure TODOs).
 
 ---
 
