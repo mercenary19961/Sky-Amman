@@ -8,6 +8,7 @@ import { AssurancePillars } from '@/Components/Home/AssurancePillars';
 import { ManagingPartner } from '@/Components/Home/ManagingPartner';
 import { HeadOfDepartments } from '@/Components/Home/HeadOfDepartments';
 import { ProjectShowcase } from '@/Components/Home/ProjectShowcase';
+import { Testimonials } from '@/Components/Home/Testimonials';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
 import { MediaRoom } from '@/Components/Home/MediaRoom';
 import { LocationMap } from '@/Components/Home/LocationMap';
@@ -49,6 +50,7 @@ export default function Home() {
                 ctaLabel={content.rentals?.card_cta?.content ?? ''}
                 projects={props.featuredRentals}
             />
+            <Testimonials content={content} />
             <ValueProposition content={content} />
             <MediaRoom content={content} embeds={props.mediaEmbeds} />
             <LocationMap
