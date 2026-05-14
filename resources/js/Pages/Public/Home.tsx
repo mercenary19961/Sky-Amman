@@ -3,7 +3,10 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { HomeHero } from '@/Components/Home/HomeHero';
 import { InvestmentBanner } from '@/Components/Home/InvestmentBanner';
+import { AboutUs } from '@/Components/Home/AboutUs';
 import { AssurancePillars } from '@/Components/Home/AssurancePillars';
+import { ManagingPartner } from '@/Components/Home/ManagingPartner';
+import { HeadOfDepartments } from '@/Components/Home/HeadOfDepartments';
 import { ProjectShowcase } from '@/Components/Home/ProjectShowcase';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
 import { MediaRoom } from '@/Components/Home/MediaRoom';
@@ -18,7 +21,7 @@ export default function Home() {
     // client picks based on the active language without an HTTP round-trip.
     const content = language === 'ar' ? props.content_ar : props.content_en;
 
-    const seoTitle = props.siteSettings?.seo_title ?? 'Sky Amman';
+    const seoTitle = props.siteSettings?.seo_title ?? 'SkyAmman';
     const seoDescription = props.siteSettings?.seo_description ?? '';
 
     return (
@@ -32,7 +35,10 @@ export default function Home() {
 
             <HomeHero content={content} />
             <InvestmentBanner content={content} />
+            <AboutUs content={content} />
             <AssurancePillars content={content} />
+            <ManagingPartner content={content} />
+            <HeadOfDepartments content={content} />
             <ProjectShowcase content={content} projects={props.featuredProjects} />
             <ValueProposition content={content} />
             <MediaRoom content={content} embeds={props.mediaEmbeds} />

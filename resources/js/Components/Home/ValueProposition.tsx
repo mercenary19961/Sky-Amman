@@ -18,7 +18,7 @@ export function ValueProposition({ content }: ValuePropositionProps) {
 
     return (
         <section className="bg-surface py-16 sm:py-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="section-x">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary text-center tracking-wide">
                     {vp.title?.content ?? ''}
                 </h2>
@@ -30,7 +30,7 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                             className="flex flex-col items-center text-center"
                         >
                             <Icon size={36} strokeWidth={1.25} className="text-primary mb-3" aria-hidden="true" />
-                            <div className="rounded-3xl bg-primary-light/30 px-5 py-6 sm:py-8 text-sm sm:text-base text-ink leading-snug min-h-[120px] flex items-center justify-center w-full">
+                            <div className="rounded-3xl bg-primary-light/30 px-5 py-6 sm:py-8 text-sm sm:text-base text-ink leading-snug min-h-30 flex items-center justify-center w-full">
                                 {vp[key]?.content ?? ''}
                             </div>
                         </div>

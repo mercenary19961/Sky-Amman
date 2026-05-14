@@ -28,7 +28,7 @@ router.on('httpException', (event) => {
 });
 
 createInertiaApp({
-    title: (title) => (title ? `Sky Amman | ${title}` : 'Sky Amman'),
+    title: (title) => (title ? `SkyAmman | ${title}` : 'SkyAmman'),
     progress: false,
     // resolvePageComponent resolves to { default: Component }; Inertia v3's
     // resolver wants the component itself, so unwrap with .then(m => m.default).

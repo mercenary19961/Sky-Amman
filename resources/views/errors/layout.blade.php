@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title') — Sky Amman</title>
+    <title>@yield('title') — SkyAmman</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -62,7 +62,7 @@
     </style>
 </head>
 <body>
-    <div class="brand">Sky Amman</div>
+    <div class="brand">SkyAmman</div>
     <div class="code">@yield('code')</div>
     <div class="message">@yield('message')</div>
     <div class="sub">@yield('description')</div>

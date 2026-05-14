@@ -33,7 +33,7 @@ class DefaultSettingsSeeder extends Seeder
             ['key' => 'instagram_embed_url', 'value' => '', 'type' => 'url', 'group' => 'media_room'],
 
             // Site-wide SEO defaults — fall back here when a page has no per-page SEO.
-            ['key' => 'seo_title_en', 'value' => 'Sky Amman — Real Estate Consultancy', 'type' => 'text', 'group' => 'seo'],
+            ['key' => 'seo_title_en', 'value' => 'SkyAmman — Real Estate Consultancy', 'type' => 'text', 'group' => 'seo'],
             ['key' => 'seo_title_ar', 'value' => 'سكاي عمان — استشارات عقارية', 'type' => 'text', 'group' => 'seo'],
             ['key' => 'seo_description_en', 'value' => 'Buy, rent or build a property in Amman with security, credibility and transparency.', 'type' => 'textarea', 'group' => 'seo'],
             ['key' => 'seo_description_ar', 'value' => 'اشترِ، استأجر أو ابنِ عقاراً في عمّان بأمان ومصداقية وشفافية.', 'type' => 'textarea', 'group' => 'seo'],

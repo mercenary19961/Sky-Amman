@@ -25,7 +25,7 @@ const en = {
         properties: 'Properties',
         investment: 'Investment',
         selfBuild: 'Self Build',
-        security: 'Security With Sky Amman',
+        security: 'Security With SkyAmman',
         about: 'About Us',
         contact: 'Contact Us',
         login: 'Admin Login',
@@ -35,13 +35,36 @@ const en = {
     },
     home: {
         hero: {
-            title: 'Buy, Rent or Build a Property in Amman',
+            title: 'Real Estate Development',
+            location: 'In Amman',
             subtitle: 'With Security, Credibility and Transparency',
             cta: 'Explore Projects',
         },
         investmentBanner: {
             tagline: 'Buy Early, Save More, Gain More',
             cta: 'Investment Opportunities',
+        },
+        departments: {
+            title: 'Head of Departments',
+            member1Name: 'Eng. Mahmoud Abu Sarhan',
+            member1Role: 'Chief Executive Officer',
+            member2Name: 'Eng. Hossam Salameh',
+            member2Role: 'Projects Director',
+            member3Name: 'Mr. Mohammad Makhl',
+            member3Role: 'Chief Financial Officer',
+            member4Name: 'Mr. Sadad Al Rawashdeh',
+            member4Role: 'Legal Director',
+        },
+        managingPartner: {
+            label: 'Managing Partner',
+            name: 'MR. Jameel Abu Hajleh',
+            body1: 'At SkyAmman, we believe that successful real estate investment begins with stability, vision, and trust. Jordan today stands as a strong example of security, urban growth, and promising investment opportunities, making it an ideal environment for modern real estate development.',
+            body2: 'From the beginning, our focus has been on delivering projects that combine quality, contemporary design, and long-term value while ensuring that every development reflects the needs and expectations of our clients.',
+            body3: 'Our mission at SkyAmman goes beyond developing properties, we aim to contribute to a modern urban future that reflects the true potential of Jordan and creates lasting value for generations to come.',
+        },
+        about: {
+            title: 'Who We Are?',
+            body: 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
         },
         stats: {
             clients: 'Clients',
@@ -82,7 +105,7 @@ const en = {
             title: 'Secure Investment',
         },
         showcase: {
-            title: 'Project Showcase',
+            title: 'Properties for Sale',
             tabs: {
                 underDevelopment: 'Projects Under Development',
                 ready: 'Ready Projects',
@@ -144,7 +167,7 @@ const en = {
             body: 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.',
         },
         cta: {
-            heading: 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, Sky Amman Provides A Reliable Investment Environment.',
+            heading: 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.',
             button: 'Self Build Service',
         },
     },
@@ -167,7 +190,7 @@ const en = {
     },
     security: {
         hero: {
-            title: 'Security With Sky Amman',
+            title: 'Security With SkyAmman',
         },
     },
     about: {

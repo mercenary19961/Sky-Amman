@@ -52,9 +52,9 @@ export function Footer() {
 
             <div className="relative">
                 {/* Top: 3-column links + socials */}
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-10 grid gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="section-x pt-14 sm:pt-20 pb-10 grid gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <div className="text-xl font-bold tracking-wide">SKY AMMAN</div>
+                        <div className="text-xl font-bold tracking-wide">SkyAmman</div>
                         <p className="mt-2 text-sm text-white/85">{t('footer.tagline')}</p>
                     </div>
 
@@ -120,9 +120,9 @@ export function Footer() {
                 </div>
 
                 {/* Big logo lockup over the villa */}
-                <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-32 sm:pb-48 text-center select-none">
+                <div className="relative section-x pt-8 pb-32 sm:pb-48 text-center select-none">
                     <div className="text-6xl sm:text-8xl lg:text-9xl font-extrabold tracking-tight text-white/95 leading-none">
-                        SKY<span className="font-light">AMMAN</span>
+                        Sky<span className="font-light">Amman</span>
                     </div>
                     <div className="mt-2 text-xs sm:text-sm uppercase tracking-[0.4em] text-white/80">
                         Real Estate Consultancy
@@ -131,8 +131,8 @@ export function Footer() {
 
                 {/* Copyright strip */}
                 <div className="relative border-t border-white/15">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 text-xs text-white/85 text-center sm:text-start">
-                        © {year} Sky Amman. {t('footer.copyright')}
+                    <div className="section-x py-4 text-xs text-white/85 text-center sm:text-start">
+                        © {year} SkyAmman. {t('footer.copyright')}
                     </div>
                 </div>
             </div>
