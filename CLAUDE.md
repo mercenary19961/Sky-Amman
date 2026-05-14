@@ -389,6 +389,13 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] sitemap.xml + robots.txt routes
 - [ ] JSON-LD structured data (Organization, RealEstateListing, BreadcrumbList)
 - [ ] Hreflang tags
+- [ ] **Instagram Graph API provisioning** — the homepage Media Room 3×3 grid is driven by [`InstagramService`](app/Services/InstagramService.php) which reads `instagram_access_token` + `instagram_user_id` from Settings (group `media_room`). Until those are filled in, the Instagram half of Media Room silently hides. One-time admin setup:
+  1. Convert the SkyAmman IG account to **Business** or **Creator**
+  2. Link it to a **Facebook Page**
+  3. Create a Meta Developer App at developers.facebook.com/apps → add "Instagram Graph API" product → request `instagram_basic` permission
+  4. Use Graph API Explorer to mint a short-lived token, then exchange for a **long-lived (60-day) token**; note the IG user ID returned
+  5. Paste long-lived token into `instagram_access_token` and user ID into `instagram_user_id`
+- [ ] **Instagram long-lived token auto-refresh** — long-lived tokens expire after 60 days. Add a scheduled Laravel task that hits Meta's refresh endpoint nightly when the token is within ~7 days of expiry. Track expiration in a new `instagram_token_expires_at` setting; surface a warning badge on the admin Settings page when within the warning window.
 
 ### Remaining
 - [ ] Code splitting (verify `manualChunks` chunks under 500kB — already configured, currently vendor-react @ 213kB largest)
