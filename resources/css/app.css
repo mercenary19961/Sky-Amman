@@ -71,13 +71,20 @@ html[dir="rtl"] body {
     animation: toast-slide-in 200ms ease-out;
 }
 
-/* Slow horizontal drift for the footer cloud layer. The image is sized to 200%
-   width so a 50% horizontal shift loops seamlessly back to start. */
-@keyframes cloud-drift {
-    from { background-position-x: 0%; }
-    to { background-position-x: -50%; }
+/* Slow horizontal drift for the footer cloud layers. We render two copies of
+   the cloud strip side-by-side inside an overflow-hidden window and translate
+   the whole pair by -50% (= one image width) so the loop is seamless without
+   the cloud asset needing to be tileable. Two speeds so stacked layers feel
+   parallax-y instead of locked together. */
+@keyframes cloud-pan {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
 
-.animate-cloud-drift {
-    animation: cloud-drift 90s linear infinite;
+.animate-cloud-pan {
+    animation: cloud-pan 90s linear infinite;
+}
+
+.animate-cloud-pan-slow {
+    animation: cloud-pan 160s linear infinite;
 }

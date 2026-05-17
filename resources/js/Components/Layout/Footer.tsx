@@ -1,140 +1,200 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import {
-    LinkedinIcon,
-    InstagramIcon,
-    FacebookIcon,
-    TwitterIcon,
-    YoutubeIcon,
-    TiktokIcon,
-} from './SocialIcons';
-import type { PageProps } from '@/types';
+import type { TFunction } from 'i18next';
+import { motion } from 'framer-motion';
+import type { PageProps, SiteSettings } from '@/types';
 
 const MAIN_PAGES = [
     { key: 'home', href: '/' },
-    { key: 'properties', href: '/properties' },
-    { key: 'investment', href: '/investment' },
-    { key: 'selfBuild', href: '/self-build' },
-    { key: 'security', href: '/security' },
+    // "Listings" in the design maps to our /properties route.
+    { key: 'listings', href: '/properties' },
+    { key: 'blog', href: '#' },
     { key: 'about', href: '/about' },
     { key: 'contact', href: '/contact' },
 ] as const;
+
+// Pages from the design that don't exist yet — rendered as dead links so the
+// footer matches the mockup. Swap href → real route as each page ships.
+const OTHER_PAGES = [
+    { key: 'listing', href: '#' },
+    { key: 'blog', href: '#' },
+    { key: 'agent', href: '#' },
+    { key: 'privacy', href: '#' },
+    { key: 'notFound', href: '#' },
+] as const;
+
+const SOCIAL_KEYS = [
+    { key: 'linkedin', settingKey: 'linkedin_url' },
+    { key: 'youtube', settingKey: 'youtube_url' },
+    { key: 'x', settingKey: 'twitter_url' },
+    { key: 'meta', settingKey: 'facebook_url' },
+    { key: 'tiktok', settingKey: 'tiktok_url' },
+] as const;
+
+function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteSettings }) {
+    return (
+        <div className="grid gap-10 sm:gap-12 sm:grid-cols-2 lg:flex lg:items-start lg:gap-32">
+            {/* Column 1 — Newsletter sign-up (visual; CTA routes to /contact).
+                lg:flex-1 lets it absorb the slack so the other 3 columns bunch on the right. */}
+            <div className="lg:flex-1">
+                <div className="flex items-center gap-3">
+                    <img
+                        src="/images/home/checkbox-outline.svg"
+                        alt=""
+                        aria-hidden="true"
+                        className="w-7 h-7 select-none"
+                    />
+                    <span className="text-lg sm:text-xl font-semibold">
+                        {t('footer.subscribe.label')}
+                    </span>
+                </div>
+                <Link
+                    href="/contact"
+                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
+                >
+                    {t('footer.subscribe.cta')}
+                </Link>
+            </div>
+
+            {/* Column 2 — Main pages */}
+            <div>
+                <h3 className="text-sm font-semibold mb-3 text-white">
+                    {t('footer.sections.mainPages')}
+                </h3>
+                <ul className="space-y-2 text-sm text-white/85">
+                    {MAIN_PAGES.map((p) => (
+                        <li key={p.key}>
+                            <Link href={p.href} className="hover:text-white transition-colors">
+                                {t(`footer.mainPages.${p.key}`)}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Column 3 — Other pages (placeholder until those routes exist) */}
+            <div>
+                <h3 className="text-sm font-semibold mb-3 text-white">
+                    {t('footer.sections.otherPages')}
+                </h3>
+                <ul className="space-y-2 text-sm text-white/85">
+                    {OTHER_PAGES.map((p) => (
+                        <li key={p.key}>
+                            <a href={p.href} className="hover:text-white transition-colors">
+                                {t(`footer.otherPages.${p.key}`)}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Column 4 — Follow us (text links to social URLs from Settings) */}
+            <div>
+                <h3 className="text-sm font-semibold mb-3 text-white">
+                    {t('footer.sections.followUs')}
+                </h3>
+                <ul className="space-y-2 text-sm text-white/85">
+                    {SOCIAL_KEYS.map(({ key, settingKey }) => {
+                        const url = (siteSettings as Record<string, string | undefined>)?.[settingKey];
+                        return (
+                            <li key={key}>
+                                {url ? (
+                                    <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        {t(`footer.socials.${key}`)}
+                                    </a>
+                                ) : (
+                                    <span className="text-white/55">
+                                        {t(`footer.socials.${key}`)}
+                                    </span>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        </div>
+    );
+}
 
 export function Footer() {
     const { t } = useTranslation();
     const { siteSettings } = usePage<PageProps>().props;
     const year = new Date().getFullYear();
 
-    const socials = [
-        { url: siteSettings?.linkedin_url, Icon: LinkedinIcon, label: 'LinkedIn' },
-        { url: siteSettings?.instagram_url, Icon: InstagramIcon, label: 'Instagram' },
-        { url: siteSettings?.facebook_url, Icon: FacebookIcon, label: 'Facebook' },
-        { url: siteSettings?.twitter_url, Icon: TwitterIcon, label: 'X' },
-        { url: siteSettings?.youtube_url, Icon: YoutubeIcon, label: 'YouTube' },
-        { url: siteSettings?.tiktok_url, Icon: TiktokIcon, label: 'TikTok' },
-    ].filter((s) => s.url);
-
     return (
         <footer className="relative bg-primary-deep text-white overflow-hidden mt-16">
-            {/* Layer 1: villa silhouette (back) */}
-            <div
-                className="absolute inset-x-0 bottom-0 h-105 sm:h-130 bg-no-repeat bg-bottom bg-contain pointer-events-none opacity-90"
-                style={{ backgroundImage: 'url(/images/home/footer-villa.svg)' }}
-                aria-hidden="true"
-            />
+            {/* Top — columns area on clean sky (no clouds behind text) */}
+            <div className="section-x pt-14 sm:pt-20 pb-10">
+                <FooterColumns t={t} siteSettings={siteSettings} />
+            </div>
 
-            {/* Layer 2: clouds (front of villa, drifting horizontally) */}
-            <div
-                className="absolute inset-x-0 bottom-0 h-105 sm:h-130 bg-no-repeat bg-bottom bg-contain pointer-events-none animate-cloud-drift"
-                style={{ backgroundImage: 'url(/images/home/footer-clouds.svg)', backgroundSize: '200% auto' }}
-                aria-hidden="true"
-            />
+            {/* Copyright */}
+            <div className="section-x pb-6 text-xs text-white/85">
+                © {year} {t('footer.copyright')} ·{' '}
+                <a href="#" className="hover:text-white">
+                    {t('footer.privacyPolicy')}
+                </a>
+            </div>
 
-            <div className="relative">
-                {/* Top: 3-column links + socials */}
-                <div className="section-x pt-14 sm:pt-20 pb-10 grid gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
-                    <div>
-                        <div className="text-xl font-bold tracking-wide">SkyAmman</div>
-                        <p className="mt-2 text-sm text-white/85">{t('footer.tagline')}</p>
-                    </div>
+            {/*
+              Photo hero — corresponds to the lower portion of Figma Group 27.
+              The SVG composition (1280×753) places the villa, two cloud clusters
+              and the SKYAMMAN logo overlapping each other; the upper ~40% of that
+              frame is just empty sky where the columns live. We crop to the lower
+              ~60% here so the hero stays a sensible height across viewports.
 
-                    <div>
-                        <h3 className="text-sm font-semibold mb-3">
-                            {t('footer.sections.mainPages')}
-                        </h3>
-                        <ul className="space-y-2 text-sm text-white/85">
-                            {MAIN_PAGES.map((p) => (
-                                <li key={p.key}>
-                                    <Link href={p.href} className="hover:text-white">
-                                        {t(`nav.${p.key}`)}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+              Hero aspect picked at 1280:450 (≈2.84:1). The photo elements are
+              positioned with percentages re-anchored to that cropped frame; some
+              extend above (top = negative %) — they're clipped by overflow-hidden,
+              which is exactly how the design "places" the villa & logo so only
+              their lower portions show.
+            */}
+            <div className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
+                {/* z-10 — bottom-right cloud cluster (footer-clouds-1.png), bleeds off right */}
+                <motion.img
+                    src="/images/home/footer-clouds-1.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-10 select-none pointer-events-none object-contain object-top-left"
+                    initial={{ x: 220, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.1 }}
+                />
 
-                    <div>
-                        <h3 className="text-sm font-semibold mb-3">
-                            {t('footer.sections.contact')}
-                        </h3>
-                        <ul className="space-y-2 text-sm text-white/85">
-                            {siteSettings?.phone && (
-                                <li>
-                                    <a href={`tel:${siteSettings.phone}`} className="hover:text-white">
-                                        {siteSettings.phone}
-                                    </a>
-                                </li>
-                            )}
-                            {siteSettings?.email && (
-                                <li>
-                                    <a href={`mailto:${siteSettings.email}`} className="hover:text-white">
-                                        {siteSettings.email}
-                                    </a>
-                                </li>
-                            )}
-                            {siteSettings?.address && <li>{siteSettings.address}</li>}
-                        </ul>
-                    </div>
+                {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
+                    bottom; the upper half of the photo (sky) is clipped by the hero. */}
+                <img
+                    src="/images/home/footer-villa-photo.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute right-[19.5%] top-[-48.9%] w-[93.5%] h-[149.6%] z-20 object-contain object-bottom select-none pointer-events-none"
+                />
 
-                    {socials.length > 0 && (
-                        <div>
-                            <h3 className="text-sm font-semibold mb-3">
-                                {t('footer.sections.followUs')}
-                            </h3>
-                            <div className="flex items-center gap-3">
-                                {socials.map(({ url, Icon, label }) => (
-                                    <a
-                                        key={label}
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={label}
-                                        className="text-white/85 hover:text-white transition-colors"
-                                    >
-                                        <Icon size={20} />
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds-1.png reused),
+                    wraps the villa from the left */}
+                <motion.img
+                    src="/images/home/footer-clouds-1.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute left-[-15%] top-[30%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
+                    initial={{ x: -220, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.25 }}
+                />
 
-                {/* Big logo lockup over the villa */}
-                <div className="relative section-x pt-8 pb-32 sm:pb-48 text-center select-none">
-                    <div className="text-6xl sm:text-8xl lg:text-9xl font-extrabold tracking-tight text-white/95 leading-none">
-                        Sky<span className="font-light">Amman</span>
-                    </div>
-                    <div className="mt-2 text-xs sm:text-sm uppercase tracking-[0.4em] text-white/80">
-                        Real Estate Consultancy
-                    </div>
-                </div>
-
-                {/* Copyright strip */}
-                <div className="relative border-t border-white/15">
-                    <div className="section-x py-4 text-xs text-white/85 text-center sm:text-start">
-                        © {year} SkyAmman. {t('footer.copyright')}
-                    </div>
-                </div>
+                {/* z-40 — SKYAMMAN logo, center-right, overlaps the villa */}
+                <img
+                    src="/images/home/skyamman-logo-large.png"
+                    alt="SkyAmman — Real Estate Consultancy"
+                    className="absolute left-[42%] top-[1%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                />
             </div>
         </footer>
     );

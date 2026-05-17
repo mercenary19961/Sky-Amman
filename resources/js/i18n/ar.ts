@@ -219,12 +219,39 @@ const ar = {
     },
     footer: {
         tagline: 'استشارات عقارية',
+        subscribe: {
+            label: 'اشترك في نشرتنا الإخبارية',
+            cta: 'تواصل معنا',
+        },
         sections: {
             mainPages: 'الصفحات الرئيسية',
+            otherPages: 'صفحات أخرى',
             followUs: 'تابعنا',
             contact: 'التواصل',
         },
-        copyright: 'جميع الحقوق محفوظة.',
+        mainPages: {
+            home: 'الرئيسية',
+            listings: 'العقارات',
+            blog: 'المدونة',
+            about: 'من نحن',
+            contact: 'اتصل بنا',
+        },
+        otherPages: {
+            listing: 'عقار',
+            blog: 'المدونة',
+            agent: 'الوكلاء',
+            privacy: 'سياسة الخصوصية',
+            notFound: '404',
+        },
+        socials: {
+            linkedin: 'لينكدإن',
+            youtube: 'يوتيوب',
+            x: 'إكس',
+            meta: 'ميتا',
+            tiktok: 'تيك توك',
+        },
+        copyright: 'جميع الحقوق محفوظة',
+        privacyPolicy: 'سياسة الخصوصية',
     },
 } as const;
 
