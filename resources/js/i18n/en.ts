@@ -223,12 +223,39 @@ const en = {
     },
     footer: {
         tagline: 'Real Estate Consultancy',
+        subscribe: {
+            label: 'Subscribe To Our Newsletter',
+            cta: 'Contact Us',
+        },
         sections: {
-            mainPages: 'Main Pages',
-            followUs: 'Follow Us',
+            mainPages: 'Main pages',
+            otherPages: 'Other pages',
+            followUs: 'Follow us',
             contact: 'Contact',
         },
-        copyright: 'All rights reserved.',
+        mainPages: {
+            home: 'Home',
+            listings: 'Listings',
+            blog: 'Blog',
+            about: 'About',
+            contact: 'Contact',
+        },
+        otherPages: {
+            listing: 'Listing',
+            blog: 'Blog',
+            agent: 'Agent',
+            privacy: 'Privacy policy',
+            notFound: '404',
+        },
+        socials: {
+            linkedin: 'Linkedin',
+            youtube: 'Youtube',
+            x: 'X',
+            meta: 'Meta',
+            tiktok: 'Tiktok',
+        },
+        copyright: 'All rights reserved',
+        privacyPolicy: 'Privacy policy',
     },
 } as const;
 
