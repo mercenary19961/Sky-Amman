@@ -113,7 +113,7 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 - Brand colors via Tailwind v4 `@theme` tokens in [resources/css/app.css](resources/css/app.css):
   `--color-primary` (sky blue #94C4EE), `--color-primary-deep` (#78AFCE — used for footer / dark sections), `--color-primary-dark` (#5C92B8), `--color-primary-light` (#C8DEF1), `--color-surface`, `--color-surface-muted`, `--color-ink`, `--color-ink-muted`.
 - Fonts: `Outfit` (Latin / EN) + `IBM Plex Sans Arabic` (AR), both loaded from Google Fonts via `<link rel="preconnect">` in [resources/views/app.blade.php](resources/views/app.blade.php). RTL font swap via `html[dir="rtl"] body` selector.
-- Custom keyframes in [resources/css/app.css](resources/css/app.css): `toast-slide-in` for ToastContext, `cloud-drift` for the Footer parallax cloud layer (90s linear infinite, 200% bg-width for seamless loop).
+- Custom keyframes in [resources/css/app.css](resources/css/app.css): `toast-slide-in` for ToastContext. The Footer cloud layers no longer drift — they slide in once on scroll via framer-motion `whileInView` instead (see Footer innovation note).
 
 ### File Storage
 - Use [`Media::storeFile()`](app/Models/Media.php) — randomizes filename, stores under `storage/app/private/media/{folder}/`, creates the model row. Never bypass.
@@ -198,7 +198,7 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 resources/js/Pages/Public/         → Public page components (Home.tsx)
 resources/js/Pages/Admin/          → Admin page components (Login.tsx, Dashboard.tsx)
 resources/js/Layouts/              → PublicLayout, AdminLayout
-resources/js/Components/Layout/    → Header (transparent + color-aware), Footer (parallax villa+clouds), AdminSidebar, SocialIcons (inline brand SVGs)
+resources/js/Components/Layout/    → Header (transparent + color-aware), Footer (4-col flex columns + Figma Group 27 photo hero), AdminSidebar, SocialIcons (inline brand SVGs — no longer used by Footer but kept for future use)
 resources/js/Components/Home/      → HomeHero, InvestmentBanner, AssurancePillars (scrollytelling), ProjectShowcase, ValueProposition, MediaRoom, LocationMap
 resources/js/Components/Public/    → Turnstile widget (and future shared public components)
 resources/js/types/                → PageProps, User, SiteSettings, Flash interfaces (index.ts) + per-page prop types (home.ts: HomePageProps, FeaturedProject, SiteContentBundle)
@@ -209,9 +209,9 @@ resources/js/app.tsx               → Client entry — wraps with Providers, hy
 resources/js/ssr.tsx               → SSR entry — same provider tree as client, same v3 resolver unwrap
 resources/js/bootstrap.ts          → axios global setup
 resources/views/app.blade.php      → Root Blade template (@inertia, @vite, lang/dir on <html>, Google Fonts preconnect for Outfit + IBM Plex Sans Arabic)
-resources/css/app.css              → Tailwind import + @theme tokens + RTL font swap + cloud-drift / toast-slide-in keyframes
+resources/css/app.css              → Tailwind import + @theme tokens + RTL font swap + toast-slide-in keyframe
 
-public/images/home/                → Seeded SVGs: hero-villa, footer-villa, footer-clouds, buy-early-strip
+public/images/home/                → Seeded SVGs (hero-villa, buy-early-strip) + Figma-exported footer assets (footer-villa-photo.png, footer-clouds-1.png, skyamman-logo-large.png, checkbox-outline.svg)
 public/images/projects/            → Seeded SVGs: dabouq-3..6 (placeholder renders until Media Library is live)
 
 app/Models/                        → User, Page, SiteContent, Media, Setting, Project, ProjectImage, ContactSubmission, ChangeLog
@@ -267,7 +267,7 @@ Single-language (English), single-theme (light). Sidebar groups mirror Nuor Stee
 - Users (admin-only) — admin / editor roles
 - Change Log + Undo (admin-only) — port the `UndoService` + `ChangeLogService` from Nuor Steel when ready
 
-**Image strategy:** Page-structural / decorative imagery (`hero-villa`, `footer-villa`, `footer-clouds`, `buy-early-strip`, etc.) stays committed under [public/images/home/](public/images/home/) — code-managed, never admin-managed. There is **no standalone Media Library** in the sidebar. Project gallery uploads use [`Media::storeFile()`](app/Models/Media.php) inside the project edit form. The `site_content.media_id` and `pages.og_image_id` columns remain in the schema as nullable but stay unused (cheap optionality if the policy ever changes).
+**Image strategy:** Page-structural / decorative imagery (`hero-villa`, `footer-villa-photo`, `footer-clouds-1`, `skyamman-logo-large`, `buy-early-strip`, etc.) stays committed under [public/images/home/](public/images/home/) — code-managed, never admin-managed. There is **no standalone Media Library** in the sidebar. Project gallery uploads use [`Media::storeFile()`](app/Models/Media.php) inside the project edit form. The `site_content.media_id` and `pages.og_image_id` columns remain in the schema as nullable but stay unused (cheap optionality if the policy ever changes).
 
 ### Admin roles
 
@@ -291,6 +291,7 @@ These extend the Nuor playbook for real-estate-specific needs.
 11. **State-driven rotating carousel** — [`ProjectShowcase`](resources/js/Components/Home/ProjectShowcase.tsx) is reused for both Properties for Sale and Properties for Rent. Instead of native horizontal scroll, an `activeIndex` state rotates the projects array (`[...projects.slice(activeIndex), ...projects.slice(0, activeIndex)]`) and only the first N are rendered (visible count: 1 on mobile, 2 on tablet, 4 on lg+, derived from a resize listener). `prev`/`next` wrap modularly; `goTo(i)` picks the shorter ring distance so dot clicks feel natural. Each card is wrapped in a `motion.div` with `layout` inside `<AnimatePresence mode="popLayout">` for direction-aware slide transitions on every navigation. Whole row is also a `motion.div drag="x"` so swipe gestures call `next`/`prev` on dragEnd (threshold = `offset + velocity * 0.2 > 60`). To add another carousel, instantiate `<ProjectShowcase title=… ctaLabel=… projects=… />`.
 12. **Header logo dual-state** — [Header.tsx](resources/js/Components/Layout/Header.tsx) renders the white PNG logo when `isDark` (over hero / footer overlap) and falls back to a `SkyAmman` text wordmark in primary color on light sections. When the designer delivers a primary-blue logo variant, swap the `<span>` for an `<img src="/images/logo-primary.png">` — TODO comment marks the spot.
 13. **Instagram Graph API integration** — [`InstagramService`](app/Services/InstagramService.php) hits `graph.instagram.com/{user_id}/media` (fields: id, caption, media_type, media_url, thumbnail_url, permalink), normalizes the response (video posts fall back to `thumbnail_url`), caches for 1 hour via `Cache::remember`, and returns `[]` gracefully on missing creds / API failure. `HomeController` injects the service and passes `instagramPosts` to the view; `MediaRoom` renders a 3×3 grid linking each thumbnail to its permalink. Admin token + user ID live in Settings (group `media_room`). When credentials are empty the Instagram half of MediaRoom hides — no broken iframes, no console errors.
+14. **Figma-anchored photo composition (Footer)** — when the designer ships an asset-heavy composition where photos overlap and bleed past the frame (homepage [Footer](resources/js/Components/Layout/Footer.tsx) — villa + 2 cloud clusters + SKYAMMAN logo PNG), the source of truth is the Figma frame exported as SVG (`Group 27.svg`, viewBox 1280×753). Each photo's `<rect x y width height>` becomes percentages of a rebuilt hero with `aspect-1280/450 max-h-140 overflow-hidden` — that's the lower ~60% of the SVG frame, since the upper portion is just empty sky behind the column area. Photos that bleed (villa, logo) get **negative** `top` / `left` and oversized `w` / `h`; `overflow-hidden` does the clipping so only the building / the lower lines of the logo show — same effect the designer achieved via photo transparency. The two cloud clusters animate in once on `whileInView` via framer-motion (slide from off-screen on their own side). Pattern: don't eyeball overlapping photo compositions — export the Figma frame to SVG, read the rect geometry as ground truth, translate 1:1.
 
 ### CMS Approach
 
@@ -323,7 +324,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 
 ### Footer needs real social URLs
 
-`DefaultSettingsSeeder` seeds empty social URL settings. The [Footer](resources/js/Components/Layout/Footer.tsx) only renders icons for configured platforms — empty values are filtered out. Fill them in via Settings before launch (LinkedIn, Instagram are the priorities).
+`DefaultSettingsSeeder` seeds empty social URL settings. The [Footer](resources/js/Components/Layout/Footer.tsx) "Follow us" column renders text links (Linkedin / Youtube / X / Meta / Tiktok); unset URLs render as dim non-links rather than disappearing, so the column shape stays consistent. Fill them in via Settings before launch (LinkedIn, Instagram are the priorities).
 
 ### Inertia v3 differences vs Nuor Steel's v2
 
@@ -366,7 +367,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [x] ProjectsSeeder — 4 DABOUQ villa projects (mix of under_development / ready / investment) — featured for the homepage Project Showcase carousel
 
 ### Public Pages (vertical builds, one at a time — TODO)
-- [x] Homepage — 12 sections wired through HomeController with EN+AR bundles, featured projects from `projects` table split by `listing_status`, Settings-driven map embed, Instagram Graph API for Media Room. Transparent color-aware navbar + parallax villa-and-clouds footer.
+- [x] Homepage — 12 sections wired through HomeController with EN+AR bundles, featured projects from `projects` table split by `listing_status`, Settings-driven map embed, Instagram Graph API for Media Room. Transparent color-aware navbar + Figma-anchored photo-composition footer.
   - **Hero** — 3-tier headline (title / location / subtitle), sky gradient (`from-[#5299CC] via-primary to-surface`), villa SVG, CTA pill
   - **InvestmentBanner** — "Buy Early" / "Save More" / "Gain More" with leaning leaf-shape strip SVG between segments
   - **AboutUs** ("Who We Are?") — single rounded card, photo background slot (`/images/home/about-villa.jpg`), white heading + body
@@ -418,7 +419,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-05-14 — homepage filled out to 12 sections (added AboutUs, ManagingPartner, HeadOfDepartments, Testimonials, Properties for Sale + Rent carousels, redesigned ValueProposition + MediaRoom). New patterns documented: `section-x` utility + custom `3xl` breakpoint at 1600px, state-driven rotating carousel with framer-motion slide transitions and viewport-aware visible count, brand-supplied SVG shapes wired in via CSS-radius/fill mirroring, Instagram Graph API service for the Media Room 3×3 grid, dual-state Header logo. User-facing brand wordmark rebranded to `SkyAmman`. Pending: Instagram token provisioning + auto-refresh (see Infrastructure TODOs).
+> **Last updated:** 2026-05-18 — Footer rebuilt to match the new Figma design (`Group 27.svg`). Old layout (3-col grid with icon socials + giant text wordmark + drifting cloud animation) replaced by: a top zone with newsletter CTA + 3 right-aligned text-link columns (Main pages / Other pages / Follow us) using `lg:flex` so the right group hugs the edge, and a photo composition hero (villa + 2 cloud clusters + SKYAMMAN logo PNG) anchored to the Figma SVG's rect geometry. New innovation #14 documents the SVG-anchored composition pattern. Pending cleanup: unused `cloud-pan` keyframes + `animate-cloud-pan*` utilities in [resources/css/app.css](resources/css/app.css), unreferenced `public/images/home/footer-clouds-2.png`. Earlier (2026-05-14): homepage filled out to 12 sections + Instagram Graph API integration — see git history for details.
 
 ---
 
