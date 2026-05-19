@@ -33,7 +33,7 @@ const SOCIAL_KEYS = [
 
 function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteSettings }) {
     return (
-        <div className="grid gap-10 sm:gap-12 sm:grid-cols-2 lg:flex lg:items-start lg:gap-32">
+        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
             {/* Column 1 — Newsletter sign-up (visual; CTA routes to /contact).
                 lg:flex-1 lets it absorb the slack so the other 3 columns bunch on the right. */}
             <div className="lg:flex-1">
