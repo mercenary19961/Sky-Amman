@@ -38,6 +38,22 @@ export interface SiteSettings {
     [key: string]: string | undefined;
 }
 
+/**
+ * Shape returned by SiteContent::getPage() — one entry per (section, key) pair
+ * for a given page slug. Used here for the shared footer copy (loaded by
+ * HandleInertiaRequests middleware).
+ *
+ * NOTE: An identically-shaped `SiteContentBundle` also lives in `@/types/home`
+ * scoped to homepage components. Kept duplicated rather than centralized to
+ * avoid a circular import (`home.ts` already pulls `PageProps` from here).
+ * If you change the shape, update both definitions.
+ */
+export type SiteContentBundle = Record<string, Record<string, {
+    content: string;
+    media: { id: number; url: string; alt: string | null } | null;
+    is_visible: boolean;
+}>>;
+
 export interface Flash {
     success?: string;
     error?: string;
@@ -52,6 +68,8 @@ export interface PageProps {
     locale: 'en' | 'ar';
     flash: Flash;
     siteSettings: SiteSettings;
+    footerContentEn: SiteContentBundle;
+    footerContentAr: SiteContentBundle;
     ziggy: {
         url: string;
         port: number | null;

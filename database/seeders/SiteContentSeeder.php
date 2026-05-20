@@ -136,6 +136,19 @@ class SiteContentSeeder extends Seeder
             // ---------------- CONTACT ----------------
             ['contact', 'hero', 'title', 'Get in Touch', 'تواصل معنا'],
             ['contact', 'hero', 'subtitle', 'Tell us what you are looking for and we will reach out shortly.', 'أخبرنا بما تبحث عنه وسنتواصل معك قريباً.'],
+
+            // ---------------- FOOTER (shared layout) ----------------
+            // Editorial strings only. Nav-link labels (Home/Listings/Blog/...),
+            // social platform names (Linkedin/Youtube/X/Meta/Tiktok), and the
+            // placeholder "Other pages" list stay in i18n — they're structural,
+            // not copy admins are expected to tune.
+            ['footer', 'subscribe', 'label', 'Subscribe To Our Newsletter', 'اشترك في نشرتنا الإخبارية'],
+            ['footer', 'subscribe', 'cta',   'Contact Us',                  'تواصل معنا'],
+            ['footer', 'sections',  'main_pages',  'Main pages',  'الصفحات الرئيسية'],
+            ['footer', 'sections',  'other_pages', 'Other pages', 'صفحات أخرى'],
+            ['footer', 'sections',  'follow_us',   'Follow us',   'تابعنا'],
+            ['footer', 'copyright', 'text',           'All rights reserved', 'جميع الحقوق محفوظة'],
+            ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],
         ];
 
         foreach ($rows as [$page, $section, $key, $en, $ar]) {

@@ -14,7 +14,7 @@ const CONTACT_REQUIRED_KEYS = ['company_phone', 'company_email'];
 const SOCIAL_PLATFORM_LABELS: Record<string, string> = {
     linkedin_url:  'LinkedIn',
     instagram_url: 'Instagram',
-    facebook_url:  'Facebook',
+    facebook_url:  'Meta (Facebook)',
     twitter_url:   'X (Twitter)',
     youtube_url:   'YouTube',
     tiktok_url:    'TikTok',

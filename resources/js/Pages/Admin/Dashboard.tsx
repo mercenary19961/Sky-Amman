@@ -45,10 +45,15 @@ const TYPE_LABELS: Record<string, string> = {
 const SOCIAL_LABELS: Record<string, string> = {
     linkedin_url: 'LinkedIn',
     instagram_url: 'Instagram',
-    facebook_url: 'Facebook',
+    facebook_url: 'Meta (Facebook)',
     twitter_url: 'X (Twitter)',
     youtube_url: 'YouTube',
     tiktok_url: 'TikTok',
+};
+
+const IG_CRED_LABELS: Record<string, string> = {
+    instagram_access_token: 'Instagram Access Token',
+    instagram_user_id: 'Instagram User ID',
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -193,6 +198,7 @@ export default function Dashboard() {
         contentHealth.projectsMissingImages.length +
         contentHealth.projectsMissingSeo.length +
         contentHealth.emptySocialKeys.length +
+        contentHealth.missingInstagramCreds.length +
         contentHealth.hiddenPages.length +
         contentHealth.hiddenSections.length;
 
@@ -422,6 +428,27 @@ export default function Dashboard() {
                                                 className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-ink-muted hover:text-primary transition-colors"
                                             >
                                                 {SOCIAL_LABELS[key] ?? key}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Missing Instagram Graph API credentials → Media Room IG grid silently hides */}
+                            {contentHealth.missingInstagramCreds.length > 0 && (
+                                <div>
+                                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 mb-2">
+                                        <AlertTriangle size={13} />
+                                        <span className="text-xs font-semibold uppercase tracking-wide">Media Room IG Grid Disabled</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {contentHealth.missingInstagramCreds.map(key => (
+                                            <Link
+                                                key={key}
+                                                href="/admin/settings#section-media_room"
+                                                className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-700 text-ink-muted hover:text-primary transition-colors"
+                                            >
+                                                {IG_CRED_LABELS[key] ?? key}
                                             </Link>
                                         ))}
                                     </div>
