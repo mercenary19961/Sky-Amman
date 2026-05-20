@@ -2,7 +2,8 @@ import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { motion } from 'framer-motion';
-import type { PageProps, SiteSettings } from '@/types';
+import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const MAIN_PAGES = [
     { key: 'home', href: '/' },
@@ -31,7 +32,23 @@ const SOCIAL_KEYS = [
     { key: 'tiktok', settingKey: 'tiktok_url' },
 ] as const;
 
-function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteSettings }) {
+/**
+ * Resolve a footer string from the CMS bundle (Site Content editor → "footer"
+ * page) with an i18n fallback. CMS wins when the row exists, is visible, and
+ * its content for the current locale is non-empty. Nav-link labels and social
+ * platform names stay in i18n — they're structural, not admin-editable.
+ */
+type FooterText = (section: string, key: string, fallbackKey: string) => string;
+
+function makeFooterText(bundle: SiteContentBundle | undefined, t: TFunction): FooterText {
+    return (section, key, fallbackKey) => {
+        const entry = bundle?.[section]?.[key];
+        if (entry && entry.is_visible && entry.content) return entry.content;
+        return t(fallbackKey);
+    };
+}
+
+function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
     return (
         <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
             {/* Column 1 — Newsletter sign-up (visual; CTA routes to /contact).
@@ -45,21 +62,21 @@ function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteS
                         className="w-7 h-7 select-none"
                     />
                     <span className="text-lg sm:text-xl font-semibold">
-                        {t('footer.subscribe.label')}
+                        {ft('subscribe', 'label', 'footer.subscribe.label')}
                     </span>
                 </div>
                 <Link
                     href="/contact"
                     className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
                 >
-                    {t('footer.subscribe.cta')}
+                    {ft('subscribe', 'cta', 'footer.subscribe.cta')}
                 </Link>
             </div>
 
             {/* Column 2 — Main pages */}
             <div>
                 <h3 className="text-sm font-semibold mb-3 text-white">
-                    {t('footer.sections.mainPages')}
+                    {ft('sections', 'main_pages', 'footer.sections.mainPages')}
                 </h3>
                 <ul className="space-y-2 text-sm text-white/85">
                     {MAIN_PAGES.map((p) => (
@@ -75,7 +92,7 @@ function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteS
             {/* Column 3 — Other pages (placeholder until those routes exist) */}
             <div>
                 <h3 className="text-sm font-semibold mb-3 text-white">
-                    {t('footer.sections.otherPages')}
+                    {ft('sections', 'other_pages', 'footer.sections.otherPages')}
                 </h3>
                 <ul className="space-y-2 text-sm text-white/85">
                     {OTHER_PAGES.map((p) => (
@@ -91,7 +108,7 @@ function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteS
             {/* Column 4 — Follow us (text links to social URLs from Settings) */}
             <div>
                 <h3 className="text-sm font-semibold mb-3 text-white">
-                    {t('footer.sections.followUs')}
+                    {ft('sections', 'follow_us', 'footer.sections.followUs')}
                 </h3>
                 <ul className="space-y-2 text-sm text-white/85">
                     {SOCIAL_KEYS.map(({ key, settingKey }) => {
@@ -123,21 +140,24 @@ function FooterColumns({ t, siteSettings }: { t: TFunction; siteSettings?: SiteS
 
 export function Footer() {
     const { t } = useTranslation();
-    const { siteSettings } = usePage<PageProps>().props;
+    const { language } = useLanguage();
+    const { siteSettings, footerContentEn, footerContentAr } = usePage<PageProps>().props;
+    const footerContent = language === 'ar' ? footerContentAr : footerContentEn;
+    const ft = makeFooterText(footerContent, t);
     const year = new Date().getFullYear();
 
     return (
         <footer className="relative bg-primary-deep text-white overflow-hidden mt-16">
             {/* Top — columns area on clean sky (no clouds behind text) */}
             <div className="section-x pt-14 sm:pt-20 pb-10">
-                <FooterColumns t={t} siteSettings={siteSettings} />
+                <FooterColumns t={t} ft={ft} siteSettings={siteSettings} />
             </div>
 
             {/* Copyright */}
             <div className="section-x pb-6 text-xs text-white/85">
-                © {year} {t('footer.copyright')} ·{' '}
+                © {year} {ft('copyright', 'text', 'footer.copyright')} ·{' '}
                 <a href="#" className="hover:text-white">
-                    {t('footer.privacyPolicy')}
+                    {ft('copyright', 'privacy_policy', 'footer.privacyPolicy')}
                 </a>
             </div>
 

@@ -33,6 +33,7 @@ export interface ContentHealth {
     projectsMissingImages: ContentHealthItem[];
     projectsMissingSeo: ContentHealthItem[];
     emptySocialKeys: string[];
+    missingInstagramCreds: string[];
     hiddenPages: Array<{ slug: string; title_en: string }>;
     hiddenSections: Array<{ page: string; section: string }>;
 }

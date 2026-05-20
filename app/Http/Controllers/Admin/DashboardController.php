@@ -67,8 +67,18 @@ class DashboardController extends Controller
             ->get(['id', 'title_en'])
             ->map(fn ($p) => ['id' => $p->id, 'title_en' => $p->title_en]);
 
-        $socialKeys = ['linkedin_url', 'instagram_url', 'facebook_url', 'twitter_url', 'youtube_url', 'tiktok_url'];
+        // Matches the social URLs the public Footer's "Follow us" column actually renders.
+        // Instagram URL is intentionally excluded — IG is no longer surfaced in the footer
+        // (the Media Room uses the Graph API via instagram_access_token instead).
+        $socialKeys = ['linkedin_url', 'facebook_url', 'twitter_url', 'youtube_url', 'tiktok_url'];
         $emptySocialKeys = Setting::whereIn('key', $socialKeys)
+            ->where(fn ($q) => $q->whereNull('value')->orWhere('value', ''))
+            ->pluck('key')
+            ->values();
+
+        // Without these the homepage Media Room's Instagram grid silently hides — surface it.
+        $instagramCredKeys = ['instagram_access_token', 'instagram_user_id'];
+        $missingInstagramCreds = Setting::whereIn('key', $instagramCredKeys)
             ->where(fn ($q) => $q->whereNull('value')->orWhere('value', ''))
             ->pluck('key')
             ->values();
@@ -115,6 +125,7 @@ class DashboardController extends Controller
                 'projectsMissingImages' => $projectsMissingImages,
                 'projectsMissingSeo'    => $projectsMissingSeo,
                 'emptySocialKeys'       => $emptySocialKeys,
+                'missingInstagramCreds' => $missingInstagramCreds,
                 'hiddenPages'           => $hiddenPages,
                 'hiddenSections'        => $hiddenSections,
             ],

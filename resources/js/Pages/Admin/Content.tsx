@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
     ExternalLink, MousePointerClick, ChevronRight,
-    Home, Building2, TrendingUp, Hammer, Shield, Info, Mail,
+    Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
@@ -18,7 +18,10 @@ function toLabel(str: string): string {
         .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact'];
+// 'footer' is a layout pseudo-page (no public URL of its own) — added here so
+// admins can edit shared footer copy from the Content editor. Its preview
+// iframe points at the homepage so changes show up at the bottom of the page.
+const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact', 'footer'];
 
 const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     home:       Home,
@@ -28,7 +31,32 @@ const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?
     security:   Shield,
     about:      Info,
     contact:    Mail,
+    footer:     PanelBottom,
 };
+
+// Friendlier labels for sections whose seeder key auto-formats awkwardly
+// (toLabel just does underscore → space + title case). Falls back to toLabel
+// when a (page, section) pair isn't listed here.
+const SECTION_LABEL_OVERRIDES: Record<string, Record<string, string>> = {
+    home: {
+        value_prop:          'Value Proposition',
+        showcase:            'Properties for Sale',
+        rentals:             'Properties for Rent',
+        assurance_legal:     'Assurance · Legal Pillar',
+        assurance_financial: 'Assurance · Financial Pillar',
+        assurance_safety:    'Assurance · Safety Pillar',
+        location:            'Location Map',
+    },
+    footer: {
+        subscribe: 'Newsletter CTA',
+        sections:  'Column Headings',
+        copyright: 'Copyright Strip',
+    },
+};
+
+function sectionLabel(page: string, section: string): string {
+    return SECTION_LABEL_OVERRIDES[page]?.[section] ?? toLabel(section);
+}
 
 const PAGE_URLS: Record<string, string> = {
     home:       '/',
@@ -38,6 +66,7 @@ const PAGE_URLS: Record<string, string> = {
     security:   '/security',
     about:      '/about',
     contact:    '/contact',
+    footer:     '/', // layout pseudo-page — preview the homepage and scroll to bottom
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -384,7 +413,7 @@ export default function ContentEditor() {
                                                     className="border-b border-ink/5 dark:border-white/10 last:border-b-0"
                                                 >
                                                     <div className="flex items-center justify-between px-5 py-2.5 bg-surface-muted dark:bg-zinc-900/40">
-                                                        <h4 className="text-xs font-semibold text-ink">{toLabel(section)}</h4>
+                                                        <h4 className="text-xs font-semibold text-ink">{sectionLabel(slug, section)}</h4>
                                                         <button
                                                             type="button"
                                                             onClick={() => toggleSection(slug, section)}
@@ -458,10 +487,17 @@ export default function ContentEditor() {
 
                 {/* ── Right: live preview ── */}
                 <div className={cn(
-                    'hidden xl:block shrink-0 transition-all duration-300',
+                    // self-stretch overrides the parent's items-start so this
+                    // column matches the left accordion's full height — gives
+                    // the inner `sticky top-4` block room to actually stick
+                    // instead of scrolling out of view with its container.
+                    'hidden xl:block xl:self-stretch shrink-0 transition-all duration-300',
                     previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
                 )}>
-                    <div className="sticky top-4">
+                    {/* top-20 (5rem) clears the AdminLayout's sticky top bar
+                        (h-16 = 4rem) and adds 1rem breathing room so the preview
+                        chrome doesn't hide behind it when scrolled. */}
+                    <div className="sticky top-20">
                         <div
                             className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
                             style={{ height: 'calc(100vh - 6rem)' }}

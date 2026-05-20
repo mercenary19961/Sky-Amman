@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Setting;
+use App\Models\SiteContent;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -37,6 +38,11 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
             ],
             'siteSettings' => fn () => $this->getSiteSettings(),
+            // Footer copy is admin-editable via the Site Content editor under the
+            // "footer" pseudo-page. Both locales ship to the client so the language
+            // toggle is instant (mirrors the homepage's content_en/content_ar pattern).
+            'footerContentEn' => fn () => SiteContent::getPage('footer', 'en'),
+            'footerContentAr' => fn () => SiteContent::getPage('footer', 'ar'),
             'turnstileSiteKey' => fn () => config('services.turnstile.site_key'),
             'ziggy' => function () use ($request) {
                 $ziggy = new Ziggy;

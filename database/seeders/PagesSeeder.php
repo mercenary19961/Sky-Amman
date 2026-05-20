@@ -17,6 +17,11 @@ class PagesSeeder extends Seeder
             ['slug' => 'security', 'title_en' => 'Security With SkyAmman', 'title_ar' => 'الأمان مع سكاي عمان', 'sort_order' => 5],
             ['slug' => 'about', 'title_en' => 'About Us', 'title_ar' => 'من نحن', 'sort_order' => 6],
             ['slug' => 'contact', 'title_en' => 'Contact Us', 'title_ar' => 'اتصل بنا', 'sort_order' => 7],
+
+            // Layout pseudo-page. Not a public route; exists so admins can edit
+            // shared footer copy from the Site Content editor. SEO + per-page
+            // visibility fields don't apply (the Footer is always visible on every page).
+            ['slug' => 'footer', 'title_en' => 'Footer', 'title_ar' => 'التذييل', 'sort_order' => 8],
         ];
 
         foreach ($pages as $row) {
