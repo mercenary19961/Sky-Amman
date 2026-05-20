@@ -12,7 +12,21 @@ import { Testimonials } from '@/Components/Home/Testimonials';
 import { ValueProposition } from '@/Components/Home/ValueProposition';
 import { MediaRoom } from '@/Components/Home/MediaRoom';
 import { LocationMap } from '@/Components/Home/LocationMap';
-import type { HomePageProps } from '@/types/home';
+import type { ContentValue, HomePageProps } from '@/types/home';
+
+/**
+ * Whether a CMS section is visible on the public site. A section is hidden
+ * when every row in it has been toggled to `is_visible=false` via the admin
+ * Site Content editor's per-section visibility button. Unseeded sections
+ * (undefined) default to visible so missing CMS rows don't accidentally hide
+ * code-driven UI.
+ */
+function sectionVisible(section: Record<string, ContentValue> | undefined): boolean {
+    if (!section) return true;
+    const rows = Object.values(section);
+    if (rows.length === 0) return true;
+    return rows.some(r => r.is_visible);
+}
 
 export default function Home() {
     const { props } = usePage<HomePageProps>();
@@ -34,33 +48,45 @@ export default function Home() {
                 <meta property="og:type" content="website" />
             </Head>
 
-            <HomeHero content={content} />
-            <InvestmentBanner content={content} />
-            <AboutUs content={content} />
-            <AssurancePillars content={content} />
-            <ManagingPartner content={content} />
-            <HeadOfDepartments content={content} />
-            <ProjectShowcase
-                title={content.showcase?.title?.content ?? ''}
-                ctaLabel={content.showcase?.card_cta?.content ?? ''}
-                projects={props.featuredProjects}
-            />
-            <ProjectShowcase
-                title={content.rentals?.title?.content ?? ''}
-                ctaLabel={content.rentals?.card_cta?.content ?? ''}
-                projects={props.featuredRentals}
-            />
-            <Testimonials content={content} />
-            <ValueProposition content={content} />
-            <MediaRoom
-                content={content}
-                linkedinUrl={props.mediaEmbeds?.linkedin ?? ''}
-                instagramPosts={props.instagramPosts ?? []}
-            />
-            <LocationMap
-                content={content}
-                mapEmbedUrl={props.siteSettings?.google_maps_embed_url ?? ''}
-            />
+            {sectionVisible(content.hero) && <HomeHero content={content} />}
+            {sectionVisible(content.investment_banner) && <InvestmentBanner content={content} />}
+            {sectionVisible(content.about) && <AboutUs content={content} />}
+            {(sectionVisible(content.assurance_legal)
+                || sectionVisible(content.assurance_financial)
+                || sectionVisible(content.assurance_safety)) && (
+                <AssurancePillars content={content} />
+            )}
+            {sectionVisible(content.managing_partner) && <ManagingPartner content={content} />}
+            {sectionVisible(content.departments) && <HeadOfDepartments content={content} />}
+            {sectionVisible(content.showcase) && (
+                <ProjectShowcase
+                    title={content.showcase?.title?.content ?? ''}
+                    ctaLabel={content.showcase?.card_cta?.content ?? ''}
+                    projects={props.featuredProjects}
+                />
+            )}
+            {sectionVisible(content.rentals) && (
+                <ProjectShowcase
+                    title={content.rentals?.title?.content ?? ''}
+                    ctaLabel={content.rentals?.card_cta?.content ?? ''}
+                    projects={props.featuredRentals}
+                />
+            )}
+            {sectionVisible(content.testimonials) && <Testimonials content={content} />}
+            {sectionVisible(content.value_prop) && <ValueProposition content={content} />}
+            {sectionVisible(content.media_room) && (
+                <MediaRoom
+                    content={content}
+                    linkedinUrl={props.mediaEmbeds?.linkedin ?? ''}
+                    instagramPosts={props.instagramPosts ?? []}
+                />
+            )}
+            {sectionVisible(content.location) && (
+                <LocationMap
+                    content={content}
+                    mapEmbedUrl={props.siteSettings?.google_maps_embed_url ?? ''}
+                />
+            )}
         </PublicLayout>
     );
 }
