@@ -487,10 +487,17 @@ export default function ContentEditor() {
 
                 {/* ── Right: live preview ── */}
                 <div className={cn(
-                    'hidden xl:block shrink-0 transition-all duration-300',
+                    // self-stretch overrides the parent's items-start so this
+                    // column matches the left accordion's full height — gives
+                    // the inner `sticky top-4` block room to actually stick
+                    // instead of scrolling out of view with its container.
+                    'hidden xl:block xl:self-stretch shrink-0 transition-all duration-300',
                     previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
                 )}>
-                    <div className="sticky top-4">
+                    {/* top-20 (5rem) clears the AdminLayout's sticky top bar
+                        (h-16 = 4rem) and adds 1rem breathing room so the preview
+                        chrome doesn't hide behind it when scrolled. */}
+                    <div className="sticky top-20">
                         <div
                             className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
                             style={{ height: 'calc(100vh - 6rem)' }}
