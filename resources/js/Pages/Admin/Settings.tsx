@@ -120,12 +120,19 @@ function MediaRoomBody({ values, setValue }: { values: Record<string, string>; s
     return (
         <div className="space-y-4">
             <div>
-                <FL>LinkedIn Post Embed</FL>
+                <FL>LinkedIn Post Embed URL</FL>
                 <input type="url" value={values['linkedin_embed_url'] ?? ''} onChange={e => setValue('linkedin_embed_url', e.target.value)} placeholder="https://www.linkedin.com/embed/feed/update/…" className={inputClass()} />
+                <Hint>Single-post iframe URL shown on the left side of the homepage Media Room.</Hint>
             </div>
             <div>
-                <FL>Instagram Post Embed</FL>
-                <input type="url" value={values['instagram_embed_url'] ?? ''} onChange={e => setValue('instagram_embed_url', e.target.value)} placeholder="https://www.instagram.com/p/…/embed" className={inputClass()} />
+                <FL>Instagram Access Token</FL>
+                <input type="text" value={values['instagram_access_token'] ?? ''} onChange={e => setValue('instagram_access_token', e.target.value)} placeholder="EAA… (long-lived token)" className={inputClass()} />
+                <Hint>Long-lived Graph API token. Powers the Media Room 3×3 grid; expires every 60 days. Leave blank to hide the grid. See CLAUDE.md → Infrastructure TODOs for provisioning & refresh steps.</Hint>
+            </div>
+            <div>
+                <FL>Instagram User ID</FL>
+                <input type="text" value={values['instagram_user_id'] ?? ''} onChange={e => setValue('instagram_user_id', e.target.value)} placeholder="17841…" className={inputClass()} />
+                <Hint>Numeric IG Business/Creator user ID returned by Graph API Explorer when the token is minted.</Hint>
             </div>
         </div>
     );
