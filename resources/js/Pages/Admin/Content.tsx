@@ -249,8 +249,13 @@ export default function ContentEditor() {
         <AdminLayout title="Site Content">
             <Head title="Site Content" />
 
-            {/* Quick-nav page selector */}
-            <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-1">
+            {/* Quick-nav page selector. Sticky right below the AdminLayout's
+                h-16 top bar so it stays accessible while the accordion scrolls.
+                `bg-surface-muted` matches the page bg exactly in both themes
+                (the token swaps via the .dark wrapper), so the sticky region
+                blends without a visible darker rectangle. z-10 keeps it above
+                the accordion but below the admin top bar (z-20). */}
+            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-1 mb-4 overflow-x-auto pt-2 pb-3">
                 {orderedPages.map(slug => (
                     <button
                         key={slug}
@@ -494,10 +499,10 @@ export default function ContentEditor() {
                     'hidden xl:block xl:self-stretch shrink-0 transition-all duration-300',
                     previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
                 )}>
-                    {/* top-20 (5rem) clears the AdminLayout's sticky top bar
-                        (h-16 = 4rem) and adds 1rem breathing room so the preview
-                        chrome doesn't hide behind it when scrolled. */}
-                    <div className="sticky top-20">
+                    {/* top-32 (8rem) clears the AdminLayout's h-16 top bar AND
+                        the now-sticky quick-nav (~3.5rem incl. its own padding)
+                        with a small buffer so the preview chrome stays visible. */}
+                    <div className="sticky top-32">
                         <div
                             className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden"
                             style={{ height: 'calc(100vh - 6rem)' }}
