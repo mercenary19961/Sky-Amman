@@ -251,10 +251,11 @@ export default function ContentEditor() {
 
             {/* Quick-nav page selector. Sticky right below the AdminLayout's
                 h-16 top bar so it stays accessible while the accordion scrolls.
-                The bg matches the page surface so accordion rows don't show
-                through; z-10 keeps it above the accordion but below the admin
-                top bar (z-20). */}
-            <div className="sticky top-16 z-10 bg-surface-muted dark:bg-zinc-900 flex items-center gap-1 mb-4 overflow-x-auto pt-2 pb-3">
+                `bg-surface-muted` matches the page bg exactly in both themes
+                (the token swaps via the .dark wrapper), so the sticky region
+                blends without a visible darker rectangle. z-10 keeps it above
+                the accordion but below the admin top bar (z-20). */}
+            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-1 mb-4 overflow-x-auto pt-2 pb-3">
                 {orderedPages.map(slug => (
                     <button
                         key={slug}
