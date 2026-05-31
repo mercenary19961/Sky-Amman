@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\MediaServeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +24,11 @@ Route::get('/media/{id}', [MediaServeController::class, 'show'])
 Route::post('/locale/{locale}', [LocaleController::class, 'set'])
     ->whereIn('locale', ['en', 'ar'])
     ->name('locale.set');
+
+// Newsletter sign-up — footer "Subscribe" widget. Rate-limited like all public POSTs.
+Route::post('/newsletter', [NewsletterController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('newsletter.subscribe');
 
 // Auth (admin login). Per-IP throttle layered with the per-email throttle in
 // LoginController to defend against both IP rotation and email fanning.

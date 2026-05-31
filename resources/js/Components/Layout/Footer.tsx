@@ -1,10 +1,12 @@
-import { Link, usePage } from '@inertiajs/react';
-import { useEffect, useRef } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { motion, useAnimationControls, useInView } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls, useInView } from 'framer-motion';
+import { Check } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 
 const MAIN_PAGES = [
     { key: 'home', href: '/' },
@@ -143,30 +145,119 @@ function DriftingCloud({
     );
 }
 
-function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
+/**
+ * Newsletter sign-up. The checkbox + label is a toggle: clicking it reveals an
+ * email field that POSTs to /newsletter (captured in the newsletter_subscribers
+ * table — a full campaign system comes later). Turnstile-gated like every public
+ * POST form; the widget mounts only once the form is expanded. The "Contact Us"
+ * CTA below is part of the original footer design and is left untouched.
+ */
+function NewsletterSignup({ t, ft }: { t: TFunction; ft: FooterText }) {
+    const [expanded, setExpanded] = useState(false);
+    const [email, setEmail] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [token, setToken] = useState('');
+    const turnstileRef = useRef<TurnstileHandle>(null);
+
+    const submit = (e: FormEvent) => {
+        e.preventDefault();
+        if (processing || !email.trim()) return;
+        setProcessing(true);
+        router.post(
+            '/newsletter',
+            { email, 'cf-turnstile-response': token },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setEmail('');
+                    setExpanded(false);
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                    setToken('');
+                    turnstileRef.current?.reset();
+                },
+            },
+        );
+    };
+
     return (
-        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
-            {/* Column 1 — Newsletter sign-up (visual; CTA routes to /contact).
-                lg:flex-1 lets it absorb the slack so the other 3 columns bunch on the right. */}
-            <div className="lg:flex-1">
-                <div className="flex items-center gap-3">
+        <div className="lg:flex-1">
+            <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                aria-expanded={expanded}
+                className="group flex items-center gap-3 text-start cursor-pointer"
+            >
+                <span className="relative grid place-items-center w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-110">
                     <img
                         src="/images/home/checkbox-outline.svg"
                         alt=""
                         aria-hidden="true"
                         className="w-7 h-7 select-none"
                     />
-                    <span className="text-lg sm:text-xl font-semibold">
-                        {ft('subscribe', 'label', 'footer.subscribe.label')}
-                    </span>
-                </div>
-                <Link
-                    href="/contact"
-                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
-                >
-                    {ft('subscribe', 'cta', 'footer.subscribe.cta')}
-                </Link>
-            </div>
+                    {/* Filled check when open; a faint preview check on hover while closed. */}
+                    <Check
+                        className={`absolute w-4 h-4 text-white transition-opacity duration-200 ${
+                            expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                        }`}
+                        strokeWidth={3}
+                        aria-hidden="true"
+                    />
+                </span>
+                <span className="text-lg sm:text-xl font-semibold transition-opacity duration-200 group-hover:opacity-80">
+                    {ft('subscribe', 'label', 'footer.subscribe.label')}
+                </span>
+            </button>
+
+            <AnimatePresence initial={false}>
+                {expanded && (
+                    <motion.form
+                        onSubmit={submit}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                    >
+                        <div className="mt-5 flex flex-col gap-3 max-w-xs">
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder={t('footer.subscribe.placeholder')}
+                                className="rounded-full bg-white/95 text-ink px-5 py-2.5 text-sm placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-white"
+                            />
+                            <Turnstile ref={turnstileRef} onVerify={setToken} onExpire={() => setToken('')} />
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-60"
+                            >
+                                {processing ? t('footer.subscribe.submitting') : t('footer.subscribe.submit')}
+                            </button>
+                        </div>
+                    </motion.form>
+                )}
+            </AnimatePresence>
+
+            <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
+            >
+                {ft('subscribe', 'cta', 'footer.subscribe.cta')}
+            </Link>
+        </div>
+    );
+}
+
+function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
+    return (
+        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
+            {/* Column 1 — Newsletter sign-up. lg:flex-1 lets it absorb the slack so
+                the other 3 columns bunch on the right. */}
+            <NewsletterSignup t={t} ft={ft} />
 
             {/* Column 2 — Main pages */}
             <div>
