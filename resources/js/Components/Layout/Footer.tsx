@@ -1,7 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls, useInView } from 'framer-motion';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -46,6 +47,100 @@ function makeFooterText(bundle: SiteContentBundle | undefined, t: TFunction): Fo
         if (entry && entry.is_visible && entry.content) return entry.content;
         return t(fallbackKey);
     };
+}
+
+// Each cloud image spans this fraction of the viewport (matches w-[84.8%] in
+// the className) and a small margin pushes it fully clear of the edge before
+// the off-screen hop, so neither edge of the cloud is ever visible at the wrap.
+const CLOUD_WIDTH_VW = 84.8;
+const EDGE_MARGIN_VW = 5;
+
+/**
+ * A footer cloud cluster that slides in once on scroll, then drifts
+ * continuously in `direction` — exiting one edge and re-entering from the
+ * other, looping forever. The wrap is seamless: the exit → re-entry hop is an
+ * instantaneous keyframe step (duplicate `times` value) while the cloud is
+ * fully off-screen, so you never see it jump. The loop's first and last frame
+ * are both `x: 0`, so the repeat boundary is invisible too. `times` is weighted
+ * by how far each visible leg travels, keeping a constant on-screen speed.
+ *
+ * The exit offsets are derived from `restLeftVw` (the cloud's CSS `left`, in
+ * vw) so a cloud resting anywhere lands FULLY off-screen at the hop — using a
+ * fixed offset would leave a cloud whose rest position differs partly on-screen
+ * after the wrap, which reads as a sudden pop.
+ */
+function DriftingCloud({
+    src,
+    className,
+    direction,
+    restLeftVw,
+    entranceFromX,
+    entranceDelay,
+    driftDuration,
+}: {
+    src: string;
+    className: string;
+    direction: 'right' | 'left';
+    restLeftVw: number;
+    entranceFromX: number;
+    entranceDelay: number;
+    driftDuration: number;
+}) {
+    const controls = useAnimationControls();
+    const ref = useRef<HTMLImageElement>(null);
+    const inView = useInView(ref, { once: true, amount: 0.2 });
+
+    useEffect(() => {
+        if (!inView) return;
+        let active = true;
+        // Offsets that place the cloud just past each edge relative to its rest:
+        //  - off the right: left edge ≥ 100vw  → x = (100 − restLeft) + margin
+        //  - off the left:  right edge ≤ 0vw   → x = −(restLeft + width) − margin
+        const exitRight = 100 - restLeftVw + EDGE_MARGIN_VW;
+        const exitLeft = -(restLeftVw + CLOUD_WIDTH_VW) - EDGE_MARGIN_VW;
+        const travel = exitRight - exitLeft;
+        // First visible leg: rest → exit edge; then an off-screen hop to the
+        // opposite edge; then re-entry → rest. Mirror the offsets per direction.
+        const exit = direction === 'right' ? exitRight : exitLeft;
+        const wrap = direction === 'right' ? exitLeft : exitRight;
+        const split = Math.abs(exit) / travel;
+        (async () => {
+            // Phase 1 — the existing one-time slide-in.
+            await controls.start({
+                x: 0,
+                opacity: 1,
+                transition: { duration: 1.6, ease: 'easeOut', delay: entranceDelay },
+            });
+            if (!active) return;
+            // Phase 2 — continuous drift. Rest → exit → (invisible hop) →
+            // re-enter from the far side → back to rest → repeat.
+            controls.start({
+                x: [0, `${exit}vw`, `${wrap}vw`, 0],
+                transition: {
+                    duration: driftDuration,
+                    ease: 'linear',
+                    times: [0, split, split, 1],
+                    repeat: Infinity,
+                    repeatType: 'loop',
+                },
+            });
+        })();
+        return () => {
+            active = false;
+        };
+    }, [inView, controls, direction, entranceDelay, driftDuration]);
+
+    return (
+        <motion.img
+            ref={ref}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            className={className}
+            initial={{ x: entranceFromX, opacity: 0 }}
+            animate={controls}
+        />
+    );
 }
 
 function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
@@ -175,16 +270,17 @@ export function Footer() {
               their lower portions show.
             */}
             <div className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
-                {/* z-10 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right */}
-                <motion.img
+                {/* z-30 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right.
+                    Slides in once, then drifts continuously across the screen. Sits in
+                    front of the apartment (z-20), same as the left cluster. */}
+                <DriftingCloud
                     src="/images/home/footer-clouds.webp"
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-10 select-none pointer-events-none object-contain object-top-left"
-                    initial={{ x: 220, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.1 }}
+                    className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
+                    direction="right"
+                    restLeftVw={38}
+                    entranceFromX={220}
+                    entranceDelay={0.1}
+                    driftDuration={42}
                 />
 
                 {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
@@ -197,16 +293,16 @@ export function Footer() {
                 />
 
                 {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds.webp reused),
-                    wraps the villa from the left */}
-                <motion.img
+                    wraps the villa from the left. Different duration than the right
+                    cluster so the two drift out of sync. */}
+                <DriftingCloud
                     src="/images/home/footer-clouds.webp"
-                    alt=""
-                    aria-hidden="true"
                     className="absolute left-[-15%] top-[30%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
-                    initial={{ x: -220, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.25 }}
+                    direction="left"
+                    restLeftVw={-15}
+                    entranceFromX={-220}
+                    entranceDelay={0.25}
+                    driftDuration={68}
                 />
 
                 {/* z-40 — SKYAMMAN logo, center-right, overlaps the villa */}
