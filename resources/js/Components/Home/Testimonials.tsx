@@ -39,7 +39,7 @@ export function Testimonials({ content }: TestimonialsProps) {
                 {/* Video — rounded-[56px] rectangle from the design SVG. Embeds the
                     configured iframe URL; falls back to a play-button placeholder
                     when no URL is set yet. */}
-                <div className="mt-10 sm:mt-12 mx-auto max-w-5xl relative aspect-[1116/446] rounded-[56px] overflow-hidden bg-primary-light/40 shadow-sm">
+                <div className="mt-10 sm:mt-12 mx-auto max-w-5xl relative aspect-1116/446 rounded-[56px] overflow-hidden bg-primary-light/40 shadow-sm">
                     {videoUrl && isFileVideo ? (
                         <video
                             src={videoUrl}
@@ -84,7 +84,7 @@ export function Testimonials({ content }: TestimonialsProps) {
 function ClientCard({ client }: { client: Client }) {
     return (
         <div
-            className="relative aspect-[290/486] w-full max-w-[280px] mx-auto bg-no-repeat bg-contain bg-top"
+            className="relative aspect-290/486 w-full max-w-70 mx-auto bg-no-repeat bg-contain bg-top"
             style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
         >
             {/* Avatar — solid white circle, sits in the dome at top of card.

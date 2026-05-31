@@ -64,7 +64,8 @@ class SiteContent extends Model
      */
     public static function getContent(string $page, string $section, string $key, string $locale = 'en'): ?string
     {
-        $row = static::where('page', $page)
+        $row = static::query()
+            ->where('page', $page)
             ->where('section', $section)
             ->where('key', $key)
             ->first();
