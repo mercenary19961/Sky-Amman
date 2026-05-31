@@ -79,7 +79,7 @@ function ClientCard({ client }: { client: Client }) {
             {/* Avatar — solid white circle, sits in the dome at top of card.
                 Swap to <img> once portrait photos are delivered. */}
             <div
-                className="absolute left-1/2 -translate-x-1/2 bg-white rounded-full overflow-hidden"
+                className="absolute left-1/2 -translate-x-1/2 bg-white rounded-full overflow-hidden shadow-[0_14px_28px_-8px_rgba(0,0,0,0.35)]"
                 style={{
                     top: '4.4%',
                     width: '82%',
@@ -93,15 +93,15 @@ function ClientCard({ client }: { client: Client }) {
                 className="absolute inset-x-0 px-5 sm:px-6 text-center"
                 style={{ top: '60%' }}
             >
-                <div className="font-bold text-sm sm:text-base text-ink">
+                <div className="font-bold text-sm sm:text-base text-white">
                     {client.name}
                 </div>
-                <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs leading-relaxed text-ink uppercase tracking-wide">
-                    <span className="text-primary text-base sm:text-lg font-bold align-top mr-0.5">
+                <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs leading-relaxed text-white uppercase tracking-wide font-light">
+                    <span className="text-white text-base sm:text-lg font-bold align-top mr-0.5">
                         &ldquo;
                     </span>
                     {client.quote}
-                    <span className="text-primary text-base sm:text-lg font-bold align-top ml-0.5">
+                    <span className="text-white text-base sm:text-lg font-bold align-top ml-0.5">
                         &rdquo;
                     </span>
                 </p>
