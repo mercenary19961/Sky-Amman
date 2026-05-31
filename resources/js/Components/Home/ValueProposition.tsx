@@ -34,8 +34,8 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                                 className="w-16 h-16 sm:w-20 sm:h-20 select-none pointer-events-none mb-4 sm:mb-5"
                             />
 
-                            {/* Rectangle 22: square card, rx=62, #E5EBF0 at 0.74 */}
-                            <div className="aspect-square w-full max-w-67 rounded-[62px] bg-[#E5EBF0]/75 flex items-center justify-center px-6 sm:px-8 py-6 text-ink text-base sm:text-lg leading-snug">
+                            {/* Rectangle 22: square card, rx=62, brand blue tint */}
+                            <div className="aspect-square w-full max-w-67 rounded-[62px] bg-primary/75 flex items-center justify-center px-6 sm:px-8 py-6 text-white text-lg sm:text-xl leading-snug">
                                 {vp[key]?.content ?? ''}
                             </div>
                         </div>
