@@ -102,7 +102,19 @@ export function Header() {
                 hidden ? '-translate-y-full' : 'translate-y-0',
             )}
         >
-            <div className="section-x h-24 flex items-center justify-between gap-6">
+            {/* Backdrop gradient — brand sky-blue at top fading to white at
+                bottom so the navbar reads as a distinct band on light page
+                sections. Fades out on sections marked data-nav-bg="dark"
+                (hero / footer overlap) so the underlying section gradient
+                stays clean there. */}
+            <div
+                aria-hidden="true"
+                className={cn(
+                    'absolute inset-0 pointer-events-none bg-linear-to-b from-primary to-white transition-opacity duration-300',
+                    isDark ? 'opacity-0' : 'opacity-100',
+                )}
+            />
+            <div className="relative section-x h-24 flex items-center justify-between gap-6">
                 <Link
                     href="/"
                     className="flex items-center transition-opacity duration-200"
