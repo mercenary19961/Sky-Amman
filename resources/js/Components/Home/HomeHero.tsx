@@ -31,11 +31,21 @@ export function HomeHero({ content }: HomeHeroProps) {
                     {subtitle}
                 </p>
 
-                <div className="relative mt-8 sm:mt-12 lg:mt-16">
+                {/*
+                  Hero villa — uses the "trimmed" variant (1280×443) whose
+                  transparent top padding has been cropped off so the visible
+                  building sits flush with the top of the <img> box. CSS margin
+                  is the actual distance to the subtitle rather than being
+                  swallowed by invisible alpha. Width: max-w-7xl matches the
+                  photo's 1280px native frame; at 3xl+ (≥1600px viewport) we
+                  scale it up to ~1500px so the villa fills the hero band on
+                  very large monitors instead of floating in empty sky.
+                */}
+                <div className="relative mt-4 sm:mt-6 lg:mt-8">
                     <img
-                        src="/images/home/hero-villa.svg"
+                        src="/images/home/hero-villa-trimmed.webp"
                         alt=""
-                        className="mx-auto w-full max-w-5xl h-auto select-none pointer-events-none"
+                        className="mx-auto w-full max-w-7xl 3xl:max-w-375 h-auto select-none pointer-events-none"
                         loading="eager"
                     />
 

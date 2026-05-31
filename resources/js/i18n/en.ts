@@ -226,6 +226,9 @@ const en = {
         subscribe: {
             label: 'Subscribe To Our Newsletter',
             cta: 'Contact Us',
+            placeholder: 'Enter your email',
+            submit: 'Subscribe',
+            submitting: 'Subscribing…',
         },
         sections: {
             mainPages: 'Main pages',

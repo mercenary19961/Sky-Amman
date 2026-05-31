@@ -222,6 +222,9 @@ const ar = {
         subscribe: {
             label: 'اشترك في نشرتنا الإخبارية',
             cta: 'تواصل معنا',
+            placeholder: 'أدخل بريدك الإلكتروني',
+            submit: 'اشترك',
+            submitting: 'جارٍ الاشتراك…',
         },
         sections: {
             mainPages: 'الصفحات الرئيسية',

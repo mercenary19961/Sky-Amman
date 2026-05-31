@@ -1,9 +1,12 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, useAnimationControls, useInView } from 'framer-motion';
+import { Check } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 
 const MAIN_PAGES = [
     { key: 'home', href: '/' },
@@ -48,30 +51,213 @@ function makeFooterText(bundle: SiteContentBundle | undefined, t: TFunction): Fo
     };
 }
 
-function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
+// Each cloud image spans this fraction of the viewport (matches w-[84.8%] in
+// the className) and a small margin pushes it fully clear of the edge before
+// the off-screen hop, so neither edge of the cloud is ever visible at the wrap.
+const CLOUD_WIDTH_VW = 84.8;
+const EDGE_MARGIN_VW = 5;
+
+/**
+ * A footer cloud cluster that slides in once on scroll, then drifts
+ * continuously in `direction` — exiting one edge and re-entering from the
+ * other, looping forever. The wrap is seamless: the exit → re-entry hop is an
+ * instantaneous keyframe step (duplicate `times` value) while the cloud is
+ * fully off-screen, so you never see it jump. The loop's first and last frame
+ * are both `x: 0`, so the repeat boundary is invisible too. `times` is weighted
+ * by how far each visible leg travels, keeping a constant on-screen speed.
+ *
+ * The exit offsets are derived from `restLeftVw` (the cloud's CSS `left`, in
+ * vw) so a cloud resting anywhere lands FULLY off-screen at the hop — using a
+ * fixed offset would leave a cloud whose rest position differs partly on-screen
+ * after the wrap, which reads as a sudden pop.
+ */
+function DriftingCloud({
+    src,
+    className,
+    direction,
+    restLeftVw,
+    entranceFromX,
+    entranceDelay,
+    driftDuration,
+}: {
+    src: string;
+    className: string;
+    direction: 'right' | 'left';
+    restLeftVw: number;
+    entranceFromX: number;
+    entranceDelay: number;
+    driftDuration: number;
+}) {
+    const controls = useAnimationControls();
+    const ref = useRef<HTMLImageElement>(null);
+    const inView = useInView(ref, { once: true, amount: 0.2 });
+
+    useEffect(() => {
+        if (!inView) return;
+        let active = true;
+        // Offsets that place the cloud just past each edge relative to its rest:
+        //  - off the right: left edge ≥ 100vw  → x = (100 − restLeft) + margin
+        //  - off the left:  right edge ≤ 0vw   → x = −(restLeft + width) − margin
+        const exitRight = 100 - restLeftVw + EDGE_MARGIN_VW;
+        const exitLeft = -(restLeftVw + CLOUD_WIDTH_VW) - EDGE_MARGIN_VW;
+        const travel = exitRight - exitLeft;
+        // First visible leg: rest → exit edge; then an off-screen hop to the
+        // opposite edge; then re-entry → rest. Mirror the offsets per direction.
+        const exit = direction === 'right' ? exitRight : exitLeft;
+        const wrap = direction === 'right' ? exitLeft : exitRight;
+        const split = Math.abs(exit) / travel;
+        (async () => {
+            // Phase 1 — the existing one-time slide-in.
+            await controls.start({
+                x: 0,
+                opacity: 1,
+                transition: { duration: 1.6, ease: 'easeOut', delay: entranceDelay },
+            });
+            if (!active) return;
+            // Phase 2 — continuous drift. Rest → exit → (invisible hop) →
+            // re-enter from the far side → back to rest → repeat.
+            controls.start({
+                x: [0, `${exit}vw`, `${wrap}vw`, 0],
+                transition: {
+                    duration: driftDuration,
+                    ease: 'linear',
+                    times: [0, split, split, 1],
+                    repeat: Infinity,
+                    repeatType: 'loop',
+                },
+            });
+        })();
+        return () => {
+            active = false;
+        };
+    }, [inView, controls, direction, entranceDelay, driftDuration]);
+
     return (
-        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
-            {/* Column 1 — Newsletter sign-up (visual; CTA routes to /contact).
-                lg:flex-1 lets it absorb the slack so the other 3 columns bunch on the right. */}
-            <div className="lg:flex-1">
-                <div className="flex items-center gap-3">
+        <motion.img
+            ref={ref}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            className={className}
+            initial={{ x: entranceFromX, opacity: 0 }}
+            animate={controls}
+        />
+    );
+}
+
+/**
+ * Newsletter sign-up. The checkbox + label is a toggle: clicking it reveals an
+ * email field that POSTs to /newsletter (captured in the newsletter_subscribers
+ * table — a full campaign system comes later). Turnstile-gated like every public
+ * POST form; the widget mounts only once the form is expanded. The "Contact Us"
+ * CTA below is part of the original footer design and is left untouched.
+ */
+function NewsletterSignup({ t, ft }: { t: TFunction; ft: FooterText }) {
+    const [expanded, setExpanded] = useState(false);
+    const [email, setEmail] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [token, setToken] = useState('');
+    const turnstileRef = useRef<TurnstileHandle>(null);
+
+    const submit = (e: FormEvent) => {
+        e.preventDefault();
+        if (processing || !email.trim()) return;
+        setProcessing(true);
+        router.post(
+            '/newsletter',
+            { email, 'cf-turnstile-response': token },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setEmail('');
+                    setExpanded(false);
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                    setToken('');
+                    turnstileRef.current?.reset();
+                },
+            },
+        );
+    };
+
+    return (
+        <div className="lg:flex-1">
+            <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                aria-expanded={expanded}
+                className="group flex items-center gap-3 text-start cursor-pointer"
+            >
+                <span className="relative grid place-items-center w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-110">
                     <img
                         src="/images/home/checkbox-outline.svg"
                         alt=""
                         aria-hidden="true"
                         className="w-7 h-7 select-none"
                     />
-                    <span className="text-lg sm:text-xl font-semibold">
-                        {ft('subscribe', 'label', 'footer.subscribe.label')}
-                    </span>
-                </div>
-                <Link
-                    href="/contact"
-                    className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
-                >
-                    {ft('subscribe', 'cta', 'footer.subscribe.cta')}
-                </Link>
-            </div>
+                    {/* Filled check when open; a faint preview check on hover while closed. */}
+                    <Check
+                        className={`absolute w-4 h-4 text-white transition-opacity duration-200 ${
+                            expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                        }`}
+                        strokeWidth={3}
+                        aria-hidden="true"
+                    />
+                </span>
+                <span className="text-lg sm:text-xl font-semibold transition-opacity duration-200 group-hover:opacity-80">
+                    {ft('subscribe', 'label', 'footer.subscribe.label')}
+                </span>
+            </button>
+
+            <AnimatePresence initial={false}>
+                {expanded && (
+                    <motion.form
+                        onSubmit={submit}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                    >
+                        <div className="mt-5 flex flex-col gap-3 max-w-xs">
+                            <input
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder={t('footer.subscribe.placeholder')}
+                                className="rounded-full bg-white/95 text-ink px-5 py-2.5 text-sm placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-white"
+                            />
+                            <Turnstile ref={turnstileRef} onVerify={setToken} onExpire={() => setToken('')} />
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-60"
+                            >
+                                {processing ? t('footer.subscribe.submitting') : t('footer.subscribe.submit')}
+                            </button>
+                        </div>
+                    </motion.form>
+                )}
+            </AnimatePresence>
+
+            <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
+            >
+                {ft('subscribe', 'cta', 'footer.subscribe.cta')}
+            </Link>
+        </div>
+    );
+}
+
+function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
+    return (
+        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
+            {/* Column 1 — Newsletter sign-up. lg:flex-1 lets it absorb the slack so
+                the other 3 columns bunch on the right. */}
+            <NewsletterSignup t={t} ft={ft} />
 
             {/* Column 2 — Main pages */}
             <div>
@@ -175,45 +361,46 @@ export function Footer() {
               their lower portions show.
             */}
             <div className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
-                {/* z-10 — bottom-right cloud cluster (footer-clouds-1.png), bleeds off right */}
-                <motion.img
-                    src="/images/home/footer-clouds-1.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-10 select-none pointer-events-none object-contain object-top-left"
-                    initial={{ x: 220, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.1 }}
+                {/* z-30 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right.
+                    Slides in once, then drifts continuously across the screen. Sits in
+                    front of the apartment (z-20), same as the left cluster. */}
+                <DriftingCloud
+                    src="/images/home/footer-clouds.webp"
+                    className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
+                    direction="right"
+                    restLeftVw={38}
+                    entranceFromX={220}
+                    entranceDelay={0.1}
+                    driftDuration={42}
                 />
 
                 {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
                     bottom; the upper half of the photo (sky) is clipped by the hero. */}
                 <img
-                    src="/images/home/footer-villa-photo.png"
+                    src="/images/home/footer-apartment-padded.webp"
                     alt=""
                     aria-hidden="true"
                     className="absolute right-[19.5%] top-[-48.9%] w-[93.5%] h-[149.6%] z-20 object-contain object-bottom select-none pointer-events-none"
                 />
 
-                {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds-1.png reused),
-                    wraps the villa from the left */}
-                <motion.img
-                    src="/images/home/footer-clouds-1.png"
-                    alt=""
-                    aria-hidden="true"
+                {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds.webp reused),
+                    wraps the villa from the left. Different duration than the right
+                    cluster so the two drift out of sync. */}
+                <DriftingCloud
+                    src="/images/home/footer-clouds.webp"
                     className="absolute left-[-15%] top-[30%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
-                    initial={{ x: -220, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 1.6, ease: 'easeOut', delay: 0.25 }}
+                    direction="left"
+                    restLeftVw={-15}
+                    entranceFromX={-220}
+                    entranceDelay={0.25}
+                    driftDuration={68}
                 />
 
                 {/* z-40 — SKYAMMAN logo, center-right, overlaps the villa */}
                 <img
                     src="/images/home/skyamman-logo-large.png"
                     alt="SkyAmman — Real Estate Consultancy"
-                    className="absolute left-[42%] top-[1%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                    className="absolute left-[49%] top-[-20%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
                 />
             </div>
         </footer>
