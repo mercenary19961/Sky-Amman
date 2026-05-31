@@ -175,9 +175,9 @@ export function Footer() {
               their lower portions show.
             */}
             <div className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
-                {/* z-10 — bottom-right cloud cluster (footer-clouds-1.png), bleeds off right */}
+                {/* z-10 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right */}
                 <motion.img
-                    src="/images/home/footer-clouds-1.png"
+                    src="/images/home/footer-clouds.webp"
                     alt=""
                     aria-hidden="true"
                     className="absolute left-[38%] top-[55%] w-[84.8%] h-[86.2%] z-10 select-none pointer-events-none object-contain object-top-left"
@@ -190,16 +190,16 @@ export function Footer() {
                 {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
                     bottom; the upper half of the photo (sky) is clipped by the hero. */}
                 <img
-                    src="/images/home/footer-villa-photo.png"
+                    src="/images/home/footer-apartment-padded.webp"
                     alt=""
                     aria-hidden="true"
                     className="absolute right-[19.5%] top-[-48.9%] w-[93.5%] h-[149.6%] z-20 object-contain object-bottom select-none pointer-events-none"
                 />
 
-                {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds-1.png reused),
+                {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds.webp reused),
                     wraps the villa from the left */}
                 <motion.img
-                    src="/images/home/footer-clouds-1.png"
+                    src="/images/home/footer-clouds.webp"
                     alt=""
                     aria-hidden="true"
                     className="absolute left-[-15%] top-[30%] w-[84.8%] h-[86.2%] z-30 select-none pointer-events-none object-contain object-top-left"
@@ -213,7 +213,7 @@ export function Footer() {
                 <img
                     src="/images/home/skyamman-logo-large.png"
                     alt="SkyAmman — Real Estate Consultancy"
-                    className="absolute left-[42%] top-[1%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                    className="absolute left-[49%] top-[-20%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
                 />
             </div>
         </footer>
