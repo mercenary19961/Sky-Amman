@@ -14,6 +14,9 @@ export function Testimonials({ content }: TestimonialsProps) {
     const t = content.testimonials ?? {};
     const title = t.title?.content ?? '';
     const videoUrl = t.video_url?.content ?? '';
+    // A direct media file (self-hosted /videos/x.mp4) renders in a <video> tag;
+    // anything else is treated as an embed URL (YouTube/Vimeo) for an <iframe>.
+    const isFileVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(videoUrl);
 
     const clients: Client[] = [1, 2, 3, 4].map((i) => ({
         name: t[`client_${i}_name`]?.content ?? '',
@@ -37,7 +40,15 @@ export function Testimonials({ content }: TestimonialsProps) {
                     configured iframe URL; falls back to a play-button placeholder
                     when no URL is set yet. */}
                 <div className="mt-10 sm:mt-12 mx-auto max-w-5xl relative aspect-[1116/446] rounded-[56px] overflow-hidden bg-primary-light/40 shadow-sm">
-                    {videoUrl ? (
+                    {videoUrl && isFileVideo ? (
+                        <video
+                            src={videoUrl}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : videoUrl ? (
                         <iframe
                             src={videoUrl}
                             title="Testimonials video"
