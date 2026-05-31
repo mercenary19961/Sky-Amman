@@ -84,6 +84,8 @@ class SiteContentSeeder extends Seeder
 
             ['home', 'testimonials', 'title', 'Testimonials', 'آراء العملاء'],
             ['home', 'testimonials', 'video_url', '/videos/testimonials.mp4', '/videos/testimonials.mp4'],
+            ['home', 'testimonials', 'video_url_left', '', ''],
+            ['home', 'testimonials', 'video_url_right', '', ''],
             ['home', 'testimonials', 'client_1_name', 'Client Name', 'اسم العميل'],
             ['home', 'testimonials', 'client_1_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
             ['home', 'testimonials', 'client_2_name', 'Client Name', 'اسم العميل'],
