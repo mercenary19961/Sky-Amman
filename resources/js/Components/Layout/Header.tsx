@@ -26,6 +26,38 @@ export function Header() {
     // "light" — dark text/logo on a light page background.
     const [navBg, setNavBg] = useState<'light' | 'dark'>('light');
 
+    // Hide-on-scroll-down / reveal-on-scroll-up.
+    const [hidden, setHidden] = useState(false);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const TOP_THRESHOLD = 80; // always show within this many px of the top
+        const SCROLL_DELTA = 6;   // ignore jitters smaller than this
+
+        let lastY = window.scrollY;
+
+        const onScroll = () => {
+            const currentY = window.scrollY;
+
+            // Near the top → always visible (handles overscroll bounce too).
+            if (currentY < TOP_THRESHOLD) {
+                setHidden(false);
+                lastY = currentY;
+                return;
+            }
+
+            const delta = currentY - lastY;
+            if (Math.abs(delta) < SCROLL_DELTA) return; // skip jitter, don't update lastY
+
+            setHidden(delta > 0); // scrolling down → hide, up → reveal
+            lastY = currentY;
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
@@ -62,8 +94,27 @@ export function Header() {
         // position: fixed so the navbar overlays section content (including
         // the hero's gradient) instead of taking layout space. Pages without a
         // top hero need to add their own top padding for the navbar.
-        <header className="fixed top-0 inset-x-0 z-40">
-            <div className="section-x h-24 flex items-center justify-between gap-6">
+        // Transform-based slide so the navbar disappears when scrolling down
+        // and re-enters from the top when scrolling up.
+        <header
+            className={cn(
+                'fixed top-0 inset-x-0 z-40 transition-transform duration-300 ease-out',
+                hidden ? '-translate-y-full' : 'translate-y-0',
+            )}
+        >
+            {/* Backdrop gradient — brand sky-blue at top fading to white at
+                bottom so the navbar reads as a distinct band on light page
+                sections. Fades out on sections marked data-nav-bg="dark"
+                (hero / footer overlap) so the underlying section gradient
+                stays clean there. */}
+            <div
+                aria-hidden="true"
+                className={cn(
+                    'absolute inset-0 pointer-events-none bg-linear-to-b from-primary to-white transition-opacity duration-300',
+                    isDark ? 'opacity-0' : 'opacity-100',
+                )}
+            />
+            <div className="relative section-x h-24 flex items-center justify-between gap-6">
                 <Link
                     href="/"
                     className="flex items-center transition-opacity duration-200"
