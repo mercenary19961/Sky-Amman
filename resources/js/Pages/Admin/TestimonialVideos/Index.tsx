@@ -117,9 +117,8 @@ export default function TestimonialVideosIndex() {
                         Build a library of videos, then choose exactly{' '}
                         <strong className="text-ink dark:text-zinc-200">{maxActive}</strong> to show on the homepage.
                         Toggle the eye on each card to stage your pick, then{' '}
-                        <strong className="text-ink dark:text-zinc-200">Update homepage</strong> to apply it. Paste a
-                        YouTube link, a hosted URL, or a path like{' '}
-                        <code className="px-1 rounded bg-white/10">/video/name.mp4</code>.
+                        <strong className="text-ink dark:text-zinc-200">Update homepage</strong> to apply it. Add a
+                        video by pasting its <strong className="text-ink dark:text-zinc-200">YouTube link</strong>.
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                         <button
@@ -423,17 +422,17 @@ function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose:
 
                         <form onSubmit={submit} className="flex-1 overflow-y-auto p-5 space-y-5">
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Video URL</label>
+                                <label className="block text-xs font-medium text-ink-muted mb-1.5">YouTube link</label>
                                 <input
                                     type="text"
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                     autoFocus
-                                    placeholder="https://youtu.be/… or /video/name.mp4"
+                                    placeholder="https://www.youtube.com/watch?v=…"
                                     className="w-full rounded-md border border-ink/15 dark:border-white/15 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 />
                                 <p className="mt-1.5 text-xs text-ink-muted">
-                                    YouTube link, hosted video URL, or a path beginning with “/”.
+                                    Paste a YouTube video link (the video must allow embedding).
                                 </p>
                             </div>
 
@@ -504,7 +503,7 @@ function PreviewModal({ url, onClose }: { url: string | null; onClose: () => voi
                     >
                         {yt ? (
                             <iframe
-                                src={`https://www.youtube.com/embed/${yt}?rel=0&autoplay=1`}
+                                src={`https://www.youtube-nocookie.com/embed/${yt}?rel=0&autoplay=1`}
                                 title="Video preview"
                                 className="w-full h-full border-0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

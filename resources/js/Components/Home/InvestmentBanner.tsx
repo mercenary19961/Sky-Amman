@@ -22,10 +22,22 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
 
                 <div className="mt-4 flex items-center justify-center flex-wrap gap-3 sm:gap-4 text-xl sm:text-2xl lg:text-3xl text-ink font-medium">
                     <span>{taglineParts[1] ?? ''}</span>
-                    <img
-                        src="/images/home/buy-early-strip.svg"
-                        alt=""
-                        className="h-12 sm:h-16 w-40 sm:w-56 select-none pointer-events-none"
+                    {/* Leaf strip shape filled with the buy-early image: the SVG
+                        masks a div whose background is the webp, so the photo only
+                        shows through the leaf silhouette. */}
+                    <span
+                        className="block h-12 sm:h-16 w-40 sm:w-56 select-none pointer-events-none"
+                        style={{
+                            backgroundImage: 'url(/images/home/buy-early.webp)',
+                            backgroundSize: '100% 100%',
+                            WebkitMaskImage: 'url(/images/home/buy-early-strip-mask.svg)',
+                            maskImage: 'url(/images/home/buy-early-strip-mask.svg)',
+                            WebkitMaskRepeat: 'no-repeat',
+                            maskRepeat: 'no-repeat',
+                            WebkitMaskSize: '100% 100%',
+                            maskSize: '100% 100%',
+                        }}
+                        aria-hidden="true"
                     />
                     <span>{taglineParts[2] ?? ''}</span>
                 </div>

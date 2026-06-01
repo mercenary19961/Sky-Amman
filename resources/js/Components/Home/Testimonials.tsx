@@ -33,7 +33,7 @@ function youtubeId(url: string): string | null {
 }
 
 const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-const youtubeEmbed = (id: string) => `https://www.youtube.com/embed/${id}?rel=0`;
+const youtubeEmbed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
 
 export function Testimonials({ content, videos }: TestimonialsProps) {
     const t = content.testimonials ?? {};
@@ -61,7 +61,7 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 
                 {/* Client cards row */}
                 {hasClients && (
-                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                         {clients.map(
                             (client, i) =>
                                 client.name && <ClientCard key={i} client={client} />,
@@ -74,12 +74,17 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 }
 
 /**
- * Three-video composition + carousel. Geometry re-anchored to the Figma frames
- * ("Desktop.svg": full frame 1280×611; the three clips span y 186→542, so the
- * box is 1280×356). The centre clip is the active video (on top, with the play
- * overlay); the two side previews show the prev/next videos, faded and peeking
- * out behind. Clicking a side preview — or an arrow / dot — rotates the active
- * video. Slot contents slide + fade on change (framer-motion, direction-aware).
+ * Three-video composition + carousel. The Figma frame was a wide ~2.5:1 crop,
+ * but real videos (esp. YouTube) are 16:9 — a wide frame pillarboxes them with
+ * black side bars. So every slot is 16:9 (`aspect-video` via the 25/9 container
+ * + matched widths): the centre clip fills edge-to-edge. The centre is the
+ * active video (on top, with the play overlay); the two side previews show the
+ * prev/next videos, faded and peeking out behind. Clicking a side preview — or
+ * an arrow / dot — rotates the active video. Slot contents slide + fade on
+ * change (framer-motion, direction-aware).
+ *
+ * Geometry (container 25/9 ≈ 2.78:1): centre w-64% × h-full → 16:9; each side
+ * w-50% × h-78% → 16:9, vertically centred (top-11%), peeking left/right.
  */
 function TestimonialVideos({ videos }: { videos: string[] }) {
     const N = videos.length;
@@ -90,8 +95,8 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     // Empty state: no videos configured yet → a single placeholder frame.
     if (N === 0) {
         return (
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-1280/356">
-                <div className="absolute left-[14.77%] top-0 w-[69.69%] h-full z-20">
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
+                <div className="absolute left-[18%] top-0 w-[64%] h-full z-20">
                     <CenterVideo src="" />
                 </div>
             </div>
@@ -125,10 +130,10 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
 
     return (
         <>
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-1280/356">
-                {/* Left preview (previous video) — peeks out behind the centre. */}
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
+                {/* Left preview (previous video) — 16:9, peeks out behind the centre. */}
                 <VideoSlot
-                    className="left-[0.86%] top-[12.08%] w-[52.66%] h-[75.56%] z-10"
+                    className="left-0 top-[11%] w-[50%] h-[78%] z-10"
                     index={leftIndex}
                     src={videos[leftIndex]}
                     variant="side"
@@ -139,7 +144,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
 
                 {/* Right preview (next video). */}
                 <VideoSlot
-                    className="left-[45.16%] top-[12.08%] w-[52.66%] h-[75.56%] z-10"
+                    className="left-[50%] top-[11%] w-[50%] h-[78%] z-10"
                     index={rightIndex}
                     src={videos[rightIndex]}
                     variant="side"
@@ -148,9 +153,9 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                     ariaLabel="Next video"
                 />
 
-                {/* Centre — the active, playable video. */}
+                {/* Centre — the active, playable video (16:9, fills edge-to-edge). */}
                 <VideoSlot
-                    className="left-[14.77%] top-0 w-[69.69%] h-full z-20"
+                    className="left-[18%] top-0 w-[64%] h-full z-20"
                     index={centerIndex}
                     src={videos[centerIndex]}
                     variant="center"
@@ -397,7 +402,7 @@ function SidePreview({ src }: { src: string }) {
 function ClientCard({ client }: { client: Client }) {
     return (
         <div
-            className="relative aspect-290/486 w-full max-w-70 mx-auto bg-no-repeat bg-contain bg-top"
+            className="relative aspect-290/486 w-full bg-no-repeat bg-contain bg-top"
             style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
         >
             {/* Avatar — solid white circle, sits in the dome at top of card.

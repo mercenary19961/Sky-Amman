@@ -29,7 +29,7 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
                     </h2>
                 )}
 
-                <div className="mt-14 sm:mt-16 lg:mt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 sm:gap-y-16 lg:gap-y-24 gap-x-6 max-w-6xl mx-auto">
+                <div className="mt-10 sm:mt-12 lg:mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 lg:gap-x-8 3xl:gap-x-12">
                     {members.map(
                         (member, idx) =>
                             member.name && <DeptCard key={idx} member={member} />,
@@ -42,11 +42,14 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
 
 function DeptCard({ member }: { member: Member }) {
     return (
-        <div className="relative mx-auto w-full max-w-44 sm:max-w-52 lg:max-w-none">
-            {/* Avatar circle — half above the card. Solid primary fill for now;
-                swap to <img> when portraits are delivered. */}
+        // pt reserves ~half the circle's height so the avatar can overhang the
+        // card top WITHOUT colliding with the section title. Everything is sized
+        // in % of the card so it scales with the (now full-width) cells.
+        <div className="relative mx-auto w-full max-w-44 sm:max-w-52 lg:max-w-none pt-[37%]">
+            {/* Avatar circle — ~card-width, sitting half over the card top. Solid
+                primary fill for now; swap to <img> when portraits are delivered. */}
             <div
-                className="absolute left-1/2 -translate-x-1/2 -top-10 sm:-top-12 lg:-top-20 w-20 h-20 sm:w-24 sm:h-24 lg:w-36 lg:h-36 rounded-full bg-primary shadow-md z-10"
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square rounded-full bg-primary shadow-md z-10"
                 aria-hidden="true"
             />
 
@@ -55,7 +58,7 @@ function DeptCard({ member }: { member: Member }) {
                 className="relative aspect-257/199 w-full bg-no-repeat bg-contain bg-top"
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 sm:pb-6 lg:pb-8 px-3 sm:px-4 text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 sm:pb-14 lg:pb-20 px-3 sm:px-4 text-center">
                     <div className="font-bold text-xs sm:text-sm lg:text-base text-ink">
                         {member.name}
                     </div>

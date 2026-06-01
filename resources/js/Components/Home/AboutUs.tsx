@@ -15,18 +15,16 @@ export function AboutUs({ content }: AboutUsProps) {
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
                 <div
-                    className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl shadow-md bg-primary-light/40 bg-cover bg-center"
-                    style={{ backgroundImage: 'url(/images/home/about-villa.jpg)' }}
+                    className="relative mx-auto overflow-hidden rounded-3xl shadow-md bg-cover bg-center"
+                    style={{
+                        backgroundImage: 'url(/images/home/who-are-we.webp)',
+                        // Match the AssurancePillars stage width (the section below).
+                        maxWidth: 'min(900px, 90vw)',
+                    }}
                 >
-                    {/* Light blue overlay so the copy stays legible over the photo */}
-                    <div
-                        className="absolute inset-0 bg-primary/30 backdrop-blur-[1px]"
-                        aria-hidden="true"
-                    />
-
                     <div className="relative px-6 sm:px-10 lg:px-14 py-20 sm:py-28 lg:py-32 text-center">
                         {title && (
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white drop-shadow-sm tracking-wide">
+                            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-normal text-primary drop-shadow-sm tracking-wide">
                                 {title}
                             </h2>
                         )}

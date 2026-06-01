@@ -70,6 +70,7 @@ export default function Home() {
                     title={content.rentals?.title?.content ?? ''}
                     ctaLabel={content.rentals?.card_cta?.content ?? ''}
                     projects={props.featuredRentals}
+                    single
                 />
             )}
             {sectionVisible(content.testimonials) && (
