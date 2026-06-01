@@ -49,7 +49,7 @@ export function HomeHero({ content }: HomeHeroProps) {
                     loading="eager"
                     initial={{ y: '12%', opacity: 0 }}
                     animate={{ y: '0%', opacity: 1 }}
-                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 3, ease: [0.22, 1, 0.36, 1] }}
                 />
 
                 {/* White fade: solid white at the bottom → transparent toward the

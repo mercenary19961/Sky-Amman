@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PropertiesController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\VideoController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/properties', [PropertiesController::class, 'index'])->name('properties');
 
 // Public media serving — scoped to image/pdf MIME types, SVG excluded.
 Route::get('/media/{id}', [MediaServeController::class, 'show'])

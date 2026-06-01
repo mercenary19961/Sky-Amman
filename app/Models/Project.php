@@ -28,6 +28,7 @@ class Project extends Model
         'slug',
         'category',
         'listing_status',
+        'group',
         'short_description_en',
         'short_description_ar',
         'description_en',

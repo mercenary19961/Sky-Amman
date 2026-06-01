@@ -15,6 +15,7 @@ export interface FeaturedProject {
     title_ar: string;
     category: 'under_development' | 'ready' | 'investment_opportunity';
     listing_status: 'for_sale' | 'for_rent' | 'sold' | 'reserved' | null;
+    group: string | null;
     location_en: string | null;
     location_ar: string | null;
     area_sqm: number | null;
@@ -27,6 +28,12 @@ export interface InstagramPost {
     media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
     media_url: string;
     permalink: string;
+}
+
+export interface PropertiesPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+    projects: FeaturedProject[];
 }
 
 export interface HomePageProps extends PageProps {
