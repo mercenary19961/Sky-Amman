@@ -48,10 +48,11 @@ function DeptCard({ member }: { member: Member }) {
         // clears it. The card width itself is capped per breakpoint so it can't
         // balloon on the wide 2-col tablet layout (which is what made the circle
         // grow huge and swallow the names). pt-[37%] = half the 74%-wide circle.
-        <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[37%]">
-            {/* Avatar circle — 74% of the card width, sitting half over the card
-                top. Solid primary fill for now; swap to <img> when portraits
-                are delivered. */}
+        <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[22%] sm:pt-[37%]">
+            {/* Avatar circle — 74% of the card width. On mobile it sits lower on
+                the card (smaller pt overhang) so it doesn't float above; at sm+
+                the overhang is half the circle (pt-[37%]). Solid primary fill
+                for now; swap to <img> when portraits land. */}
             <div
                 className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square rounded-full bg-primary shadow-md z-10"
                 aria-hidden="true"

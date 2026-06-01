@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import { Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { PageProps } from '@/types';
@@ -28,6 +29,14 @@ export function Header() {
 
     // Hide-on-scroll-down / reveal-on-scroll-up.
     const [hidden, setHidden] = useState(false);
+
+    // Mobile hamburger menu open/closed (below lg).
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    // Close the mobile menu whenever the route changes (Inertia visit).
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [url]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -178,7 +187,51 @@ export function Header() {
                     >
                         {language === 'en' ? 'AR' : 'EN'}
                     </button>
+
+                    {/* Hamburger — only below lg, toggles the mobile menu. */}
+                    <button
+                        type="button"
+                        onClick={() => setMobileOpen((o) => !o)}
+                        className={cn(
+                            'lg:hidden inline-flex items-center justify-center rounded-md p-1.5 transition-colors duration-200',
+                            isDark ? 'text-white hover:text-white/80' : 'text-white hover:text-white/80',
+                        )}
+                        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                        aria-expanded={mobileOpen}
+                    >
+                        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
                 </div>
+            </div>
+
+            {/* Mobile menu panel — drops below the bar on lg-down when the
+                hamburger is open. Solid white surface so links read clearly
+                over any section. */}
+            <div
+                className={cn(
+                    'lg:hidden relative overflow-hidden bg-white shadow-lg transition-[max-height,opacity] duration-300 ease-out',
+                    mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
+                )}
+            >
+                <nav className="section-x flex flex-col py-2">
+                    {NAV_ITEMS.map((item) => {
+                        const active = url === item.href;
+                        return (
+                            <Link
+                                key={item.key}
+                                href={item.href}
+                                className={cn(
+                                    'rounded-md px-2 py-3 text-base transition-colors duration-200',
+                                    active
+                                        ? 'font-semibold text-primary'
+                                        : 'text-ink hover:bg-surface-muted hover:text-primary',
+                                )}
+                            >
+                                {t(`nav.${item.key}`)}
+                            </Link>
+                        );
+                    })}
+                </nav>
             </div>
         </header>
     );
