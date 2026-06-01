@@ -38,7 +38,7 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
                             src="/images/home/quote-open.png"
                             alt=""
                             aria-hidden="true"
-                            className="absolute -top-8 left-2 sm:-top-10 sm:left-6 w-16 sm:w-24 h-auto select-none pointer-events-none"
+                            className="absolute -top-8 -left-3 sm:-top-10 sm:left-0 w-16 sm:w-24 h-auto select-none pointer-events-none"
                         />
 
                         <div className="space-y-5 text-center text-sm sm:text-base lg:text-lg text-ink leading-relaxed max-w-4xl mx-auto">
@@ -51,7 +51,7 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
                             src="/images/home/quote-close.png"
                             alt=""
                             aria-hidden="true"
-                            className="absolute -bottom-8 right-2 sm:-bottom-10 sm:right-6 w-16 sm:w-24 h-auto select-none pointer-events-none"
+                            className="absolute -bottom-8 -right-3 sm:-bottom-10 sm:right-0 w-16 sm:w-24 h-auto select-none pointer-events-none"
                         />
                     </div>
                 </div>
