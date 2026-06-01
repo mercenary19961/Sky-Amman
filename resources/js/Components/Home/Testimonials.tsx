@@ -33,7 +33,7 @@ function youtubeId(url: string): string | null {
 }
 
 const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-const youtubeEmbed = (id: string) => `https://www.youtube.com/embed/${id}?rel=0`;
+const youtubeEmbed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
 
 export function Testimonials({ content, videos }: TestimonialsProps) {
     const t = content.testimonials ?? {};
