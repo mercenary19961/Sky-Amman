@@ -5,10 +5,12 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
+use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\MediaServeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +21,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/media/{id}', [MediaServeController::class, 'show'])
     ->name('media.serve')
     ->where('id', '[0-9]+');
+
+// Code-managed video streaming with Range support (see VideoController).
+Route::get('/video/{filename}', [VideoController::class, 'show'])
+    ->where('filename', '[A-Za-z0-9._-]+\.(mp4|webm|ogg|mov)')
+    ->name('video.serve');
 
 // Locale toggle — hit by LanguageContext via fetch POST (not an Inertia visit).
 Route::post('/locale/{locale}', [LocaleController::class, 'set'])
@@ -49,6 +56,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Site Content — editors and admins can manage content.
     Route::get('/content', [SiteContentController::class, 'index'])->name('content.index');
     Route::put('/content/{page}', [SiteContentController::class, 'update'])->name('content.update');
+
+    // Testimonial videos — content management (editors + admins).
+    Route::get('/testimonial-videos', [TestimonialVideoController::class, 'index'])->name('testimonial-videos.index');
+    Route::post('/testimonial-videos', [TestimonialVideoController::class, 'store'])->name('testimonial-videos.store');
+    Route::post('/testimonial-videos/reorder', [TestimonialVideoController::class, 'reorder'])->name('testimonial-videos.reorder');
+    Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
+    Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
+    Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
 
     // Settings — admin only.
     Route::middleware('admin')->group(function () {

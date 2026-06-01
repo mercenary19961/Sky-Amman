@@ -9,6 +9,7 @@ import {
     Settings as SettingsIcon,
     Users as UsersIcon,
     History,
+    Video,
     Menu,
 } from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
@@ -17,6 +18,7 @@ import type { PageProps } from '@/types';
 // Ordered longest-first so more-specific paths match before shorter prefixes.
 const PAGE_ICONS: Array<[path: string, icon: React.ComponentType<{ size?: number }>, exact?: boolean]> = [
     ['/admin',           LayoutDashboard, true],
+    ['/admin/testimonial-videos', Video],
     ['/admin/content',   FileText],
     ['/admin/projects',  Building2],
     ['/admin/contacts',  MessageSquare],

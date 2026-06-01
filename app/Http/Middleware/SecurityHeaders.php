@@ -40,8 +40,8 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "img-src 'self' data: blob: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
-            // Turnstile + Google Maps + LinkedIn/Instagram embeds.
-            "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://www.linkedin.com https://www.instagram.com",
+            // Turnstile + Google Maps + LinkedIn/Instagram + YouTube embeds.
+            "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://www.linkedin.com https://www.instagram.com https://www.youtube.com https://www.youtube-nocookie.com",
             // Inertia XHRs target self; Turnstile siteverify runs server-side.
             "connect-src 'self' https://cloudflareinsights.com",
             "media-src 'self'",

@@ -83,7 +83,8 @@ class SiteContentSeeder extends Seeder
             ['home', 'rentals', 'card_cta', 'Explore More', 'استكشف المزيد'],
 
             ['home', 'testimonials', 'title', 'Testimonials', 'آراء العملاء'],
-            ['home', 'testimonials', 'video_url', '', ''],
+            // Carousel videos live in their own table now (TestimonialVideosSeeder),
+            // managed via Admin → Testimonial Videos — not as site_content rows.
             ['home', 'testimonials', 'client_1_name', 'Client Name', 'اسم العميل'],
             ['home', 'testimonials', 'client_1_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
             ['home', 'testimonials', 'client_2_name', 'Client Name', 'اسم العميل'],

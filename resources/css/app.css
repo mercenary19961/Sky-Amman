@@ -16,6 +16,10 @@
     --color-primary-deep: #78AFCE;
     --color-primary-light: #C8DEF1;
     --color-primary-dark: #5C92B8;
+    /* Filled-button blue — deep enough for legible white text (AA ~5.4:1).
+       The lighter primary tones above stay for backgrounds, gradients, accents. */
+    --color-primary-strong: #356B96;
+    --color-primary-strong-hover: #2C5C82;
     --color-surface: #FFFFFF;
     --color-surface-muted: #F5F8FB;
     --color-ink: #1A2433;

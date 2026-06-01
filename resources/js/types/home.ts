@@ -34,6 +34,7 @@ export interface HomePageProps extends PageProps {
     content_ar: SiteContentBundle;
     featuredProjects: FeaturedProject[];
     featuredRentals: FeaturedProject[];
+    testimonialVideos: string[];
     mediaEmbeds: {
         linkedin: string;
     };
