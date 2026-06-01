@@ -29,6 +29,12 @@ export interface InstagramPost {
     permalink: string;
 }
 
+export interface PropertiesPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+    projects: FeaturedProject[];
+}
+
 export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;

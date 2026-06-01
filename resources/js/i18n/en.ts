@@ -136,6 +136,10 @@ const en = {
             title: 'Spaces that work for you',
             subtitle: 'Browse residential and commercial properties with clarity and ease',
         },
+        filters: {
+            all: 'All Properties',
+        },
+        empty: 'No properties match this filter yet.',
         bottomCta: {
             title: 'Find The Right Space, Made Simple',
             subtitle: 'Explore residential and commercial properties with clear details and guided support.',
