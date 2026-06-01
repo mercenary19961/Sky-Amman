@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import { Play } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { cn } from '@/lib/cn';
 import type { SiteContentBundle } from '@/types/home';
 
 interface TestimonialsProps {
@@ -18,19 +20,22 @@ const VIDEO_FILE_RE = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
 export function Testimonials({ content }: TestimonialsProps) {
     const t = content.testimonials ?? {};
     const title = t.title?.content ?? '';
-    // Three-video composition (Figma "Desktop.svg"): a prominent centre clip
-    // flanked by two smaller, faded side previews. The side slots fall back to
-    // the centre video so a single configured URL still fills the whole layout.
-    const centerUrl = t.video_url?.content ?? '';
-    const leftUrl = t.video_url_left?.content || centerUrl;
-    const rightUrl = t.video_url_right?.content || centerUrl;
+
+    // Carousel videos: numbered keys video_1, video_2, … (extensible). A future
+    // admin "media" section will manage which clips appear here and on what
+    // schedule; for now the list is whatever non-empty video_N rows exist.
+    const videos = Object.keys(t)
+        .filter((k) => /^video_\d+$/.test(k))
+        .sort((a, b) => Number(a.slice(6)) - Number(b.slice(6)))
+        .map((k) => t[k]?.content ?? '')
+        .filter(Boolean);
 
     const clients: Client[] = [1, 2, 3, 4].map((i) => ({
         name: t[`client_${i}_name`]?.content ?? '',
         quote: t[`client_${i}_quote`]?.content ?? '',
     }));
 
-    if (!title && !centerUrl && clients.every((c) => !c.name)) return null;
+    if (!title && videos.length === 0 && clients.every((c) => !c.name)) return null;
 
     const hasClients = clients.some((c) => c.name);
 
@@ -43,16 +48,7 @@ export function Testimonials({ content }: TestimonialsProps) {
                     </h2>
                 )}
 
-                {/* Three-video composition. Geometry re-anchored to the bounding
-                    box of the Figma frames (full frame 1280×611; the three clips
-                    span y 186→542, so the box is 1280×356). Centre clip on top
-                    (z-20) with the play overlay; side previews behind (z-10),
-                    faded, peeking out left and right. */}
-                <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-1280/356">
-                    <SidePreview src={leftUrl} className="left-[0.86%] top-[12.08%] w-[52.66%] h-[75.56%]" />
-                    <SidePreview src={rightUrl} className="left-[45.16%] top-[12.08%] w-[52.66%] h-[75.56%]" />
-                    <CenterVideo src={centerUrl} className="left-[14.77%] top-0 w-[69.69%] h-full" />
-                </div>
+                <TestimonialVideos videos={videos} />
 
                 {/* Client cards row */}
                 {hasClients && (
@@ -69,19 +65,204 @@ export function Testimonials({ content }: TestimonialsProps) {
 }
 
 /**
+ * Three-video composition + carousel. Geometry re-anchored to the Figma frames
+ * ("Desktop.svg": full frame 1280×611; the three clips span y 186→542, so the
+ * box is 1280×356). The centre clip is the active video (on top, with the play
+ * overlay); the two side previews show the prev/next videos, faded and peeking
+ * out behind. Clicking a side preview — or an arrow / dot — rotates the active
+ * video. Slot contents slide + fade on change (framer-motion, direction-aware).
+ */
+function TestimonialVideos({ videos }: { videos: string[] }) {
+    const N = videos.length;
+    const [activeIndex, setActiveIndex] = useState(0);
+    // +1 = forward (new content slides in from the right), -1 = backward.
+    const [direction, setDirection] = useState(1);
+
+    // Empty state: no videos configured yet → a single placeholder frame.
+    if (N === 0) {
+        return (
+            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-1280/356">
+                <div className="absolute left-[14.77%] top-0 w-[69.69%] h-full z-20">
+                    <CenterVideo src="" />
+                </div>
+            </div>
+        );
+    }
+
+    const wrap = (i: number) => ((i % N) + N) % N;
+    const next = () => {
+        setDirection(1);
+        setActiveIndex((i) => wrap(i + 1));
+    };
+    const prev = () => {
+        setDirection(-1);
+        setActiveIndex((i) => wrap(i - 1));
+    };
+    const goTo = (target: number) => {
+        const dest = wrap(target);
+        if (dest !== activeIndex) {
+            // Pick the shorter way around the ring so a dot click feels natural.
+            const forward = wrap(dest - activeIndex);
+            const backward = wrap(activeIndex - dest);
+            setDirection(forward <= backward ? 1 : -1);
+        }
+        setActiveIndex(dest);
+    };
+
+    const centerIndex = activeIndex;
+    const leftIndex = wrap(activeIndex - 1);
+    const rightIndex = wrap(activeIndex + 1);
+    const multi = N > 1;
+
+    return (
+        <>
+            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-1280/356">
+                {/* Left preview (previous video) — peeks out behind the centre. */}
+                <VideoSlot
+                    className="left-[0.86%] top-[12.08%] w-[52.66%] h-[75.56%] z-10"
+                    index={leftIndex}
+                    src={videos[leftIndex]}
+                    variant="side"
+                    direction={direction}
+                    onClick={multi ? prev : undefined}
+                    ariaLabel="Previous video"
+                />
+
+                {/* Right preview (next video). */}
+                <VideoSlot
+                    className="left-[45.16%] top-[12.08%] w-[52.66%] h-[75.56%] z-10"
+                    index={rightIndex}
+                    src={videos[rightIndex]}
+                    variant="side"
+                    direction={direction}
+                    onClick={multi ? next : undefined}
+                    ariaLabel="Next video"
+                />
+
+                {/* Centre — the active, playable video. */}
+                <VideoSlot
+                    className="left-[14.77%] top-0 w-[69.69%] h-full z-20"
+                    index={centerIndex}
+                    src={videos[centerIndex]}
+                    variant="center"
+                    direction={direction}
+                />
+
+                {/* Arrow controls. */}
+                {multi && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={prev}
+                            aria-label="Previous video"
+                            className="absolute z-30 left-2 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                        >
+                            <ChevronLeft size={22} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={next}
+                            aria-label="Next video"
+                            className="absolute z-30 right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                        >
+                            <ChevronRight size={22} />
+                        </button>
+                    </>
+                )}
+            </div>
+
+            {/* Pagination dots (one per video). */}
+            {multi && (
+                <div className="mt-6 flex justify-center items-center gap-3">
+                    {videos.map((_, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => goTo(i)}
+                            aria-label={`Go to video ${i + 1}`}
+                            className={cn(
+                                'rounded-full transition-all cursor-pointer',
+                                i === activeIndex
+                                    ? 'w-3 h-3 bg-primary'
+                                    : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
+        </>
+    );
+}
+
+// Direction-aware slide + fade. Using `variants` (which accept a custom-resolver
+// function) keeps this type-safe, unlike passing a function to initial/exit.
+const slotVariants = {
+    enter: (d: number) => ({ opacity: 0, x: d * 60 }),
+    center: { opacity: 1, x: 0 },
+    exit: (d: number) => ({ opacity: 0, x: -d * 60 }),
+};
+
+interface VideoSlotProps {
+    className: string;
+    index: number;
+    src: string;
+    variant: 'center' | 'side';
+    direction: number;
+    onClick?: () => void;
+    ariaLabel?: string;
+}
+
+/**
+ * A positioned slot whose content slides + fades when its `index` changes.
+ * `index` (not `src`) is the AnimatePresence key so the transition still fires
+ * when two slots happen to share the same source video.
+ */
+function VideoSlot({ className, index, src, variant, direction, onClick, ariaLabel }: VideoSlotProps) {
+    return (
+        <div className={`absolute ${className}`}>
+            <AnimatePresence custom={direction} initial={false} mode="popLayout">
+                <motion.div
+                    key={index}
+                    custom={direction}
+                    variants={slotVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 260, damping: 32 }}
+                    className="absolute inset-0"
+                >
+                    {variant === 'center' ? (
+                        <CenterVideo src={src} />
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={onClick}
+                            aria-label={ariaLabel}
+                            className="block w-full h-full cursor-pointer"
+                        >
+                            <SidePreview src={src} />
+                        </button>
+                    )}
+                </motion.div>
+            </AnimatePresence>
+        </div>
+    );
+}
+
+/**
  * The prominent centre clip. Self-hosted files get a custom play overlay (the
  * Figma play button); embed URLs render as an iframe; an empty URL shows the
  * play-button placeholder so the layout still reads while no video is set.
  */
-function CenterVideo({ src, className }: { src: string; className: string }) {
+function CenterVideo({ src }: { src: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [started, setStarted] = useState(false);
 
-    const wrap = `absolute z-20 rounded-[56px] overflow-hidden shadow-lg bg-black ${className}`;
+    const base = 'relative w-full h-full rounded-[56px] overflow-hidden shadow-lg bg-black';
 
     if (src && VIDEO_FILE_RE.test(src)) {
         return (
-            <div className={wrap}>
+            <div className={base}>
                 <video
                     ref={videoRef}
                     src={src}
@@ -109,7 +290,7 @@ function CenterVideo({ src, className }: { src: string; className: string }) {
 
     if (src) {
         return (
-            <div className={wrap}>
+            <div className={base}>
                 <iframe
                     src={src}
                     title="Testimonials video"
@@ -124,7 +305,7 @@ function CenterVideo({ src, className }: { src: string; className: string }) {
     }
 
     return (
-        <div className={`${wrap} bg-primary-light/40`}>
+        <div className={`${base} bg-primary-light/40`}>
             <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/85 shadow-md flex items-center justify-center">
                     <Play size={32} className="text-primary ms-1" fill="currentColor" />
@@ -135,21 +316,24 @@ function CenterVideo({ src, className }: { src: string; className: string }) {
 }
 
 /**
- * A faded side preview behind the centre clip. Decorative + non-interactive:
- * muted, no controls, shows the first frame. Only renders for self-hosted files.
+ * A faded side preview behind the centre clip. Decorative + non-interactive
+ * (click is handled by the wrapping slot button): muted, no controls, first
+ * frame only. Falls back to a blank panel for empty / embed sources.
  */
-function SidePreview({ src, className }: { src: string; className: string }) {
-    if (!src || !VIDEO_FILE_RE.test(src)) return null;
-    return (
-        <video
-            src={src}
-            muted
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-            className={`absolute z-10 rounded-[56px] object-cover opacity-60 pointer-events-none shadow-md ${className}`}
-        />
-    );
+function SidePreview({ src }: { src: string }) {
+    if (src && VIDEO_FILE_RE.test(src)) {
+        return (
+            <video
+                src={src}
+                muted
+                playsInline
+                preload="metadata"
+                aria-hidden="true"
+                className="w-full h-full rounded-[56px] object-cover opacity-60 shadow-md pointer-events-none"
+            />
+        );
+    }
+    return <div className="w-full h-full rounded-[56px] bg-primary-light/30 opacity-60 shadow-md pointer-events-none" />;
 }
 
 function ClientCard({ client }: { client: Client }) {

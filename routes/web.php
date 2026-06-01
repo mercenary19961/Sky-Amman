@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\VideoController;
 use App\Http\Controllers\MediaServeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/media/{id}', [MediaServeController::class, 'show'])
     ->name('media.serve')
     ->where('id', '[0-9]+');
+
+// Code-managed video streaming with Range support (see VideoController).
+Route::get('/video/{filename}', [VideoController::class, 'show'])
+    ->where('filename', '[A-Za-z0-9._-]+\.(mp4|webm|ogg|mov)')
+    ->name('video.serve');
 
 // Locale toggle — hit by LanguageContext via fetch POST (not an Inertia visit).
 Route::post('/locale/{locale}', [LocaleController::class, 'set'])
