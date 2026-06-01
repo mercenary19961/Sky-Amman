@@ -17,16 +17,16 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
     return (
         <section className="bg-surface py-16 sm:py-24">
             <div className="section-x">
-                <div className="relative mx-auto max-w-5xl rounded-3xl bg-surface p-8 sm:p-12 lg:p-16">
+                <div className="relative">
                     {/* Title block */}
                     <div className="text-center">
                         {label && (
-                            <div className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-primary">
+                            <div className="text-3xl sm:text-4xl lg:text-5xl font-medium text-primary">
                                 {label}
                             </div>
                         )}
                         {name && (
-                            <div className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold text-ink">
+                            <div className="mt-2 text-4xl sm:text-5xl lg:text-6xl font-semibold text-primary-dark">
                                 {name}
                             </div>
                         )}
@@ -38,10 +38,10 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
                             src="/images/home/quote-open.png"
                             alt=""
                             aria-hidden="true"
-                            className="absolute -top-6 -left-3 sm:-top-8 sm:-left-6 w-14 sm:w-20 h-auto select-none pointer-events-none"
+                            className="absolute -top-8 left-2 sm:-top-10 sm:left-6 w-16 sm:w-24 h-auto select-none pointer-events-none"
                         />
 
-                        <div className="space-y-5 text-center text-sm sm:text-base lg:text-lg text-ink leading-relaxed">
+                        <div className="space-y-5 text-center text-sm sm:text-base lg:text-lg text-ink leading-relaxed max-w-4xl mx-auto">
                             {body1 && <p>{body1}</p>}
                             {body2 && <p>{body2}</p>}
                             {body3 && <p>{body3}</p>}
@@ -51,7 +51,7 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
                             src="/images/home/quote-close.png"
                             alt=""
                             aria-hidden="true"
-                            className="absolute -bottom-6 -right-3 sm:-bottom-8 sm:-right-6 w-14 sm:w-20 h-auto select-none pointer-events-none"
+                            className="absolute -bottom-8 right-2 sm:-bottom-10 sm:right-6 w-16 sm:w-24 h-auto select-none pointer-events-none"
                         />
                     </div>
                 </div>

@@ -58,7 +58,7 @@ function DeptCard({ member }: { member: Member }) {
                 className="relative aspect-257/199 w-full bg-no-repeat bg-contain bg-top"
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 sm:pb-6 lg:pb-8 px-3 sm:px-4 text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 sm:pb-14 lg:pb-20 px-3 sm:px-4 text-center">
                     <div className="font-bold text-xs sm:text-sm lg:text-base text-ink">
                         {member.name}
                     </div>
