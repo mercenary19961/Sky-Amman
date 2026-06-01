@@ -95,7 +95,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     // Empty state: no videos configured yet → a single placeholder frame.
     if (N === 0) {
         return (
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-5xl aspect-25/9">
+            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-25/9">
                 <div className="absolute left-[18%] top-0 w-[64%] h-full z-20">
                     <CenterVideo src="" />
                 </div>
@@ -130,7 +130,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
 
     return (
         <>
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-5xl aspect-25/9">
+            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-25/9">
                 {/* Left preview (previous video) — 16:9, peeks out behind the centre. */}
                 <VideoSlot
                     className="left-0 top-[11%] w-[50%] h-[78%] z-10"
