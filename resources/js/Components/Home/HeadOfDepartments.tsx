@@ -29,7 +29,7 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
                     </h2>
                 )}
 
-                <div className="mt-14 sm:mt-16 lg:mt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 sm:gap-y-16 lg:gap-y-24 gap-x-6 max-w-6xl mx-auto">
+                <div className="mt-14 sm:mt-16 lg:mt-28 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 sm:gap-y-16 lg:gap-y-24 gap-x-6 lg:gap-x-8 3xl:gap-x-12">
                     {members.map(
                         (member, idx) =>
                             member.name && <DeptCard key={idx} member={member} />,
