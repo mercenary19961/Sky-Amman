@@ -61,7 +61,7 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 
                 {/* Client cards row */}
                 {hasClients && (
-                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    <div className="mt-14 sm:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                         {clients.map(
                             (client, i) =>
                                 client.name && <ClientCard key={i} client={client} />,
@@ -402,7 +402,7 @@ function SidePreview({ src }: { src: string }) {
 function ClientCard({ client }: { client: Client }) {
     return (
         <div
-            className="relative aspect-290/486 w-full max-w-72 sm:max-w-none mx-auto bg-no-repeat bg-contain bg-top"
+            className="relative aspect-290/486 w-full bg-no-repeat bg-contain bg-top"
             style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
         >
             {/* Avatar — solid white circle, sits in the dome at top of card.
