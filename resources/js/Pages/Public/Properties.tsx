@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
@@ -152,55 +152,108 @@ export default function Properties() {
             {/* ---------------- LISTINGS ---------------- */}
             <section className="bg-surface py-16 sm:py-24">
                 <div className="section-x">
-                    {/* Filter system (PROJECTS SHOWCASE.svg): navy Sale/Rent mode
-                        tabs + an "Available For Sale" toggle, with light-blue
-                        group sub-pills under the Sale tab. */}
-                    <div className="flex flex-col gap-3 sm:gap-4">
-                        <div className="flex flex-wrap gap-3 sm:gap-4">
-                            <NavyPill active={mode === 'sale'} onClick={() => selectMode('sale')}>
-                                {t('properties.filters.forSale')}
-                            </NavyPill>
-                            <NavyPill active={mode === 'rent'} onClick={() => selectMode('rent')}>
-                                {t('properties.filters.forRent')}
-                            </NavyPill>
-                            {mode === 'sale' && (
-                                <NavyPill active={availableOnly} onClick={() => setAvailableOnly((v) => !v)}>
-                                    {t('properties.filters.availableForSale')}
-                                </NavyPill>
-                            )}
-                        </div>
-
-                        {mode === 'sale' && saleGroups.length > 0 && (
-                            <div className="flex flex-wrap gap-3 sm:gap-4">
-                                {saleGroups.map((g) => {
-                                    const active = group === g;
+                    {/* Filter bar: a segmented Sale/Rent control + an
+                        "Available only" switch; group chips appear below in Sale
+                        mode. Clean, with clearly distinct controls per type. */}
+                    <div className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            {/* Segmented control — mutually-exclusive mode. */}
+                            <div className="inline-flex w-fit rounded-full bg-surface-muted p-1.5">
+                                {(['sale', 'rent'] as const).map((m) => {
+                                    const active = mode === m;
                                     return (
                                         <button
-                                            key={g}
+                                            key={m}
                                             type="button"
-                                            onClick={() => setGroup(active ? null : g)}
-                                            className={cn(
-                                                'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium transition-colors cursor-pointer',
-                                                active
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-[#CCE7FF] text-[#1A3954] hover:bg-[#b9dcff]',
-                                            )}
+                                            onClick={() => selectMode(m)}
+                                            className="relative rounded-full px-6 sm:px-8 py-2.5 text-sm sm:text-base font-medium transition-colors cursor-pointer"
                                         >
-                                            {g}
+                                            {active && (
+                                                <motion.span
+                                                    layoutId="propMode"
+                                                    className="absolute inset-0 rounded-full bg-[#1A3954]"
+                                                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                                                />
+                                            )}
+                                            <span className={cn('relative z-10', active ? 'text-white' : 'text-ink-muted')}>
+                                                {t(m === 'sale' ? 'properties.filters.forSale' : 'properties.filters.forRent')}
+                                            </span>
                                         </button>
                                     );
                                 })}
                             </div>
+
+                            {/* Available-only switch (Sale mode only). */}
+                            {mode === 'sale' && (
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={availableOnly}
+                                    onClick={() => setAvailableOnly((v) => !v)}
+                                    className="inline-flex items-center gap-3 cursor-pointer"
+                                >
+                                    <span
+                                        className={cn(
+                                            'relative h-6 w-11 rounded-full transition-colors',
+                                            availableOnly ? 'bg-primary' : 'bg-ink/20',
+                                        )}
+                                    >
+                                        <span
+                                            className={cn(
+                                                'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all',
+                                                availableOnly ? 'inset-s-5.5' : 'inset-s-0.5',
+                                            )}
+                                        />
+                                    </span>
+                                    <span className="text-sm sm:text-base font-medium text-ink">
+                                        {t('properties.filters.availableForSale')}
+                                    </span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Group chips (Sale mode only). */}
+                        {mode === 'sale' && saleGroups.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <span className="me-1 text-sm font-medium text-ink-muted">
+                                    {t('properties.filters.development')}:
+                                </span>
+                                <Chip active={group === null} onClick={() => setGroup(null)}>
+                                    {t('properties.filters.allGroups')}
+                                </Chip>
+                                {saleGroups.map((g) => (
+                                    <Chip key={g} active={group === g} onClick={() => setGroup(group === g ? null : g)}>
+                                        {g}
+                                    </Chip>
+                                ))}
+                            </div>
                         )}
+
+                        {/* Result count. */}
+                        <p className="text-sm text-ink-muted">
+                            {t('properties.resultCount', { count: filtered.length })}
+                        </p>
                     </div>
 
                     {/* Grid */}
                     {pageItems.length > 0 ? (
-                        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-                            {pageItems.map(({ project, dimmed }) => (
-                                <PropertyCard key={project.id} project={project} dimmed={dimmed} language={language} t={t} />
-                            ))}
-                        </div>
+                        <motion.div layout className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+                            <AnimatePresence mode="popLayout">
+                                {pageItems.map(({ project, dimmed }) => (
+                                    <motion.div
+                                        key={project.id}
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.96 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.96 }}
+                                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                                        className="h-full"
+                                    >
+                                        <PropertyCard project={project} dimmed={dimmed} language={language} t={t} />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </motion.div>
                     ) : (
                         <p className="mt-16 text-center text-ink-muted">
                             {t('properties.empty')}
@@ -277,17 +330,20 @@ export default function Properties() {
     );
 }
 
-/** Navy (#1A3954) rounded-full pill — active solid / inactive 42% opacity. */
-function NavyPill({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
+/** Lightweight group filter chip — active = primary fill, idle = soft outline. */
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
     return (
         <button
             type="button"
             onClick={onClick}
             className={cn(
-                'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium text-white transition-colors cursor-pointer',
-                active ? 'bg-[#1A3954]' : 'bg-[#1A3954]/40 hover:bg-[#1A3954]/60',
+                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+                active
+                    ? 'border-primary bg-primary text-white'
+                    : 'border-ink/15 text-ink-muted hover:border-primary hover:text-primary',
             )}
         >
+            {active && <Check size={15} />}
             {children}
         </button>
     );

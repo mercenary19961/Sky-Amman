@@ -134,10 +134,13 @@ const ar = {
         },
         filters: {
             all: 'جميع العقارات',
-            forSale: 'عقارات للبيع',
-            forRent: 'عقارات للإيجار',
-            availableForSale: 'متاح للبيع',
+            forSale: 'للبيع',
+            forRent: 'للإيجار',
+            availableForSale: 'المتاح فقط',
+            development: 'المجمّع',
+            allGroups: 'الكل',
         },
+        resultCount: '{{count}} عقار',
         empty: 'لا توجد عقارات مطابقة لهذا التصنيف بعد.',
         bottomCta: {
             title: 'ابحث عن المساحة المثالية بسهولة',

@@ -138,10 +138,13 @@ const en = {
         },
         filters: {
             all: 'All Properties',
-            forSale: 'Properties for Sale',
-            forRent: 'Properties for Rent',
-            availableForSale: 'Available For Sale',
+            forSale: 'For Sale',
+            forRent: 'For Rent',
+            availableForSale: 'Available only',
+            development: 'Development',
+            allGroups: 'All',
         },
+        resultCount: '{{count}} properties',
         empty: 'No properties match this filter yet.',
         bottomCta: {
             title: 'Find The Right Space, Made Simple',
