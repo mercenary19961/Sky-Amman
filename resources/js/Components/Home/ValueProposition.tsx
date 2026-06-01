@@ -35,9 +35,10 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                             />
 
                             {/* Rectangle 22: square card, rx=62, brand blue tint.
-                                Fills its grid cell (no max-width) so the cards
-                                close the gaps like the testimonials row. */}
-                            <div className="aspect-square w-full rounded-[62px] bg-primary flex items-center justify-center px-6 sm:px-8 py-6 text-white text-xl sm:text-2xl 3xl:text-3xl leading-snug">
+                                Capped on mobile so the single-column square
+                                doesn't balloon to full viewport width; fills its
+                                grid cell at sm+ to close the gaps. */}
+                            <div className="aspect-square w-full max-w-64 sm:max-w-none mx-auto rounded-[62px] bg-primary flex items-center justify-center px-6 sm:px-8 py-6 text-white text-xl sm:text-2xl 3xl:text-3xl leading-snug">
                                 {vp[key]?.content ?? ''}
                             </div>
                         </div>
