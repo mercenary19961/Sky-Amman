@@ -64,23 +64,26 @@ export default function Properties() {
                             </h1>
                         </div>
 
-                        <div className="lg:max-w-sm lg:text-end">
-                            <p className="text-base sm:text-lg text-ink-muted leading-relaxed">
+                        <div className="lg:max-w-md lg:text-end">
+                            <p className="text-lg sm:text-xl lg:text-2xl text-ink-muted leading-relaxed">
                                 {text(hero, 'subtitle') || t('properties.hero.subtitle')}
                             </p>
                             <Link
                                 href="/contact"
-                                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-ink uppercase transition-colors hover:text-primary"
+                                className="mt-4 inline-flex items-center gap-2 text-base sm:text-lg font-semibold tracking-wide text-ink uppercase transition-colors hover:text-primary"
                             >
                                 {t('nav.contact')}
-                                <ArrowRight size={18} className="rtl:rotate-180" />
+                                <ArrowRight size={22} className="rtl:rotate-180" />
                             </Link>
                         </div>
                     </div>
 
-                    {/* Wide hero image with large rounded top corners (SVG rx=170). */}
+                    {/* Wide hero banner matching prop_hero.svg: the 1148×646
+                        rounded rect (rx=170) cropped to a 1148×442 window — so
+                        rounded TOP corners, straight sides, flat bottom, with the
+                        building filling the frame (object-cover, anchored to top). */}
                     <motion.div
-                        className="mt-10 sm:mt-12 overflow-hidden rounded-t-[48px] sm:rounded-t-[88px] lg:rounded-t-[130px] xl:rounded-t-[170px]"
+                        className="mt-10 sm:mt-12 aspect-574/221 overflow-hidden rounded-t-[48px] sm:rounded-t-[88px] lg:rounded-t-[130px] xl:rounded-t-[170px]"
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
@@ -88,7 +91,7 @@ export default function Properties() {
                         <img
                             src="/images/properties/properties-hero.webp"
                             alt=""
-                            className="w-full h-auto select-none"
+                            className="h-full w-full object-cover object-top select-none"
                             loading="eager"
                         />
                     </motion.div>
