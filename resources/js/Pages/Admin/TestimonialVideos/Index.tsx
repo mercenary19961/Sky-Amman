@@ -11,7 +11,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Trash2, Pencil, Play, GripVertical, Video as VideoIcon, Eye, EyeOff, X } from 'lucide-react';
+import { Plus, Trash2, Pencil, Play, GripVertical, Video as VideoIcon, Eye, EyeOff, X, Check } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
 
@@ -33,21 +33,55 @@ const VIDEO_FILE_RE = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
 const YT_RE = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
 const youtubeId = (url: string): string | null => url.match(YT_RE)?.[1] ?? null;
 
-// `editing` drawer state: null = closed, 'new' = add form, object = edit form.
 type EditingState = VideoItem | 'new' | null;
+
+const sortedKey = (ids: Iterable<number>) => [...ids].sort((a, b) => a - b).join(',');
 
 export default function TestimonialVideosIndex() {
     const { videos, maxActive } = usePage<TestimonialVideosProps>().props;
 
-    // Local copy for optimistic drag reordering; resynced whenever the server
-    // sends a fresh list (after add / edit / delete / reorder).
+    // Order/list mirror for optimistic drag reordering.
     const [items, setItems] = useState<VideoItem[]>(videos);
     useEffect(() => setItems(videos), [videos]);
+
+    // The LIVE active set (what the homepage shows right now).
+    const liveKey = sortedKey(videos.filter((v) => v.is_active).map((v) => v.id));
+
+    // The DRAFT selection the admin is editing. Toggling a card changes only
+    // this — nothing goes live until "Update homepage" (publish) is clicked.
+    const [draft, setDraft] = useState<Set<number>>(() => new Set(videos.filter((v) => v.is_active).map((v) => v.id)));
+    // Resync to live whenever the published set changes (after a publish).
+    useEffect(() => {
+        setDraft(new Set(videos.filter((v) => v.is_active).map((v) => v.id)));
+    }, [liveKey]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Drop ids that no longer exist (after a delete) without clobbering edits.
+    useEffect(() => {
+        setDraft((prev) => new Set([...prev].filter((id) => videos.some((v) => v.id === id))));
+    }, [videos]);
 
     const [editing, setEditing] = useState<EditingState>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+    const selectedCount = draft.size;
+    const draftKey = sortedKey(draft);
+    const dirty = draftKey !== liveKey;
+    const exactly = selectedCount === maxActive;
+    const canPublish = dirty && exactly;
+
+    const toggleDraft = (id: number) =>
+        setDraft((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else if (next.size < maxActive) next.add(id);
+            return next;
+        });
+
+    const publish = () => {
+        if (!canPublish) return;
+        router.post('/admin/testimonial-videos/publish', { ids: [...draft] }, { preserveScroll: true });
+    };
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -63,21 +97,13 @@ export default function TestimonialVideosIndex() {
         );
     };
 
-    const toggleActive = (v: VideoItem) => {
-        router.put(
-            `/admin/testimonial-videos/${v.id}`,
-            { url: v.url, title: v.title, is_active: !v.is_active },
-            { preserveScroll: true },
-        );
-    };
+    const remove = (v: VideoItem) => router.delete(`/admin/testimonial-videos/${v.id}`, { preserveScroll: true });
 
-    const remove = (v: VideoItem) => {
-        router.delete(`/admin/testimonial-videos/${v.id}`, { preserveScroll: true });
-    };
-
-    const activeCount = items.filter((v) => v.is_active).length;
-    const atCap = activeCount >= maxActive;
-    const exactlyRight = activeCount === maxActive;
+    const statusNote = !dirty
+        ? 'live'
+        : selectedCount < maxActive
+          ? `select ${maxActive - selectedCount} more, then update`
+          : 'unsaved — click Update homepage';
 
     return (
         <AdminLayout title="Testimonial Videos">
@@ -85,35 +111,55 @@ export default function TestimonialVideosIndex() {
 
             <div className="max-w-5xl">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                    <p className="text-sm text-ink-muted max-w-2xl">
-                        These videos rotate in the homepage Testimonials carousel. Paste a{' '}
-                        <strong className="text-ink dark:text-zinc-200">YouTube link</strong>, a hosted video URL, or a
-                        self-hosted path like <code className="px-1 rounded bg-white/10">/video/name.mp4</code>. The
-                        section shows exactly <strong className="text-ink dark:text-zinc-200">{maxActive}</strong>{' '}
-                        videos — only the active ones (drag to reorder).
+                    <p className="text-sm text-ink-muted max-w-xl">
+                        Build a library of videos, then choose exactly{' '}
+                        <strong className="text-ink dark:text-zinc-200">{maxActive}</strong> to show on the homepage.
+                        Toggle the eye on each card to stage your pick, then{' '}
+                        <strong className="text-ink dark:text-zinc-200">Update homepage</strong> to apply it. Paste a
+                        YouTube link, a hosted URL, or a path like{' '}
+                        <code className="px-1 rounded bg-white/10">/video/name.mp4</code>.
                     </p>
-                    <button
-                        type="button"
-                        onClick={() => setEditing('new')}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors shrink-0"
-                    >
-                        <Plus size={16} /> Add video
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            type="button"
+                            onClick={publish}
+                            disabled={!canPublish}
+                            title={
+                                !dirty
+                                    ? 'No changes to apply'
+                                    : !exactly
+                                      ? `Select exactly ${maxActive} videos first`
+                                      : 'Apply to the homepage'
+                            }
+                            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <Check size={16} /> Update homepage
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setEditing('new')}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
+                        >
+                            <Plus size={16} /> Add video
+                        </button>
+                    </div>
                 </div>
 
-                {/* Active-count status: green at exactly the cap, amber otherwise. */}
+                {/* Selection status: green only at exactly the target, else amber. */}
                 <div
                     className={cn(
                         'mb-6 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium',
-                        exactlyRight
+                        exactly && !dirty
                             ? 'bg-emerald-500/15 text-emerald-400'
-                            : 'bg-amber-500/15 text-amber-400',
+                            : dirty
+                              ? 'bg-amber-500/15 text-amber-400'
+                              : 'bg-emerald-500/15 text-emerald-400',
                     )}
                 >
-                    <span className={cn('w-2 h-2 rounded-full', exactlyRight ? 'bg-emerald-400' : 'bg-amber-400')} />
-                    {activeCount} of {maxActive} active
-                    {activeCount < maxActive && ` — activate ${maxActive - activeCount} more`}
-                    {atCap && ` — hide one to swap`}
+                    <span
+                        className={cn('w-2 h-2 rounded-full', exactly && !dirty ? 'bg-emerald-400' : 'bg-amber-400')}
+                    />
+                    {selectedCount} of {maxActive} selected — {statusNote}
                 </div>
 
                 {items.length === 0 ? (
@@ -133,10 +179,11 @@ export default function TestimonialVideosIndex() {
                                     <SortableVideoCard
                                         key={video.id}
                                         video={video}
-                                        atCap={atCap}
+                                        selected={draft.has(video.id)}
+                                        selectDisabled={!draft.has(video.id) && draft.size >= maxActive}
+                                        onToggle={() => toggleDraft(video.id)}
                                         onEdit={() => setEditing(video)}
                                         onPreview={() => setPreview(video.url)}
-                                        onToggle={() => toggleActive(video)}
                                         onDelete={() => remove(video)}
                                     />
                                 ))}
@@ -146,7 +193,7 @@ export default function TestimonialVideosIndex() {
                 )}
             </div>
 
-            <VideoFormDrawer editing={editing} atCap={atCap} onClose={() => setEditing(null)} />
+            <VideoFormDrawer editing={editing} onClose={() => setEditing(null)} />
             <PreviewModal url={preview} onClose={() => setPreview(null)} />
         </AdminLayout>
     );
@@ -176,41 +223,39 @@ function VideoThumb({ url }: { url: string }) {
 
 function SortableVideoCard({
     video,
-    atCap,
+    selected,
+    selectDisabled,
+    onToggle,
     onEdit,
     onPreview,
-    onToggle,
     onDelete,
 }: {
     video: VideoItem;
-    atCap: boolean;
+    selected: boolean;
+    selectDisabled: boolean;
+    onToggle: () => void;
     onEdit: () => void;
     onPreview: () => void;
-    onToggle: () => void;
     onDelete: () => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: video.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
     const [confirmDelete, setConfirmDelete] = useState(false);
 
-    // Can't turn a 4th video on while the cap is reached.
-    const disableActivate = !video.is_active && atCap;
-
     return (
         <div
             ref={setNodeRef}
             style={style}
             className={cn(
-                'group relative rounded-lg overflow-hidden border bg-white dark:bg-zinc-800 border-ink/5 dark:border-white/10 transition-all',
-                isDragging && 'opacity-60 scale-95 ring-2 ring-primary z-10',
-                !video.is_active && 'opacity-60',
+                'group relative rounded-lg overflow-hidden border bg-white dark:bg-zinc-800 transition-all',
+                selected ? 'border-emerald-500/60 ring-1 ring-emerald-500/40' : 'border-ink/5 dark:border-white/10',
+                isDragging && 'opacity-60 scale-95 z-10',
+                !selected && 'opacity-75',
             )}
         >
-            {/* Thumbnail + overlays */}
             <div className="relative aspect-video bg-zinc-900">
                 <VideoThumb url={video.url} />
 
-                {/* Click anywhere on the thumb to preview */}
                 <button
                     type="button"
                     onClick={onPreview}
@@ -222,7 +267,6 @@ function SortableVideoCard({
                     </span>
                 </button>
 
-                {/* Drag handle */}
                 <button
                     type="button"
                     {...attributes}
@@ -233,18 +277,16 @@ function SortableVideoCard({
                     <GripVertical size={14} />
                 </button>
 
-                {/* Active badge */}
                 <span
                     className={cn(
                         'absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold',
-                        video.is_active ? 'bg-emerald-500 text-white' : 'bg-zinc-600 text-zinc-200',
+                        selected ? 'bg-emerald-500 text-white' : 'bg-zinc-600 text-zinc-200',
                     )}
                 >
-                    {video.is_active ? 'Active' : 'Hidden'}
+                    {selected ? 'Showing' : 'Hidden'}
                 </span>
             </div>
 
-            {/* Footer: title/url + actions */}
             <div className="p-3 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                     <div className="text-sm font-medium truncate text-ink dark:text-zinc-100">
@@ -257,17 +299,17 @@ function SortableVideoCard({
                     <button
                         type="button"
                         onClick={onToggle}
-                        disabled={disableActivate}
+                        disabled={selectDisabled}
                         title={
-                            disableActivate
-                                ? '3 videos already active — hide one first'
-                                : video.is_active
-                                  ? 'Active — click to hide'
-                                  : 'Hidden — click to show'
+                            selectDisabled
+                                ? 'Already 3 selected — deselect one first'
+                                : selected
+                                  ? 'Showing — click to remove from selection'
+                                  : 'Hidden — click to select'
                         }
                         className="p-1.5 rounded text-ink-muted hover:bg-white/5 hover:text-ink dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
-                        {video.is_active ? <Eye size={15} /> : <EyeOff size={15} />}
+                        {selected ? <Eye size={15} /> : <EyeOff size={15} />}
                     </button>
                     <button
                         type="button"
@@ -306,32 +348,25 @@ function SortableVideoCard({
     );
 }
 
-function VideoFormDrawer({ editing, atCap, onClose }: { editing: EditingState; atCap: boolean; onClose: () => void }) {
+function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose: () => void }) {
     const open = editing !== null;
     const isNew = editing === 'new';
     const video = editing && editing !== 'new' ? editing : null;
 
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
-    const [isActive, setIsActive] = useState(true);
     const [processing, setProcessing] = useState(false);
 
-    // Activating isn't allowed once 3 are active (unless this row is already one).
-    const lockActive = atCap && !video?.is_active;
-
-    // Seed the form whenever the target changes (open / switch row).
     useEffect(() => {
         setUrl(video?.url ?? '');
         setTitle(video?.title ?? '');
-        // Default to active only if there's room (or this row is already active).
-        setIsActive(video?.is_active ?? !atCap);
     }, [editing]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
         if (processing || !url.trim()) return;
         setProcessing(true);
-        const payload = { url, title, is_active: isActive };
+        const payload = { url, title };
         const opts = {
             preserveScroll: true,
             onSuccess: onClose,
@@ -399,31 +434,10 @@ function VideoFormDrawer({ editing, atCap, onClose }: { editing: EditingState; a
                                 />
                             </div>
 
-                            <div>
-                                <label
-                                    className={cn(
-                                        'flex items-center gap-2 text-sm text-ink dark:text-zinc-100',
-                                        lockActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-                                    )}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={isActive && !lockActive}
-                                        disabled={lockActive}
-                                        onChange={(e) => setIsActive(e.target.checked)}
-                                        className="rounded border-ink/30 text-primary focus:ring-primary/40"
-                                    />
-                                    Show this video on the homepage
-                                </label>
-                                {lockActive && (
-                                    <p className="mt-1.5 text-xs text-amber-400">
-                                        3 videos are already active — this will be saved as hidden. Hide another to
-                                        show it.
-                                    </p>
-                                )}
-                            </div>
+                            <p className="text-xs text-ink-muted">
+                                New videos start hidden — select them on the grid and click “Update homepage” to show them.
+                            </p>
 
-                            {/* Live thumbnail preview */}
                             {url.trim() && (
                                 <div className="rounded-lg overflow-hidden border border-ink/5 dark:border-white/10 aspect-video bg-zinc-900">
                                     <VideoThumb url={url} />

@@ -61,6 +61,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/testimonial-videos', [TestimonialVideoController::class, 'index'])->name('testimonial-videos.index');
     Route::post('/testimonial-videos', [TestimonialVideoController::class, 'store'])->name('testimonial-videos.store');
     Route::post('/testimonial-videos/reorder', [TestimonialVideoController::class, 'reorder'])->name('testimonial-videos.reorder');
+    Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
 

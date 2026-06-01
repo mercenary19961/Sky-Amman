@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TestimonialVideo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,8 +15,8 @@ class TestimonialVideoController extends Controller
 {
     /**
      * The Testimonials section always shows exactly three videos (a 3-up
-     * layout). We can't force a minimum (the admin may still be adding them),
-     * but we hard-cap the number that can be ACTIVE so it's never more than 3.
+     * layout). publish() enforces this exact count for the live set; the admin
+     * stages a selection in the UI and applies it here.
      */
     private const MAX_ACTIVE = 3;
 
@@ -32,25 +32,16 @@ class TestimonialVideoController extends Controller
     {
         $data = $this->validateData($request);
 
-        $wantsActive = $data['is_active'] ?? true;
-        $atCap = TestimonialVideo::active()->count() >= self::MAX_ACTIVE;
-
-        // Adding while 3 are already active → save it hidden rather than reject.
-        $active = $wantsActive && ! $atCap;
-
+        // New videos enter the library hidden; the admin selects which 3 are
+        // live via the draft selection + "Update homepage" (publish) action.
         TestimonialVideo::create([
             'title' => $data['title'] ?? null,
             'url' => $data['url'],
-            'is_active' => $active,
-            // New videos go to the end of the list.
-            'sort_order' => (int) TestimonialVideo::max('sort_order') + 1,
+            'is_active' => false,
+            'sort_order' => (int) TestimonialVideo::query()->max('sort_order') + 1,
         ]);
 
-        $message = $wantsActive && ! $active
-            ? 'Video added as hidden — 3 videos are already active. Hide one to show this.'
-            : 'Video added.';
-
-        return back()->with($wantsActive && ! $active ? 'info' : 'success', $message);
+        return back()->with('success', 'Video added to the library.');
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -58,25 +49,33 @@ class TestimonialVideoController extends Controller
         $video = TestimonialVideo::findOrFail($id);
         $data = $this->validateData($request);
 
-        $wantsActive = $data['is_active'] ?? false;
-
-        // Block turning a 4th video on.
-        if ($wantsActive && ! $video->is_active) {
-            $otherActive = TestimonialVideo::where('is_active', true)
-                ->where('id', '!=', $video->id)
-                ->count();
-            if ($otherActive >= self::MAX_ACTIVE) {
-                return back()->with('error', 'Only 3 videos can be active. Hide one first.');
-            }
-        }
-
+        // Editing only changes the URL/label — active state is managed solely
+        // through publish() so the live set is always exactly MAX_ACTIVE.
         $video->update([
             'title' => $data['title'] ?? null,
             'url' => $data['url'],
-            'is_active' => $wantsActive,
         ]);
 
         return back()->with('success', 'Video updated.');
+    }
+
+    /**
+     * Apply the admin's chosen live set. Requires EXACTLY MAX_ACTIVE ids — this
+     * is what guarantees the homepage always shows three (no more, no less).
+     */
+    public function publish(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'size:' . self::MAX_ACTIVE],
+            'ids.*' => ['integer', 'distinct', 'exists:testimonial_videos,id'],
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            TestimonialVideo::query()->update(['is_active' => false]);
+            TestimonialVideo::query()->whereIn('id', $validated['ids'])->update(['is_active' => true]);
+        });
+
+        return back()->with('success', 'Homepage videos updated.');
     }
 
     public function destroy(int $id): RedirectResponse
@@ -97,32 +96,25 @@ class TestimonialVideoController extends Controller
         ]);
 
         foreach ($validated['ids'] as $position => $id) {
-            TestimonialVideo::where('id', $id)->update(['sort_order' => $position + 1]);
+            TestimonialVideo::query()->where('id', $id)->update(['sort_order' => $position + 1]);
         }
 
         return back()->with('success', 'Order updated.');
     }
 
     /**
-     * A url may be a self-hosted path (/video/x.mp4), an http(s) URL, or a
-     * YouTube link — all valid. Reject anything else so a typo can't slip in.
+     * A url may be a self-hosted path (/video/x.mp4) or an http(s) URL
+     * (including YouTube links). Reject anything else so a typo can't slip in.
      */
     private function validateData(Request $request): array
     {
-        return Validator::make($request->all(), [
-            'title' => ['nullable', 'string', 'max:255'],
-            'url' => [
-                'required',
-                'string',
-                'max:2048',
-                function (string $attribute, mixed $value, callable $fail) {
-                    $ok = Str::startsWith($value, '/') || filter_var($value, FILTER_VALIDATE_URL);
-                    if (! $ok) {
-                        $fail('Enter a valid URL or a path beginning with "/".');
-                    }
-                },
+        return Validator::make(
+            $request->all(),
+            [
+                'title' => ['nullable', 'string', 'max:255'],
+                'url' => ['required', 'string', 'max:2048', 'regex:/^(https?:\/\/\S+|\/\S*)$/i'],
             ],
-            'is_active' => ['boolean'],
-        ])->validate();
+            ['url.regex' => 'Enter a valid URL or a path beginning with "/".'],
+        )->validate();
     }
 }
