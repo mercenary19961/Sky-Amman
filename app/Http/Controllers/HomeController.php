@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Models\TestimonialVideo;
 use App\Services\InstagramService;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,6 +53,8 @@ class HomeController extends Controller
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
             'featuredRentals' => $featuredRentals,
+            // Testimonials carousel — active videos in admin-defined order.
+            'testimonialVideos' => TestimonialVideo::active()->ordered()->pluck('url')->all(),
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
             ],

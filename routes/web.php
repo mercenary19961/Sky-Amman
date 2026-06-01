@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
+use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocaleController;
@@ -55,6 +56,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Site Content — editors and admins can manage content.
     Route::get('/content', [SiteContentController::class, 'index'])->name('content.index');
     Route::put('/content/{page}', [SiteContentController::class, 'update'])->name('content.update');
+
+    // Testimonial videos — content management (editors + admins).
+    Route::get('/testimonial-videos', [TestimonialVideoController::class, 'index'])->name('testimonial-videos.index');
+    Route::post('/testimonial-videos', [TestimonialVideoController::class, 'store'])->name('testimonial-videos.store');
+    Route::post('/testimonial-videos/reorder', [TestimonialVideoController::class, 'reorder'])->name('testimonial-videos.reorder');
+    Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
+    Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
 
     // Settings — admin only.
     Route::middleware('admin')->group(function () {

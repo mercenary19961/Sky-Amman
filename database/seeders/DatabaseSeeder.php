@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             PagesSeeder::class,
             SiteContentSeeder::class,
             ProjectsSeeder::class,
+            TestimonialVideosSeeder::class,
         ]);
     }
 }

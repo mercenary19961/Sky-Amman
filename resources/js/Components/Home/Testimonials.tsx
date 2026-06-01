@@ -6,6 +6,8 @@ import type { SiteContentBundle } from '@/types/home';
 
 interface TestimonialsProps {
     content: SiteContentBundle;
+    // Active, ordered video URLs from the admin Testimonial Videos section.
+    videos: string[];
 }
 
 interface Client {
@@ -14,21 +16,28 @@ interface Client {
 }
 
 // A direct media file (self-hosted /videos/x.mp4) renders in a <video> tag;
-// anything else is treated as an embed URL (YouTube/Vimeo) for an <iframe>.
+// a YouTube link renders as a lazy-loaded embed; anything else is treated as a
+// generic embed URL (e.g. Vimeo) for an <iframe>.
 const VIDEO_FILE_RE = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
 
-export function Testimonials({ content }: TestimonialsProps) {
+/**
+ * Extract the 11-char video id from any common YouTube URL shape
+ * (watch?v=, youtu.be/, embed/, shorts/, /v/). Returns null for non-YouTube
+ * URLs so an admin can paste a normal share/watch link and it Just Works.
+ */
+function youtubeId(url: string): string | null {
+    const m = url.match(
+        /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
+    );
+    return m ? m[1] : null;
+}
+
+const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const youtubeEmbed = (id: string) => `https://www.youtube.com/embed/${id}?rel=0`;
+
+export function Testimonials({ content, videos }: TestimonialsProps) {
     const t = content.testimonials ?? {};
     const title = t.title?.content ?? '';
-
-    // Carousel videos: numbered keys video_1, video_2, … (extensible). A future
-    // admin "media" section will manage which clips appear here and on what
-    // schedule; for now the list is whatever non-empty video_N rows exist.
-    const videos = Object.keys(t)
-        .filter((k) => /^video_\d+$/.test(k))
-        .sort((a, b) => Number(a.slice(6)) - Number(b.slice(6)))
-        .map((k) => t[k]?.content ?? '')
-        .filter(Boolean);
 
     const clients: Client[] = [1, 2, 3, 4].map((i) => ({
         name: t[`client_${i}_name`]?.content ?? '',
@@ -288,6 +297,44 @@ function CenterVideo({ src }: { src: string }) {
         );
     }
 
+    const ytId = src ? youtubeId(src) : null;
+    if (ytId) {
+        // Show the YouTube thumbnail + our play button; swap to an autoplaying
+        // embed only on click (no iframe cost until the user wants it).
+        return (
+            <div className={base}>
+                {started ? (
+                    <iframe
+                        src={`${youtubeEmbed(ytId)}&autoplay=1`}
+                        title="Testimonials video"
+                        className="w-full h-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                ) : (
+                    <>
+                        <img
+                            src={youtubeThumb(ytId)}
+                            alt=""
+                            aria-hidden="true"
+                            className="w-full h-full object-cover"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setStarted(true)}
+                            aria-label="Play video"
+                            className="group absolute inset-0 grid place-items-center cursor-pointer"
+                        >
+                            <span className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/85 shadow-md flex items-center justify-center transition-transform group-hover:scale-105">
+                                <Play size={32} className="text-primary ms-1" fill="currentColor" />
+                            </span>
+                        </button>
+                    </>
+                )}
+            </div>
+        );
+    }
+
     if (src) {
         return (
             <div className={base}>
@@ -328,6 +375,17 @@ function SidePreview({ src }: { src: string }) {
                 muted
                 playsInline
                 preload="metadata"
+                aria-hidden="true"
+                className="w-full h-full rounded-[56px] object-cover opacity-60 shadow-md pointer-events-none"
+            />
+        );
+    }
+    const ytId = src ? youtubeId(src) : null;
+    if (ytId) {
+        return (
+            <img
+                src={youtubeThumb(ytId)}
+                alt=""
                 aria-hidden="true"
                 className="w-full h-full rounded-[56px] object-cover opacity-60 shadow-md pointer-events-none"
             />

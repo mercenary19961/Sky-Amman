@@ -7,6 +7,7 @@ import {
     Settings as SettingsIcon,
     Users as UsersIcon,
     History,
+    Video,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
@@ -44,6 +45,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Content',
         items: [
             { label: 'Site Content', path: '/admin/content', icon: <FileText size={18} />, built: true },
+            { label: 'Testimonial Videos', path: '/admin/testimonial-videos', icon: <Video size={18} />, built: true },
         ],
     },
     {
