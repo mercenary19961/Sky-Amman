@@ -18,7 +18,8 @@ export function HomeHero({ content }: HomeHeroProps) {
                 white near the villa — matches the target picker (#5299CC). */}
             <div className="absolute inset-0 bg-linear-to-b from-[#5299CC] via-primary to-surface" aria-hidden="true" />
 
-            <div className="relative section-x pt-24 pb-12 sm:pt-32 lg:pt-40 lg:pb-16 text-center">
+            {/* Headline block — constrained by section-x padding. */}
+            <div className="relative section-x pt-24 sm:pt-32 lg:pt-40 text-center">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white drop-shadow-sm leading-tight">
                     {title}
                 </h1>
@@ -30,34 +31,40 @@ export function HomeHero({ content }: HomeHeroProps) {
                 <p className="mt-4 text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto">
                     {subtitle}
                 </p>
+            </div>
 
-                {/*
-                  Hero villa — uses the "trimmed" variant (1280×443) whose
-                  transparent top padding has been cropped off so the visible
-                  building sits flush with the top of the <img> box. CSS margin
-                  is the actual distance to the subtitle rather than being
-                  swallowed by invisible alpha. Width: max-w-7xl matches the
-                  photo's 1280px native frame; at 3xl+ (≥1600px viewport) we
-                  scale it up to ~1500px so the villa fills the hero band on
-                  very large monitors instead of floating in empty sky.
-                */}
-                <div className="relative mt-4 sm:mt-6 lg:mt-8">
-                    <img
-                        src="/images/home/hero-villa-trimmed.webp"
-                        alt=""
-                        className="mx-auto w-full max-w-7xl 3xl:max-w-375 h-auto select-none pointer-events-none"
-                        loading="eager"
-                    />
+            {/*
+              Hero villa — full-bleed: spans the entire section width (outside
+              section-x) so it covers the hero instead of floating centered with
+              sky on the sides. The "trimmed" variant (1280×443) has its
+              transparent top padding cropped, so the building sits flush at the
+              top of the <img> box.
+            */}
+            <div className="relative mt-4 sm:mt-6 lg:mt-8">
+                <img
+                    src="/images/home/hero-villa-trimmed.webp"
+                    alt=""
+                    className="w-full h-auto select-none pointer-events-none"
+                    loading="eager"
+                />
 
-                    {/* CTA pill overlaps the bottom edge of the villa image */}
-                    <div className="absolute inset-x-0 bottom-0 translate-y-1/2 flex justify-center">
-                        <Link
-                            href="/properties"
-                            className="inline-flex items-center justify-center rounded-full bg-primary-deep px-8 py-3 text-sm sm:text-base font-medium text-white shadow-lg hover:bg-primary-dark transition-colors"
-                        >
-                            {cta}
-                        </Link>
-                    </div>
+                {/* White fade: solid white at the bottom → transparent toward the
+                    top, weighted to the lower half so the building base melts into
+                    the page below. */}
+                <div
+                    className="absolute inset-0 bg-linear-to-t from-white from-0% to-transparent to-55% pointer-events-none"
+                    aria-hidden="true"
+                />
+
+                {/* CTA pill — lifted up from the bottom so it clears the white
+                    fade and stays readable over the building. */}
+                <div className="absolute inset-x-0 bottom-[18%] flex justify-center">
+                    <Link
+                        href="/properties"
+                        className="inline-flex items-center justify-center rounded-full bg-primary-deep px-8 py-3 text-sm sm:text-base font-medium text-white shadow-lg hover:bg-primary-dark transition-colors"
+                    >
+                        {cta}
+                    </Link>
                 </div>
             </div>
         </section>
