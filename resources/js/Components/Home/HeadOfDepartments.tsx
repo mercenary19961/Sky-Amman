@@ -42,12 +42,16 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
 
 function DeptCard({ member }: { member: Member }) {
     return (
-        // pt reserves ~half the circle's height so the avatar can overhang the
-        // card top WITHOUT colliding with the section title. Everything is sized
-        // in % of the card so it scales with the (now full-width) cells.
-        <div className="relative mx-auto w-full max-w-44 sm:max-w-52 lg:max-w-none pt-[37%]">
-            {/* Avatar circle — ~card-width, sitting half over the card top. Solid
-                primary fill for now; swap to <img> when portraits are delivered. */}
+        // Everything is sized as a % of the card width (pt, circle, text
+        // padding) so the geometry is IDENTICAL at every viewport — the circle
+        // always overhangs the card top by exactly half and the text always
+        // clears it. The card width itself is capped per breakpoint so it can't
+        // balloon on the wide 2-col tablet layout (which is what made the circle
+        // grow huge and swallow the names). pt-[37%] = half the 74%-wide circle.
+        <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[37%]">
+            {/* Avatar circle — 74% of the card width, sitting half over the card
+                top. Solid primary fill for now; swap to <img> when portraits
+                are delivered. */}
             <div
                 className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square rounded-full bg-primary shadow-md z-10"
                 aria-hidden="true"
@@ -58,7 +62,7 @@ function DeptCard({ member }: { member: Member }) {
                 className="relative aspect-257/199 w-full bg-no-repeat bg-contain bg-top"
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
-                <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 sm:pb-14 lg:pb-20 px-3 sm:px-4 text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-end pb-[12%] px-[8%] text-center">
                     <div className="font-bold text-xs sm:text-sm lg:text-base text-ink">
                         {member.name}
                     </div>
