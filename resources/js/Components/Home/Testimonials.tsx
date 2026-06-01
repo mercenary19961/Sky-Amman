@@ -61,7 +61,7 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 
                 {/* Client cards row */}
                 {hasClients && (
-                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    <div className="mt-14 sm:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                         {clients.map(
                             (client, i) =>
                                 client.name && <ClientCard key={i} client={client} />,
@@ -401,27 +401,22 @@ function SidePreview({ src }: { src: string }) {
 
 function ClientCard({ client }: { client: Client }) {
     return (
-        <div
-            className="relative aspect-290/486 w-full bg-no-repeat bg-contain bg-top"
-            style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
-        >
-            {/* Avatar — solid white circle, sits in the dome at top of card.
-                Swap to <img> once portrait photos are delivered. */}
-            <div
-                className="absolute left-1/2 -translate-x-1/2 bg-white rounded-full overflow-hidden shadow-[0_14px_28px_-8px_rgba(0,0,0,0.35)]"
-                style={{
-                    top: '4.4%',
-                    width: '82%',
-                    aspectRatio: '1',
-                }}
-                aria-hidden="true"
-            />
+        // The blue shape is built from TWO pieces instead of one stretched SVG:
+        //   1. a perfect semicircle DOME (aspect-[2/1] + rounded-t-full → radius
+        //      = half the width), which stays circular at ANY card height; and
+        //   2. a BODY that grows with the quote (flex-1 + content), rounded at
+        //      the bottom.
+        // Because the dome's height is width-relative (w/2) and the avatar's
+        // offset is also width-relative (mt-%), the circle nests in the dome
+        // identically no matter how tall the card grows — so the text can never
+        // overflow AND the circle never drifts. h-full evens the row heights.
+        <div className="relative flex h-full w-full flex-col items-center">
+            {/* Dome — top half of the shape, a true semicircle. */}
+            <div className="w-full aspect-2/1 rounded-t-full bg-primary" />
 
-            {/* Name + quote in the lower portion of the card. */}
-            <div
-                className="absolute inset-x-0 px-5 sm:px-6 text-center"
-                style={{ top: '60%' }}
-            >
+            {/* Body — grows to fit the quote. pt clears the avatar that overhangs
+                down into it; -mt-px hides the hairline seam with the dome. */}
+            <div className="-mt-px w-full flex-1 rounded-b-[56px] bg-primary px-5 sm:px-6 pt-[45%] pb-10 sm:pb-12 text-center">
                 <div className="font-bold text-sm sm:text-base text-white">
                     {client.name}
                 </div>
@@ -435,6 +430,14 @@ function ClientCard({ client }: { client: Client }) {
                     </span>
                 </p>
             </div>
+
+            {/* Avatar — DOM-last so it sits above the body. Top offset is
+                width-relative (mt-%) so it tracks the dome at any height. Swap to
+                <img> once portrait photos are delivered. */}
+            <div
+                className="absolute top-0 left-1/2 mt-[7%] w-[82%] -translate-x-1/2 aspect-square rounded-full bg-white shadow-[0_14px_28px_-8px_rgba(0,0,0,0.35)]"
+                aria-hidden="true"
+            />
         </div>
     );
 }

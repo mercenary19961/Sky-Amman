@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
+import { Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { PageProps } from '@/types';
@@ -17,7 +18,7 @@ const NAV_ITEMS = [
 
 export function Header() {
     const { t } = useTranslation();
-    const { toggleLanguage } = useLanguage();
+    const { language, toggleLanguage } = useLanguage();
     const { url } = usePage<PageProps>();
 
     // Sections opt in to a navbar theme by setting `data-nav-bg="dark"` on
@@ -28,6 +29,14 @@ export function Header() {
 
     // Hide-on-scroll-down / reveal-on-scroll-up.
     const [hidden, setHidden] = useState(false);
+
+    // Mobile hamburger menu open/closed (below lg).
+    const [mobileOpen, setMobileOpen] = useState(false);
+
+    // Close the mobile menu whenever the route changes (Inertia visit).
+    useEffect(() => {
+        setMobileOpen(false);
+    }, [url]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -110,7 +119,7 @@ export function Header() {
             <div
                 aria-hidden="true"
                 className={cn(
-                    'absolute inset-0 pointer-events-none bg-linear-to-b from-primary to-white transition-opacity duration-300',
+                    'absolute inset-0 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
                     isDark ? 'opacity-0' : 'opacity-100',
                 )}
             />
@@ -136,7 +145,75 @@ export function Header() {
                     )}
                 </Link>
 
-                <nav className="hidden lg:flex items-center gap-6 text-sm mb-3">
+                {/* Nav + language button grouped on the right; justify-between
+                    on the parent keeps the logo pinned left. */}
+                <div className="flex items-center gap-6">
+                    <nav className="hidden lg:flex items-center gap-6 text-sm">
+                        {NAV_ITEMS.map((item) => {
+                            const active = url === item.href;
+                            return (
+                                <Link
+                                    key={item.key}
+                                    href={item.href}
+                                    className={cn(
+                                        'transition-colors duration-200',
+                                        isDark
+                                            ? active
+                                                ? 'text-white font-medium'
+                                                : 'text-white/80 hover:text-white'
+                                            : active
+                                                ? 'text-white font-semibold'
+                                                : 'text-white hover:text-white/80',
+                                    )}
+                                >
+                                    {t(`nav.${item.key}`)}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Language switcher pill — shows the language you'll switch
+                        TO ("AR" while in English, "EN" while in Arabic). */}
+                    <button
+                        type="button"
+                        onClick={toggleLanguage}
+                        className={cn(
+                            'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors duration-200',
+                            isDark
+                                ? 'border-white/60 text-white hover:bg-white hover:text-primary'
+                                : 'border-white/80 text-white hover:bg-white hover:text-primary',
+                        )}
+                        aria-label="Toggle language"
+                    >
+                        {language === 'en' ? 'AR' : 'EN'}
+                    </button>
+
+                    {/* Hamburger — only below lg, toggles the mobile menu. */}
+                    <button
+                        type="button"
+                        onClick={() => setMobileOpen((o) => !o)}
+                        className={cn(
+                            'lg:hidden inline-flex items-center justify-center rounded-md p-1.5 transition-colors duration-200',
+                            isDark ? 'text-white hover:text-white/80' : 'text-white hover:text-white/80',
+                        )}
+                        aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                        aria-expanded={mobileOpen}
+                    >
+                        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile menu panel — drops below the bar on lg-down when the
+                hamburger is open. Solid white surface so links read clearly
+                over any section. */}
+            <div
+                className={cn(
+                    'lg:hidden relative overflow-hidden bg-white shadow-lg transition-[max-height,opacity] duration-300 ease-out',
+                    mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
+                )}
+            >
+                <nav className="section-x flex flex-col py-2">
                     {NAV_ITEMS.map((item) => {
                         const active = url === item.href;
                         return (
@@ -144,14 +221,10 @@ export function Header() {
                                 key={item.key}
                                 href={item.href}
                                 className={cn(
-                                    'transition-colors duration-200',
-                                    isDark
-                                        ? active
-                                            ? 'text-white font-medium'
-                                            : 'text-white/80 hover:text-white'
-                                        : active
-                                            ? 'text-primary font-medium'
-                                            : 'text-ink-muted hover:text-primary',
+                                    'rounded-md px-2 py-3 text-base transition-colors duration-200',
+                                    active
+                                        ? 'font-semibold text-primary'
+                                        : 'text-ink hover:bg-surface-muted hover:text-primary',
                                 )}
                             >
                                 {t(`nav.${item.key}`)}
@@ -159,18 +232,6 @@ export function Header() {
                         );
                     })}
                 </nav>
-
-                <button
-                    type="button"
-                    onClick={toggleLanguage}
-                    className={cn(
-                        'text-sm font-medium transition-colors duration-200 mb-3',
-                        isDark ? 'text-white hover:text-white/80' : 'text-ink hover:text-primary',
-                    )}
-                    aria-label="Toggle language"
-                >
-                    {t('language.toggle')}
-                </button>
             </div>
         </header>
     );

@@ -24,7 +24,7 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                     {vp.title?.content ?? ''}
                 </h2>
 
-                <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 3xl:gap-16">
+                <div className="mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 3xl:gap-16">
                     {ITEMS.map(({ key, icon }) => (
                         <div key={key} className="flex flex-col items-center text-center">
                             <img
@@ -35,9 +35,8 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                             />
 
                             {/* Rectangle 22: square card, rx=62, brand blue tint.
-                                Fills its grid cell (no max-width) so the cards
-                                close the gaps like the testimonials row. */}
-                            <div className="aspect-square w-full rounded-[62px] bg-primary flex items-center justify-center px-6 sm:px-8 py-6 text-white text-xl sm:text-2xl 3xl:text-3xl leading-snug">
+                                Fills its grid cell so the cards close the gaps. */}
+                            <div className="aspect-square w-full rounded-[62px] bg-primary flex items-center justify-center px-4 sm:px-8 py-6 text-white text-base sm:text-2xl 3xl:text-3xl leading-snug">
                                 {vp[key]?.content ?? ''}
                             </div>
                         </div>

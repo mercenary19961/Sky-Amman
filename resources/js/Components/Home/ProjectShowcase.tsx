@@ -205,7 +205,9 @@ function GridProjectCard({ project, language, ctaLabel }: CardProps) {
 
     return (
         <article className="w-full bg-[#E5EBF0] rounded-[62px] p-4 flex flex-col">
-            <div className="aspect-square w-full overflow-hidden rounded-4xl bg-primary-light/30">
+            {/* Mobile: short banner (h-56) to match the single Rent card.
+                sm+: restore the square grid image. */}
+            <div className="h-56 w-full sm:h-auto sm:aspect-square overflow-hidden rounded-4xl bg-primary-light/30">
                 <img
                     src={project.image_url}
                     alt={title}
