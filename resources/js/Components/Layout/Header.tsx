@@ -110,7 +110,7 @@ export function Header() {
             <div
                 aria-hidden="true"
                 className={cn(
-                    'absolute inset-0 pointer-events-none bg-linear-to-b from-primary to-white transition-opacity duration-300',
+                    'absolute inset-0 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
                     isDark ? 'opacity-0' : 'opacity-100',
                 )}
             />
@@ -153,8 +153,8 @@ export function Header() {
                                                 ? 'text-white font-medium'
                                                 : 'text-white/80 hover:text-white'
                                             : active
-                                                ? 'text-primary font-medium'
-                                                : 'text-ink-muted hover:text-primary',
+                                                ? 'text-white font-semibold'
+                                                : 'text-white hover:text-white/80',
                                     )}
                                 >
                                     {t(`nav.${item.key}`)}
@@ -172,7 +172,7 @@ export function Header() {
                             'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors duration-200',
                             isDark
                                 ? 'border-white/60 text-white hover:bg-white hover:text-primary'
-                                : 'border-primary text-primary hover:bg-primary hover:text-white',
+                                : 'border-white/80 text-white hover:bg-white hover:text-primary',
                         )}
                         aria-label="Toggle language"
                     >
