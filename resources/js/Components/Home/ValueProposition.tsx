@@ -24,7 +24,7 @@ export function ValueProposition({ content }: ValuePropositionProps) {
                     {vp.title?.content ?? ''}
                 </h2>
 
-                <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 max-w-6xl mx-auto">
+                <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12 3xl:gap-16">
                     {ITEMS.map(({ key, icon }) => (
                         <div key={key} className="flex flex-col items-center text-center">
                             <img

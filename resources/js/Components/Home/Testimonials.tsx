@@ -61,7 +61,7 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 
                 {/* Client cards row */}
                 {hasClients && (
-                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                    <div className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                         {clients.map(
                             (client, i) =>
                                 client.name && <ClientCard key={i} client={client} />,
@@ -95,7 +95,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     // Empty state: no videos configured yet → a single placeholder frame.
     if (N === 0) {
         return (
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-25/9">
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
                 <div className="absolute left-[18%] top-0 w-[64%] h-full z-20">
                     <CenterVideo src="" />
                 </div>
@@ -130,7 +130,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
 
     return (
         <>
-            <div className="relative mx-auto mt-10 sm:mt-12 max-w-6xl aspect-25/9">
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
                 {/* Left preview (previous video) — 16:9, peeks out behind the centre. */}
                 <VideoSlot
                     className="left-0 top-[11%] w-[50%] h-[78%] z-10"
@@ -402,7 +402,7 @@ function SidePreview({ src }: { src: string }) {
 function ClientCard({ client }: { client: Client }) {
     return (
         <div
-            className="relative aspect-290/486 w-full max-w-70 mx-auto bg-no-repeat bg-contain bg-top"
+            className="relative aspect-290/486 w-full bg-no-repeat bg-contain bg-top"
             style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
         >
             {/* Avatar — solid white circle, sits in the dome at top of card.
