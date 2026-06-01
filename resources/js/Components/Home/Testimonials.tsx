@@ -402,7 +402,7 @@ function SidePreview({ src }: { src: string }) {
 function ClientCard({ client }: { client: Client }) {
     return (
         <div
-            className="relative aspect-290/486 w-full bg-no-repeat bg-contain bg-top"
+            className="relative aspect-290/486 w-full max-w-72 sm:max-w-none mx-auto bg-no-repeat bg-contain bg-top"
             style={{ backgroundImage: 'url(/images/home/testimonial-card.svg)' }}
         >
             {/* Avatar — solid white circle, sits in the dome at top of card.
