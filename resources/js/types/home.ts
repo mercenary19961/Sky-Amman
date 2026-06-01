@@ -15,6 +15,7 @@ export interface FeaturedProject {
     title_ar: string;
     category: 'under_development' | 'ready' | 'investment_opportunity';
     listing_status: 'for_sale' | 'for_rent' | 'sold' | 'reserved' | null;
+    group: string | null;
     location_en: string | null;
     location_ar: string | null;
     area_sqm: number | null;

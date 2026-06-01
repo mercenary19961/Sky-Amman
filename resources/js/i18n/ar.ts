@@ -136,6 +136,7 @@ const ar = {
             all: 'جميع العقارات',
             forSale: 'عقارات للبيع',
             forRent: 'عقارات للإيجار',
+            availableForSale: 'متاح للبيع',
         },
         empty: 'لا توجد عقارات مطابقة لهذا التصنيف بعد.',
         bottomCta: {

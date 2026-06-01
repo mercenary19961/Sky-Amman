@@ -19,7 +19,7 @@ class PropertiesController extends Controller
     {
         $projects = Project::active()
             ->ordered()
-            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'location_en', 'location_ar', 'area_sqm'])
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm'])
             ->map(fn (Project $p) => [
                 'id' => $p->id,
                 'slug' => $p->slug,
@@ -27,6 +27,7 @@ class PropertiesController extends Controller
                 'title_ar' => $p->title_ar,
                 'category' => $p->category,
                 'listing_status' => $p->listing_status,
+                'group' => $p->group,
                 'location_en' => $p->location_en,
                 'location_ar' => $p->location_ar,
                 'area_sqm' => $p->area_sqm,

@@ -8,13 +8,11 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 import type { ContentValue, FeaturedProject, PropertiesPageProps } from '@/types/home';
 
-type ListingFilter = 'all' | 'for_sale' | 'for_rent';
+type Mode = 'sale' | 'rent';
 
-const FILTERS: { key: ListingFilter; i18n: string }[] = [
-    { key: 'all', i18n: 'properties.filters.all' },
-    { key: 'for_sale', i18n: 'properties.filters.forSale' },
-    { key: 'for_rent', i18n: 'properties.filters.forRent' },
-];
+// Listing statuses that belong to the "for sale" universe (vs. for_rent).
+// `for_sale` = available; `sold` / `reserved` = not currently available.
+const SALE_STATUSES = ['for_sale', 'sold', 'reserved'];
 
 /** CMS-first text resolver: returns the CMS row when present & visible, else ''. */
 function text(section: Record<string, ContentValue> | undefined, key: string): string {
@@ -32,21 +30,62 @@ export default function Properties() {
     const hero = content.hero;
     const bottomCta = content.bottom_cta;
 
-    const [filter, setFilter] = useState<ListingFilter>('all');
-    const filtered = useMemo(
-        () => (filter === 'all' ? props.projects : props.projects.filter((p) => p.listing_status === filter)),
-        [props.projects, filter],
-    );
+    // Two-tier filter (per PROJECTS SHOWCASE.svg):
+    //  • mode: Sale vs Rent (mutually exclusive).
+    //  • Sale mode adds light-blue group sub-pills + an "Available For Sale"
+    //    toggle. Rent mode has no availability concept.
+    const [mode, setMode] = useState<Mode>('sale');
+    const [group, setGroup] = useState<string | null>(null);
+    const [availableOnly, setAvailableOnly] = useState(false);
+
+    // Distinct developments across the sale-side listings (for the sub-pills).
+    const saleGroups = useMemo(() => {
+        const set = new Set<string>();
+        props.projects.forEach((p) => {
+            if (p.group && p.listing_status && SALE_STATUSES.includes(p.listing_status)) {
+                set.add(p.group);
+            }
+        });
+        return Array.from(set);
+    }, [props.projects]);
+
+    // Resolve the visible cards. In sale mode WITHOUT the availability toggle,
+    // sold / reserved listings are kept but flagged `dimmed` (rendered faded).
+    const filtered = useMemo(() => {
+        if (mode === 'rent') {
+            return props.projects
+                .filter((p) => p.listing_status === 'for_rent')
+                .map((project) => ({ project, dimmed: false }));
+        }
+        let list = props.projects.filter(
+            (p) => p.listing_status && SALE_STATUSES.includes(p.listing_status),
+        );
+        if (group) list = list.filter((p) => p.group === group);
+        if (availableOnly) list = list.filter((p) => p.listing_status === 'for_sale');
+        return list.map((project) => ({
+            project,
+            dimmed: !availableOnly && project.listing_status !== 'for_sale',
+        }));
+    }, [props.projects, mode, group, availableOnly]);
+
+    // Switching modes clears the sale-only sub-filters.
+    const selectMode = (m: Mode) => {
+        setMode(m);
+        if (m === 'rent') {
+            setGroup(null);
+            setAvailableOnly(false);
+        }
+    };
 
     // Client-side pagination — 6 cards per page.
     const PER_PAGE = 6;
     const [page, setPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-    // Reset to page 1 whenever the filter changes (or the result set shrinks).
+    // Reset to page 1 whenever any filter changes.
     useEffect(() => {
         setPage(1);
-    }, [filter]);
-    const projects = useMemo(
+    }, [mode, group, availableOnly]);
+    const pageItems = useMemo(
         () => filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE),
         [filtered, page],
     );
@@ -113,32 +152,53 @@ export default function Properties() {
             {/* ---------------- LISTINGS ---------------- */}
             <section className="bg-surface py-16 sm:py-24">
                 <div className="section-x">
-                    {/* Filter pills — navy (#1A3954) rounded-full, active solid /
-                        inactive 42% opacity, per PROJECTS SHOWCASE.svg. */}
-                    <div className="flex flex-wrap gap-3 sm:gap-4">
-                        {FILTERS.map(({ key, i18n }) => {
-                            const active = filter === key;
-                            return (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => setFilter(key)}
-                                    className={cn(
-                                        'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium text-white transition-colors cursor-pointer',
-                                        active ? 'bg-[#1A3954]' : 'bg-[#1A3954]/40 hover:bg-[#1A3954]/60',
-                                    )}
-                                >
-                                    {t(i18n)}
-                                </button>
-                            );
-                        })}
+                    {/* Filter system (PROJECTS SHOWCASE.svg): navy Sale/Rent mode
+                        tabs + an "Available For Sale" toggle, with light-blue
+                        group sub-pills under the Sale tab. */}
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                        <div className="flex flex-wrap gap-3 sm:gap-4">
+                            <NavyPill active={mode === 'sale'} onClick={() => selectMode('sale')}>
+                                {t('properties.filters.forSale')}
+                            </NavyPill>
+                            <NavyPill active={mode === 'rent'} onClick={() => selectMode('rent')}>
+                                {t('properties.filters.forRent')}
+                            </NavyPill>
+                            {mode === 'sale' && (
+                                <NavyPill active={availableOnly} onClick={() => setAvailableOnly((v) => !v)}>
+                                    {t('properties.filters.availableForSale')}
+                                </NavyPill>
+                            )}
+                        </div>
+
+                        {mode === 'sale' && saleGroups.length > 0 && (
+                            <div className="flex flex-wrap gap-3 sm:gap-4">
+                                {saleGroups.map((g) => {
+                                    const active = group === g;
+                                    return (
+                                        <button
+                                            key={g}
+                                            type="button"
+                                            onClick={() => setGroup(active ? null : g)}
+                                            className={cn(
+                                                'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium transition-colors cursor-pointer',
+                                                active
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-[#CCE7FF] text-[#1A3954] hover:bg-[#b9dcff]',
+                                            )}
+                                        >
+                                            {g}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* Grid */}
-                    {projects.length > 0 ? (
+                    {pageItems.length > 0 ? (
                         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-                            {projects.map((p) => (
-                                <PropertyCard key={p.id} project={p} language={language} t={t} />
+                            {pageItems.map(({ project, dimmed }) => (
+                                <PropertyCard key={project.id} project={project} dimmed={dimmed} language={language} t={t} />
                             ))}
                         </div>
                     ) : (
@@ -217,13 +277,30 @@ export default function Properties() {
     );
 }
 
+/** Navy (#1A3954) rounded-full pill — active solid / inactive 42% opacity. */
+function NavyPill({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={cn(
+                'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium text-white transition-colors cursor-pointer',
+                active ? 'bg-[#1A3954]' : 'bg-[#1A3954]/40 hover:bg-[#1A3954]/60',
+            )}
+        >
+            {children}
+        </button>
+    );
+}
+
 interface PropertyCardProps {
     project: FeaturedProject;
     language: 'en' | 'ar';
     t: (key: string) => string;
+    dimmed?: boolean;
 }
 
-function PropertyCard({ project, language, t }: PropertyCardProps) {
+function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProps) {
     const title = language === 'ar' ? project.title_ar : project.title_en;
     const location = language === 'ar' ? project.location_ar : project.location_en;
     const areaLabel = language === 'ar' ? `${project.area_sqm} م²` : `${project.area_sqm} M²`;
@@ -241,7 +318,12 @@ function PropertyCard({ project, language, t }: PropertyCardProps) {
         // #E5EBF0 card rx=52, near-square image rx=44, white FOR SALE badge.
         <Link
             href={`/properties/${project.slug}`}
-            className="group flex flex-col rounded-[52px] bg-[#E5EBF0] p-2 transition-shadow hover:shadow-lg"
+            className={cn(
+                'group flex flex-col rounded-[52px] bg-[#E5EBF0] p-2 transition-all hover:shadow-lg',
+                // Sold / reserved listings (shown when "Available For Sale" is
+                // off) are faded to signal they're not currently available.
+                dimmed && 'opacity-55 hover:opacity-80',
+            )}
         >
             <div className="relative aspect-square w-full overflow-hidden rounded-[44px] bg-primary-light/30">
                 <img
