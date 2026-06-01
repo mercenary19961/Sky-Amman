@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 export function Header() {
     const { t } = useTranslation();
-    const { toggleLanguage } = useLanguage();
+    const { language, toggleLanguage } = useLanguage();
     const { url } = usePage<PageProps>();
 
     // Sections opt in to a navbar theme by setting `data-nav-bg="dark"` on
@@ -136,41 +136,49 @@ export function Header() {
                     )}
                 </Link>
 
-                <nav className="hidden lg:flex items-center gap-6 text-sm mb-3">
-                    {NAV_ITEMS.map((item) => {
-                        const active = url === item.href;
-                        return (
-                            <Link
-                                key={item.key}
-                                href={item.href}
-                                className={cn(
-                                    'transition-colors duration-200',
-                                    isDark
-                                        ? active
-                                            ? 'text-white font-medium'
-                                            : 'text-white/80 hover:text-white'
-                                        : active
-                                            ? 'text-primary font-medium'
-                                            : 'text-ink-muted hover:text-primary',
-                                )}
-                            >
-                                {t(`nav.${item.key}`)}
-                            </Link>
-                        );
-                    })}
-                </nav>
+                {/* Nav + language button grouped on the right; justify-between
+                    on the parent keeps the logo pinned left. */}
+                <div className="flex items-center gap-6">
+                    <nav className="hidden lg:flex items-center gap-6 text-sm">
+                        {NAV_ITEMS.map((item) => {
+                            const active = url === item.href;
+                            return (
+                                <Link
+                                    key={item.key}
+                                    href={item.href}
+                                    className={cn(
+                                        'transition-colors duration-200',
+                                        isDark
+                                            ? active
+                                                ? 'text-white font-medium'
+                                                : 'text-white/80 hover:text-white'
+                                            : active
+                                                ? 'text-primary font-medium'
+                                                : 'text-ink-muted hover:text-primary',
+                                    )}
+                                >
+                                    {t(`nav.${item.key}`)}
+                                </Link>
+                            );
+                        })}
+                    </nav>
 
-                <button
-                    type="button"
-                    onClick={toggleLanguage}
-                    className={cn(
-                        'text-sm font-medium transition-colors duration-200 mb-3',
-                        isDark ? 'text-white hover:text-white/80' : 'text-ink hover:text-primary',
-                    )}
-                    aria-label="Toggle language"
-                >
-                    {t('language.toggle')}
-                </button>
+                    {/* Language switcher pill — shows the language you'll switch
+                        TO ("AR" while in English, "EN" while in Arabic). */}
+                    <button
+                        type="button"
+                        onClick={toggleLanguage}
+                        className={cn(
+                            'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors duration-200',
+                            isDark
+                                ? 'border-white/60 text-white hover:bg-white hover:text-primary'
+                                : 'border-primary text-primary hover:bg-primary hover:text-white',
+                        )}
+                        aria-label="Toggle language"
+                    >
+                        {language === 'en' ? 'AR' : 'EN'}
+                    </button>
+                </div>
             </div>
         </header>
     );
