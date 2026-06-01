@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import type { SiteContentBundle } from '@/types/home';
 
 interface HomeHeroProps {
@@ -41,11 +42,14 @@ export function HomeHero({ content }: HomeHeroProps) {
               top of the <img> box.
             */}
             <div className="relative mt-4 sm:mt-6 lg:mt-8">
-                <img
+                <motion.img
                     src="/images/home/hero-villa-trimmed.webp"
                     alt=""
                     className="w-full h-auto select-none pointer-events-none"
                     loading="eager"
+                    initial={{ y: '12%', opacity: 0 }}
+                    animate={{ y: '0%', opacity: 1 }}
+                    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
                 />
 
                 {/* White fade: solid white at the bottom → transparent toward the
