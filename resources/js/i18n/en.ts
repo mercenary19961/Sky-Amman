@@ -138,6 +138,8 @@ const en = {
         },
         filters: {
             all: 'All Properties',
+            forSale: 'Properties for Sale',
+            forRent: 'Properties for Rent',
         },
         empty: 'No properties match this filter yet.',
         bottomCta: {

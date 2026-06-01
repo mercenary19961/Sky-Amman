@@ -1,20 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 import type { ContentValue, FeaturedProject, PropertiesPageProps } from '@/types/home';
 
-type CategoryFilter = 'all' | 'under_development' | 'ready' | 'investment_opportunity';
+type ListingFilter = 'all' | 'for_sale' | 'for_rent';
 
-const FILTERS: { key: CategoryFilter; i18n: string }[] = [
+const FILTERS: { key: ListingFilter; i18n: string }[] = [
     { key: 'all', i18n: 'properties.filters.all' },
-    { key: 'under_development', i18n: 'home.showcase.tabs.underDevelopment' },
-    { key: 'ready', i18n: 'home.showcase.tabs.ready' },
-    { key: 'investment_opportunity', i18n: 'home.showcase.tabs.investmentOpportunity' },
+    { key: 'for_sale', i18n: 'properties.filters.forSale' },
+    { key: 'for_rent', i18n: 'properties.filters.forRent' },
 ];
 
 /** CMS-first text resolver: returns the CMS row when present & visible, else ''. */
@@ -33,10 +32,23 @@ export default function Properties() {
     const hero = content.hero;
     const bottomCta = content.bottom_cta;
 
-    const [filter, setFilter] = useState<CategoryFilter>('all');
-    const projects = useMemo(
-        () => (filter === 'all' ? props.projects : props.projects.filter((p) => p.category === filter)),
+    const [filter, setFilter] = useState<ListingFilter>('all');
+    const filtered = useMemo(
+        () => (filter === 'all' ? props.projects : props.projects.filter((p) => p.listing_status === filter)),
         [props.projects, filter],
+    );
+
+    // Client-side pagination — 6 cards per page.
+    const PER_PAGE = 6;
+    const [page, setPage] = useState(1);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+    // Reset to page 1 whenever the filter changes (or the result set shrinks).
+    useEffect(() => {
+        setPage(1);
+    }, [filter]);
+    const projects = useMemo(
+        () => filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE),
+        [filtered, page],
     );
 
     const seoTitle = props.siteSettings?.seo_title ?? 'Properties · SkyAmman';
@@ -101,8 +113,9 @@ export default function Properties() {
             {/* ---------------- LISTINGS ---------------- */}
             <section className="bg-surface py-16 sm:py-24">
                 <div className="section-x">
-                    {/* Filter pills */}
-                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+                    {/* Filter pills — navy (#1A3954) rounded-full, active solid /
+                        inactive 42% opacity, per PROJECTS SHOWCASE.svg. */}
+                    <div className="flex flex-wrap gap-3 sm:gap-4">
                         {FILTERS.map(({ key, i18n }) => {
                             const active = filter === key;
                             return (
@@ -111,10 +124,8 @@ export default function Properties() {
                                     type="button"
                                     onClick={() => setFilter(key)}
                                     className={cn(
-                                        'rounded-full border px-5 py-2 text-sm sm:text-base font-medium transition-colors cursor-pointer',
-                                        active
-                                            ? 'border-primary bg-primary text-white'
-                                            : 'border-primary/40 text-ink-muted hover:border-primary hover:text-primary',
+                                        'rounded-full px-6 py-2 min-w-44 text-center text-sm sm:text-base font-medium text-white transition-colors cursor-pointer',
+                                        active ? 'bg-[#1A3954]' : 'bg-[#1A3954]/40 hover:bg-[#1A3954]/60',
                                     )}
                                 >
                                     {t(i18n)}
@@ -134,6 +145,49 @@ export default function Properties() {
                         <p className="mt-16 text-center text-ink-muted">
                             {t('properties.empty')}
                         </p>
+                    )}
+
+                    {/* Pagination — 6 per page. */}
+                    {totalPages > 1 && (
+                        <div className="mt-12 flex items-center justify-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                aria-label="Previous page"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
+                            >
+                                <ChevronLeft size={20} className="rtl:rotate-180" />
+                            </button>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                                <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setPage(n)}
+                                    aria-label={`Page ${n}`}
+                                    aria-current={n === page ? 'page' : undefined}
+                                    className={cn(
+                                        'h-10 w-10 rounded-full text-sm font-medium transition-colors cursor-pointer',
+                                        n === page
+                                            ? 'bg-primary text-white'
+                                            : 'text-ink-muted hover:bg-primary/10 hover:text-primary',
+                                    )}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+
+                            <button
+                                type="button"
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                                aria-label="Next page"
+                                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
+                            >
+                                <ChevronRight size={20} className="rtl:rotate-180" />
+                            </button>
+                        </div>
                     )}
                 </div>
             </section>
@@ -183,37 +237,35 @@ function PropertyCard({ project, language, t }: PropertyCardProps) {
     const status = project.listing_status ? statusKey[project.listing_status] : null;
 
     return (
-        <article className="flex flex-col overflow-hidden rounded-[40px] bg-[#E5EBF0] p-4">
-            <div className="relative h-56 sm:h-64 w-full overflow-hidden rounded-[28px] bg-primary-light/30">
+        // Whole card is the link (the SVG card has no separate button).
+        // #E5EBF0 card rx=52, near-square image rx=44, white FOR SALE badge.
+        <Link
+            href={`/properties/${project.slug}`}
+            className="group flex flex-col rounded-[52px] bg-[#E5EBF0] p-2 transition-shadow hover:shadow-lg"
+        >
+            <div className="relative aspect-square w-full overflow-hidden rounded-[44px] bg-primary-light/30">
                 <img
                     src={project.image_url}
                     alt={title}
                     loading="lazy"
-                    className="h-full w-full object-cover object-center"
+                    className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 />
                 {status && (
-                    <span className="absolute top-4 inset-s-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm">
+                    <span className="absolute top-5 inset-s-5 rounded-full bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-ink shadow-sm">
                         {t(status)}
                     </span>
                 )}
             </div>
 
-            <div className="flex flex-1 flex-col items-center px-2 pt-5 pb-3 text-center">
+            <div className="flex flex-col items-center px-3 pt-4 pb-5 text-center">
                 <h3 className="text-base sm:text-lg font-semibold uppercase tracking-wide text-ink">
                     {title}
                 </h3>
-                {location && <p className="mt-2 text-sm sm:text-base text-ink">{location}</p>}
+                {location && <p className="mt-1 text-sm sm:text-base text-ink">{location}</p>}
                 {project.area_sqm != null && (
                     <p className="text-sm sm:text-base text-ink">{areaLabel}</p>
                 )}
-
-                <Link
-                    href={`/properties/${project.slug}`}
-                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-sm sm:text-base font-medium text-primary shadow-sm transition-colors hover:bg-primary hover:text-white"
-                >
-                    {t('common.exploreMore')}
-                </Link>
             </div>
-        </article>
+        </Link>
     );
 }
