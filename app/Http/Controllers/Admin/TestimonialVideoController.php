@@ -80,7 +80,17 @@ class TestimonialVideoController extends Controller
 
     public function destroy(int $id): RedirectResponse
     {
-        TestimonialVideo::findOrFail($id)->delete();
+        $video = TestimonialVideo::findOrFail($id);
+
+        // Don't let a live video be deleted while the homepage is fully stocked —
+        // that would drop the live set below MAX_ACTIVE. Swap it out via publish
+        // first. (If fewer than MAX_ACTIVE are live, deleting is allowed.)
+        $activeCount = TestimonialVideo::active()->count();
+        if ($video->is_active && $activeCount >= self::MAX_ACTIVE) {
+            return back()->with('error', 'This video is live. Swap it out via “Update homepage” before deleting.');
+        }
+
+        $video->delete();
 
         return back()->with('success', 'Video removed.');
     }

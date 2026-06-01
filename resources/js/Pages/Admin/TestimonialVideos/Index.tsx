@@ -67,6 +67,8 @@ export default function TestimonialVideosIndex() {
     const selectedCount = draft.size;
     const draftKey = sortedKey(draft);
     const dirty = draftKey !== liveKey;
+    // A live video can't be deleted while the homepage is fully stocked.
+    const liveActiveCount = videos.filter((v) => v.is_active).length;
     const exactly = selectedCount === maxActive;
     const canPublish = dirty && exactly;
 
@@ -138,7 +140,7 @@ export default function TestimonialVideosIndex() {
                         <button
                             type="button"
                             onClick={() => setEditing('new')}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark transition-colors"
+                            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary-strong px-4 py-2 text-sm font-medium text-white hover:bg-primary-strong-hover transition-colors"
                         >
                             <Plus size={16} /> Add video
                         </button>
@@ -181,6 +183,7 @@ export default function TestimonialVideosIndex() {
                                         video={video}
                                         selected={draft.has(video.id)}
                                         selectDisabled={!draft.has(video.id) && draft.size >= maxActive}
+                                        deleteLocked={video.is_active && liveActiveCount >= maxActive}
                                         onToggle={() => toggleDraft(video.id)}
                                         onEdit={() => setEditing(video)}
                                         onPreview={() => setPreview(video.url)}
@@ -225,6 +228,7 @@ function SortableVideoCard({
     video,
     selected,
     selectDisabled,
+    deleteLocked,
     onToggle,
     onEdit,
     onPreview,
@@ -233,6 +237,7 @@ function SortableVideoCard({
     video: VideoItem;
     selected: boolean;
     selectDisabled: boolean;
+    deleteLocked: boolean;
     onToggle: () => void;
     onEdit: () => void;
     onPreview: () => void;
@@ -319,7 +324,16 @@ function SortableVideoCard({
                     >
                         <Pencil size={15} />
                     </button>
-                    {confirmDelete ? (
+                    {deleteLocked ? (
+                        <button
+                            type="button"
+                            disabled
+                            title="This video is live — swap it out via “Update homepage” before deleting"
+                            className="p-1.5 rounded text-ink-muted opacity-30 cursor-not-allowed"
+                        >
+                            <Trash2 size={15} />
+                        </button>
+                    ) : confirmDelete ? (
                         <span className="flex items-center gap-1 text-xs ps-1">
                             <button type="button" onClick={onDelete} className="text-red-500 font-medium hover:underline">
                                 Delete
@@ -457,7 +471,7 @@ function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose:
                                 type="button"
                                 onClick={submit}
                                 disabled={processing || !url.trim()}
-                                className="px-4 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
+                                className="px-4 py-2 text-sm font-medium rounded-md bg-primary-strong text-white hover:bg-primary-strong-hover transition-colors disabled:opacity-50"
                             >
                                 {isNew ? 'Add' : 'Save'}
                             </button>
