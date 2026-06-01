@@ -25,6 +25,7 @@ interface VideoItem {
 
 interface TestimonialVideosProps {
     videos: VideoItem[];
+    maxActive: number;
     [key: string]: unknown;
 }
 
@@ -36,7 +37,7 @@ const youtubeId = (url: string): string | null => url.match(YT_RE)?.[1] ?? null;
 type EditingState = VideoItem | 'new' | null;
 
 export default function TestimonialVideosIndex() {
-    const { videos } = usePage<TestimonialVideosProps>().props;
+    const { videos, maxActive } = usePage<TestimonialVideosProps>().props;
 
     // Local copy for optimistic drag reordering; resynced whenever the server
     // sends a fresh list (after add / edit / delete / reorder).
@@ -75,19 +76,21 @@ export default function TestimonialVideosIndex() {
     };
 
     const activeCount = items.filter((v) => v.is_active).length;
+    const atCap = activeCount >= maxActive;
+    const exactlyRight = activeCount === maxActive;
 
     return (
         <AdminLayout title="Testimonial Videos">
             <Head title="Testimonial Videos" />
 
             <div className="max-w-5xl">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <p className="text-sm text-ink-muted max-w-2xl">
                         These videos rotate in the homepage Testimonials carousel. Paste a{' '}
                         <strong className="text-ink dark:text-zinc-200">YouTube link</strong>, a hosted video URL, or a
-                        self-hosted path like <code className="px-1 rounded bg-white/10">/video/name.mp4</code>. Only{' '}
-                        <strong className="text-ink dark:text-zinc-200">active</strong> videos appear; drag to reorder.
-                        The section uses a 3-up layout, so 3+ active look best ({activeCount} active).
+                        self-hosted path like <code className="px-1 rounded bg-white/10">/video/name.mp4</code>. The
+                        section shows exactly <strong className="text-ink dark:text-zinc-200">{maxActive}</strong>{' '}
+                        videos — only the active ones (drag to reorder).
                     </p>
                     <button
                         type="button"
@@ -96,6 +99,21 @@ export default function TestimonialVideosIndex() {
                     >
                         <Plus size={16} /> Add video
                     </button>
+                </div>
+
+                {/* Active-count status: green at exactly the cap, amber otherwise. */}
+                <div
+                    className={cn(
+                        'mb-6 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium',
+                        exactlyRight
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'bg-amber-500/15 text-amber-400',
+                    )}
+                >
+                    <span className={cn('w-2 h-2 rounded-full', exactlyRight ? 'bg-emerald-400' : 'bg-amber-400')} />
+                    {activeCount} of {maxActive} active
+                    {activeCount < maxActive && ` — activate ${maxActive - activeCount} more`}
+                    {atCap && ` — hide one to swap`}
                 </div>
 
                 {items.length === 0 ? (
@@ -115,6 +133,7 @@ export default function TestimonialVideosIndex() {
                                     <SortableVideoCard
                                         key={video.id}
                                         video={video}
+                                        atCap={atCap}
                                         onEdit={() => setEditing(video)}
                                         onPreview={() => setPreview(video.url)}
                                         onToggle={() => toggleActive(video)}
@@ -127,7 +146,7 @@ export default function TestimonialVideosIndex() {
                 )}
             </div>
 
-            <VideoFormDrawer editing={editing} onClose={() => setEditing(null)} />
+            <VideoFormDrawer editing={editing} atCap={atCap} onClose={() => setEditing(null)} />
             <PreviewModal url={preview} onClose={() => setPreview(null)} />
         </AdminLayout>
     );
@@ -157,12 +176,14 @@ function VideoThumb({ url }: { url: string }) {
 
 function SortableVideoCard({
     video,
+    atCap,
     onEdit,
     onPreview,
     onToggle,
     onDelete,
 }: {
     video: VideoItem;
+    atCap: boolean;
     onEdit: () => void;
     onPreview: () => void;
     onToggle: () => void;
@@ -171,6 +192,9 @@ function SortableVideoCard({
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: video.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
     const [confirmDelete, setConfirmDelete] = useState(false);
+
+    // Can't turn a 4th video on while the cap is reached.
+    const disableActivate = !video.is_active && atCap;
 
     return (
         <div
@@ -233,8 +257,15 @@ function SortableVideoCard({
                     <button
                         type="button"
                         onClick={onToggle}
-                        title={video.is_active ? 'Active — click to hide' : 'Hidden — click to show'}
-                        className="p-1.5 rounded text-ink-muted hover:bg-white/5 hover:text-ink dark:hover:text-zinc-100 transition-colors"
+                        disabled={disableActivate}
+                        title={
+                            disableActivate
+                                ? '3 videos already active — hide one first'
+                                : video.is_active
+                                  ? 'Active — click to hide'
+                                  : 'Hidden — click to show'
+                        }
+                        className="p-1.5 rounded text-ink-muted hover:bg-white/5 hover:text-ink dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >
                         {video.is_active ? <Eye size={15} /> : <EyeOff size={15} />}
                     </button>
@@ -275,7 +306,7 @@ function SortableVideoCard({
     );
 }
 
-function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose: () => void }) {
+function VideoFormDrawer({ editing, atCap, onClose }: { editing: EditingState; atCap: boolean; onClose: () => void }) {
     const open = editing !== null;
     const isNew = editing === 'new';
     const video = editing && editing !== 'new' ? editing : null;
@@ -285,11 +316,15 @@ function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose:
     const [isActive, setIsActive] = useState(true);
     const [processing, setProcessing] = useState(false);
 
+    // Activating isn't allowed once 3 are active (unless this row is already one).
+    const lockActive = atCap && !video?.is_active;
+
     // Seed the form whenever the target changes (open / switch row).
     useEffect(() => {
         setUrl(video?.url ?? '');
         setTitle(video?.title ?? '');
-        setIsActive(video?.is_active ?? true);
+        // Default to active only if there's room (or this row is already active).
+        setIsActive(video?.is_active ?? !atCap);
     }, [editing]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const submit = (e: FormEvent) => {
@@ -364,15 +399,29 @@ function VideoFormDrawer({ editing, onClose }: { editing: EditingState; onClose:
                                 />
                             </div>
 
-                            <label className="flex items-center gap-2 text-sm text-ink dark:text-zinc-100 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={isActive}
-                                    onChange={(e) => setIsActive(e.target.checked)}
-                                    className="rounded border-ink/30 text-primary focus:ring-primary/40"
-                                />
-                                Show this video on the homepage
-                            </label>
+                            <div>
+                                <label
+                                    className={cn(
+                                        'flex items-center gap-2 text-sm text-ink dark:text-zinc-100',
+                                        lockActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                    )}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={isActive && !lockActive}
+                                        disabled={lockActive}
+                                        onChange={(e) => setIsActive(e.target.checked)}
+                                        className="rounded border-ink/30 text-primary focus:ring-primary/40"
+                                    />
+                                    Show this video on the homepage
+                                </label>
+                                {lockActive && (
+                                    <p className="mt-1.5 text-xs text-amber-400">
+                                        3 videos are already active — this will be saved as hidden. Hide another to
+                                        show it.
+                                    </p>
+                                )}
+                            </div>
 
                             {/* Live thumbnail preview */}
                             {url.trim() && (

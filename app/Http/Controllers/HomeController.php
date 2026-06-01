@@ -53,8 +53,8 @@ class HomeController extends Controller
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
             'featuredRentals' => $featuredRentals,
-            // Testimonials carousel — active videos in admin-defined order.
-            'testimonialVideos' => TestimonialVideo::active()->ordered()->pluck('url')->all(),
+            // Testimonials carousel — the (max 3) active videos in admin order.
+            'testimonialVideos' => TestimonialVideo::active()->ordered()->limit(3)->pluck('url')->all(),
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
             ],
