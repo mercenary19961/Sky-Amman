@@ -305,24 +305,42 @@ export default function Properties() {
                 </div>
             </section>
 
-            {/* ---------------- BOTTOM CTA ---------------- */}
+            {/* ---------------- BOTTOM CTA BANNER ---------------- */}
+            {/* Per HERO SECTION.svg: a 1148×646 rounded image (rx≈151, all
+                corners) at 74% opacity over a brand-blue card — giving the blue
+                wash — with centered text and an arrow link on the trailing edge. */}
             {(text(bottomCta, 'title') || text(bottomCta, 'subtitle')) && (
                 <section className="bg-surface pb-20 sm:pb-28">
                     <div className="section-x">
-                        <div className="rounded-[40px] bg-primary px-6 sm:px-12 py-14 sm:py-20 text-center text-white">
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-                                {text(bottomCta, 'title') || t('properties.bottomCta.title')}
-                            </h2>
-                            <p className="mt-4 mx-auto max-w-2xl text-sm sm:text-base lg:text-lg text-white/90">
-                                {text(bottomCta, 'subtitle') || t('properties.bottomCta.subtitle')}
-                            </p>
-                            <Link
-                                href="/contact"
-                                className="mt-8 inline-flex items-center justify-center rounded-full bg-white px-8 py-3 text-sm sm:text-base font-semibold text-primary shadow-md transition-colors hover:bg-surface-muted"
-                            >
-                                {t('nav.contact')}
-                            </Link>
-                        </div>
+                        <Link
+                            href="/contact"
+                            aria-label={text(bottomCta, 'title') || t('properties.bottomCta.title')}
+                            className="group relative mx-auto block aspect-574/323 w-full max-w-7xl overflow-hidden rounded-[40px] sm:rounded-[80px] lg:rounded-[120px] xl:rounded-[151px]"
+                        >
+                            {/* Banner image — slightly reduced opacity so it
+                                softens against the page background. */}
+                            <img
+                                src="/images/properties/find-the-right-space.webp"
+                                alt=""
+                                loading="lazy"
+                                className="absolute inset-0 h-full w-full object-cover"
+                            />
+
+                            {/* Centered text. */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center text-white">
+                                <h2 className="max-w-3xl text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] drop-shadow-sm">
+                                    {text(bottomCta, 'title') || t('properties.bottomCta.title')}
+                                </h2>
+                                <p className="mt-4 sm:mt-6 max-w-2xl text-base sm:text-xl lg:text-2xl text-white/95 drop-shadow-sm">
+                                    {text(bottomCta, 'subtitle') || t('properties.bottomCta.subtitle')}
+                                </p>
+                            </div>
+
+                            {/* Arrow on the trailing edge. */}
+                            <span className="absolute top-1/2 inset-e-6 sm:inset-e-10 lg:inset-e-16 -translate-y-1/2 text-white transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+                                <ArrowRight className="h-7 w-7 sm:h-9 sm:w-9 rtl:rotate-180" />
+                            </span>
+                        </Link>
                     </div>
                 </section>
             )}
