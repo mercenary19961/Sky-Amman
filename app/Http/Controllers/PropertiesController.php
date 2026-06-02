@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectImage;
+use App\Models\Setting;
 use App\Models\SiteContent;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -39,6 +41,152 @@ class PropertiesController extends Controller
             'content_en' => SiteContent::getPage('properties', 'en'),
             'content_ar' => SiteContent::getPage('properties', 'ar'),
             'projects' => $projects,
+            'galleryImages' => $this->galleryImages(),
         ]);
+    }
+
+    /**
+     * Single property detail page. Loads one active project by slug with its
+     * gallery, a handful of related listings, and the site map embed. All
+     * bilingual fields are sent raw so the client swaps language instantly.
+     */
+    public function show(string $slug): Response
+    {
+        $project = Project::active()
+            ->where('slug', $slug)
+            ->with(['images.media'])
+            ->firstOrFail();
+
+        // Full image set for the hero + thumbnail row + lightbox. Uses the
+        // project's uploaded gallery; falls back to a demo set of villa renders
+        // until real galleries are uploaded so the gallery/lightbox is testable.
+        $images = $project->images
+            ->filter(fn (ProjectImage $img) => $img->media !== null)
+            ->map(fn (ProjectImage $img) => [
+                'id' => "img-{$img->id}",
+                'url' => route('media.serve', $img->media_id, false),
+                'alt' => $project->title_en,
+            ])
+            ->values()
+            ->all();
+
+        if (empty($images)) {
+            $images = collect([
+                '/images/properties/detail-hero.webp',
+                '/images/properties/properties-hero.webp',
+                '/images/properties/find-the-right-space.webp',
+                '/images/home/hero-villa-trimmed.webp',
+            ])->map(fn (string $url, int $i) => [
+                'id' => "demo-{$i}",
+                'url' => $url,
+                'alt' => $project->title_en,
+            ])->all();
+        }
+
+        // Related listings — same-category projects first, then the rest, for
+        // the "Find homes…" row.
+        $related = Project::active()
+            ->where('id', '!=', $project->id)
+            ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$project->category])
+            ->orderBy('sort_order')
+            ->orderBy('id', 'desc')
+            ->take(6)
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'listing_status'])
+            ->map(fn (Project $p) => [
+                'id' => $p->id,
+                'slug' => $p->slug,
+                'title_en' => $p->title_en,
+                'title_ar' => $p->title_ar,
+                'listing_status' => $p->listing_status,
+                'image_url' => "/images/projects/{$p->slug}.svg",
+            ])
+            ->all();
+
+        return Inertia::render('Public/PropertyDetail', [
+            'project' => [
+                'id' => $project->id,
+                'slug' => $project->slug,
+                'title_en' => $project->title_en,
+                'title_ar' => $project->title_ar,
+                'listing_status' => $project->listing_status,
+                'address_en' => $project->address_en,
+                'address_ar' => $project->address_ar,
+                'location_en' => $project->location_en,
+                'location_ar' => $project->location_ar,
+                'description_en' => $project->description_en,
+                'description_ar' => $project->description_ar,
+                'area_sqm' => $project->area_sqm,
+                'completion_year' => $project->completion_year,
+                'floors' => $project->floors,
+                'bedrooms' => $project->bedrooms,
+                'bathrooms' => $project->bathrooms,
+                // Per-listing SEO (falls back to title/description on the client).
+                'seo_title_en' => $project->seo_title_en,
+                'seo_title_ar' => $project->seo_title_ar,
+                'seo_description_en' => $project->seo_description_en,
+                'seo_description_ar' => $project->seo_description_ar,
+                // Absolute URLs for canonical link + OG image + JSON-LD.
+                'url' => route('properties.show', $project->slug),
+                'og_image' => url($images[0]['url']),
+            ],
+            'images' => $images,
+            'related' => $related,
+            'mapEmbedUrl' => Setting::get('google_maps_embed_url', ''),
+        ]);
+    }
+
+    /**
+     * Builds the "Projects Gallery" image set. The pool is every active
+     * project's gallery images, falling back to each project's placeholder
+     * render when it has no uploaded gallery yet. `gallery_mode` decides between
+     * a random subset per visit (`shuffle`) or an admin-ordered manual list.
+     */
+    private function galleryImages(): array
+    {
+        if (! (bool) Setting::get('gallery_enabled', true)) {
+            return [];
+        }
+
+        $count = max(1, (int) Setting::get('gallery_count', 6));
+        $mode = Setting::get('gallery_mode', 'shuffle');
+
+        $pool = Project::active()
+            ->ordered()
+            ->with(['images.media'])
+            ->get()
+            ->flatMap(function (Project $p) {
+                if ($p->images->isNotEmpty()) {
+                    return $p->images
+                        ->filter(fn (ProjectImage $img) => $img->media !== null)
+                        ->map(fn (ProjectImage $img) => [
+                            'id' => "img-{$img->id}",
+                            'url' => route('media.serve', $img->media_id, false),
+                            'alt' => $p->title_en,
+                        ]);
+                }
+
+                // No uploaded gallery → use the project's placeholder render.
+                return [[
+                    'id' => "slug-{$p->slug}",
+                    'url' => "/images/projects/{$p->slug}.svg",
+                    'alt' => $p->title_en,
+                ]];
+            })
+            ->values();
+
+        if ($mode === 'manual') {
+            $manual = json_decode((string) Setting::get('gallery_manual', '[]'), true) ?: [];
+            $byId = $pool->keyBy('id');
+
+            return collect($manual)
+                ->map(fn ($id) => $byId->get($id))
+                ->filter()
+                ->take($count)
+                ->values()
+                ->all();
+        }
+
+        // Shuffle: a fresh random subset on every page load.
+        return $pool->shuffle()->take($count)->values()->all();
     }
 }

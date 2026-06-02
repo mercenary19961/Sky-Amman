@@ -146,6 +146,9 @@ const en = {
         },
         resultCount: '{{count}} properties',
         empty: 'No properties match this filter yet.',
+        gallery: {
+            title: 'Projects Gallery',
+        },
         bottomCta: {
             title: 'Find The Right Space, Made Simple',
             subtitle: 'Explore residential and commercial properties with clear details and guided support.',
@@ -209,10 +212,12 @@ const en = {
         },
     },
     contact: {
+        label: 'Contact',
         hero: {
             title: 'Get in Touch',
             subtitle: 'Tell us what you are looking for and we will reach out shortly.',
         },
+        aboutProject: 'Inquiry about {{name}}',
         form: {
             name: 'Name',
             email: 'Email',
@@ -228,7 +233,10 @@ const en = {
                 general: 'General Inquiry',
             },
             submit: 'Send Message',
+            sending: 'Sending…',
             success: 'Thank you — we received your message and will get back to you soon.',
+            verifyFailed: 'Verification failed. Please try again.',
+            error: 'Something went wrong. Please try again.',
         },
     },
     footer: {
