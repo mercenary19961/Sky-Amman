@@ -93,7 +93,7 @@ export default function Contact() {
                                 </div>
                             )}
 
-                            <ul className="mt-8 space-y-5">
+                            <ul className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5">
                                 {settings?.phone && (
                                     <ContactMethod icon={<Phone size={18} />}>
                                         <a href={`tel:${settings.phone.replace(/\s+/g, '')}`} className="transition-colors hover:text-primary" dir="ltr">
@@ -113,20 +113,18 @@ export default function Contact() {
                                         <span>{settings.address}</span>
                                     </ContactMethod>
                                 )}
-                            </ul>
 
-                            {/* Social links */}
-                            <div className="mt-7 flex items-center gap-3">
-                                <SocialLink href={settings?.facebook_url} label="Facebook">
+                                {/* Social links — same icon + text row, clickable. */}
+                                <SocialRow href={settings?.facebook_url} label="Facebook">
                                     <FacebookIcon size={18} />
-                                </SocialLink>
-                                <SocialLink href={settings?.instagram_url} label="Instagram">
+                                </SocialRow>
+                                <SocialRow href={settings?.instagram_url} label="Instagram">
                                     <InstagramIcon size={18} />
-                                </SocialLink>
-                                <SocialLink href={settings?.twitter_url} label="X">
+                                </SocialRow>
+                                <SocialRow href={settings?.twitter_url} label="X">
                                     <TwitterIcon size={18} />
-                                </SocialLink>
-                            </div>
+                                </SocialRow>
+                            </ul>
 
                             {/* Map — grows to fill the column so its bottom lines up
                                 with the form (Send Message) instead of overshooting. */}
@@ -234,26 +232,41 @@ export default function Contact() {
     );
 }
 
-/** Circular social icon — a link when the URL is set, a dim placeholder otherwise. */
-function SocialLink({ href, label, children }: { href?: string; label: string; children: React.ReactNode }) {
-    const base = 'flex h-11 w-11 items-center justify-center rounded-full border transition-colors';
-    if (href) {
-        return (
-            <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className={cn(base, 'border-primary/30 text-primary hover:bg-primary hover:text-white')}
-            >
-                {children}
-            </a>
-        );
-    }
-    return (
-        <span aria-label={label} className={cn(base, 'border-ink/10 text-ink/25')}>
+/**
+ * Social row — same icon-circle + text layout as a contact method. The whole
+ * row is a link when the URL is set; otherwise it's a dim placeholder (fill the
+ * URL in Settings to activate).
+ */
+function SocialRow({ href, label, children }: { href?: string; label: string; children: React.ReactNode }) {
+    const iconCircle = (
+        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-primary/30 text-primary">
             {children}
         </span>
+    );
+
+    if (href) {
+        return (
+            <li>
+                <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 text-ink transition-colors hover:text-primary"
+                >
+                    {iconCircle}
+                    <span className="text-base">{label}</span>
+                </a>
+            </li>
+        );
+    }
+
+    return (
+        <li className="flex items-center gap-4 text-ink/35">
+            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-ink/10">
+                {children}
+            </span>
+            <span className="text-base">{label}</span>
+        </li>
     );
 }
 
