@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Lightbox } from '@/Components/Public/Lightbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
-import type { PropertyDetailPageProps, RelatedProject } from '@/types/home';
+import { cn } from '@/lib/cn';
+import type { GalleryImage, PropertyDetailPageProps, RelatedProject } from '@/types/home';
 
 const STATUS_KEY: Record<string, string> = {
     for_sale: 'properties.card.forSale',
@@ -136,28 +138,11 @@ export default function PropertyDetail() {
                 </div>
             </section>
 
-            {/* ---------------- GALLERY (square thumbnails) ---------------- */}
+            {/* ---------------- GALLERY (square thumbnails, horizontal carousel) ---------------- */}
             {thumbs.length > 0 && (
                 <section className="bg-surface pb-12 sm:pb-16">
                     <div className="section-x">
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                            {thumbs.map((img, i) => (
-                                <button
-                                    key={img.id}
-                                    type="button"
-                                    onClick={() => setLightbox(i + 1)}
-                                    aria-label={`${title} — image ${i + 2}`}
-                                    className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-3xl"
-                                >
-                                    <img
-                                        src={img.url}
-                                        alt={img.alt}
-                                        loading="lazy"
-                                        className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                </button>
-                            ))}
-                        </div>
+                        <GalleryCarousel thumbs={thumbs} title={title} onOpen={(i) => setLightbox(i + 1)} />
                     </div>
                 </section>
             )}
@@ -217,6 +202,97 @@ export default function PropertyDetail() {
                 )}
             </AnimatePresence>
         </PublicLayout>
+    );
+}
+
+/**
+ * Square thumbnails in a single horizontally-scrolling row. Native overflow
+ * gives touch/trackpad swipe; the arrows page through on desktop and hide at
+ * each edge.
+ */
+function GalleryCarousel({
+    thumbs,
+    title,
+    onOpen,
+}: {
+    thumbs: GalleryImage[];
+    title: string;
+    onOpen: (index: number) => void;
+}) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [edges, setEdges] = useState({ start: true, end: false });
+
+    const update = () => {
+        const el = ref.current;
+        if (!el) return;
+        const max = el.scrollWidth - el.clientWidth;
+        const left = Math.abs(el.scrollLeft); // abs() keeps it correct under RTL
+        setEdges({ start: left <= 1, end: left >= max - 1 });
+    };
+
+    useEffect(() => {
+        update();
+        const el = ref.current;
+        if (!el) return;
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, [thumbs.length]);
+
+    const page = (dir: number) => {
+        const el = ref.current;
+        if (!el) return;
+        el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+    };
+
+    return (
+        <div className="relative">
+            <div
+                ref={ref}
+                onScroll={update}
+                className="flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x"
+            >
+                {thumbs.map((img, i) => (
+                    <button
+                        key={img.id}
+                        type="button"
+                        onClick={() => onOpen(i)}
+                        aria-label={`${title} — image ${i + 2}`}
+                        className="group relative aspect-square w-40 shrink-0 cursor-zoom-in snap-start overflow-hidden rounded-3xl sm:w-52 lg:w-64"
+                    >
+                        <img
+                            src={img.url}
+                            alt={img.alt}
+                            loading="lazy"
+                            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                        />
+                    </button>
+                ))}
+            </div>
+
+            {/* Arrows (desktop) — fade out at the respective edge. */}
+            <button
+                type="button"
+                onClick={() => page(-1)}
+                aria-label="Scroll left"
+                className={cn(
+                    'absolute inset-s-2 top-1/2 hidden -translate-y-1/2 rounded-full border-2 border-primary bg-white/90 p-2 text-primary shadow-sm transition hover:bg-primary hover:text-white sm:flex cursor-pointer',
+                    edges.start && 'pointer-events-none opacity-0',
+                )}
+            >
+                <ChevronLeft className="rtl:rotate-180" />
+            </button>
+            <button
+                type="button"
+                onClick={() => page(1)}
+                aria-label="Scroll right"
+                className={cn(
+                    'absolute inset-e-2 top-1/2 hidden -translate-y-1/2 rounded-full border-2 border-primary bg-white/90 p-2 text-primary shadow-sm transition hover:bg-primary hover:text-white sm:flex cursor-pointer',
+                    edges.end && 'pointer-events-none opacity-0',
+                )}
+            >
+                <ChevronRight className="rtl:rotate-180" />
+            </button>
+        </div>
     );
 }
 
