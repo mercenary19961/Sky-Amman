@@ -102,6 +102,19 @@ export default function Contact() {
                                         </a>
                                     </ContactMethod>
                                 )}
+                                {/* Instagram swapped into the email slot (right column, top). */}
+                                <SocialRow href={settings?.instagram_url} label="Instagram">
+                                    <InstagramIcon size={18} />
+                                </SocialRow>
+                                {settings?.address && (
+                                    <ContactMethod icon={<MapPin size={18} />}>
+                                        <span>{settings.address}</span>
+                                    </ContactMethod>
+                                )}
+
+                                <SocialRow href={settings?.facebook_url} label="Facebook">
+                                    <FacebookIcon size={18} />
+                                </SocialRow>
                                 {settings?.email && (
                                     <ContactMethod icon={<Mail size={18} />}>
                                         <a href={`mailto:${settings.email}`} className="transition-colors hover:text-primary">
@@ -109,19 +122,6 @@ export default function Contact() {
                                         </a>
                                     </ContactMethod>
                                 )}
-                                {settings?.address && (
-                                    <ContactMethod icon={<MapPin size={18} />}>
-                                        <span>{settings.address}</span>
-                                    </ContactMethod>
-                                )}
-
-                                {/* Social links — same icon + text row, clickable. */}
-                                <SocialRow href={settings?.facebook_url} label="Facebook">
-                                    <FacebookIcon size={18} />
-                                </SocialRow>
-                                <SocialRow href={settings?.instagram_url} label="Instagram">
-                                    <InstagramIcon size={18} />
-                                </SocialRow>
                                 <SocialRow href={settings?.twitter_url} label="X">
                                     <TwitterIcon size={18} />
                                 </SocialRow>
