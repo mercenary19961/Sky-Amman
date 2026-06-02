@@ -63,7 +63,7 @@ export default function Contact() {
     const seoTitle = settings?.seo_title || `${heroTitle} · SkyAmman`;
 
     const inputClass =
-        'mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink outline-none transition-colors focus:border-primary';
+        'mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink transition-colors focus:outline-none focus:border-primary';
 
     return (
         <PublicLayout>
@@ -194,7 +194,7 @@ export default function Contact() {
                                         label: t(`contact.form.requestTypes.${rt}`),
                                     }))}
                                     className="mt-2"
-                                    buttonClassName="w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink outline-none transition-colors focus:border-primary"
+                                    buttonClassName="w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink transition-colors focus:outline-none focus:border-primary"
                                 />
                                 {form.errors.request_type && <p className="mt-1 text-sm text-red-600">{form.errors.request_type}</p>}
                             </div>
