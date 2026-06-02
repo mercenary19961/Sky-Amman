@@ -77,6 +77,11 @@ export interface RelatedProject {
     image_url: string;
 }
 
+export interface SecurityPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+}
+
 export interface ContactPageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;

@@ -203,7 +203,29 @@ const en = {
     },
     security: {
         hero: {
-            title: 'Security With SkyAmman',
+            title: 'Secure Ownership With SkyAmman',
+            subtitle: 'With Security, Credibility and Transparency',
+        },
+        legal: {
+            title: 'Legal Security',
+            item_1: 'Contracts are drafted and verified by a dedicated legal department',
+            item_2: 'All payments are officially documented',
+            item_3: 'Full support through the property registration process',
+            item_4: 'Legal verification of land ownership before project initiation',
+        },
+        financial: {
+            title: 'Financial Security',
+            item_1: 'Client payments are protected until ownership registration',
+            item_2: 'Flexible financing solutions through banking partners',
+            item_3: 'Full transparency in pricing and payment schedules',
+            item_4: 'No hidden costs or unexpected obligations',
+        },
+        construction: {
+            title: 'Construction Security',
+            item_1: 'Projects executed under certified engineering supervision',
+            item_2: 'Approved execution partners recognized by official authorities',
+            item_3: 'Strict adherence to technical specifications',
+            item_4: 'Use of trusted and verified suppliers',
         },
     },
     about: {
