@@ -46,6 +46,74 @@ class PropertiesController extends Controller
     }
 
     /**
+     * Single property detail page. Loads one active project by slug with its
+     * gallery, a handful of related listings, and the site map embed. All
+     * bilingual fields are sent raw so the client swaps language instantly.
+     */
+    public function show(string $slug): Response
+    {
+        $project = Project::active()
+            ->where('slug', $slug)
+            ->with(['images.media'])
+            ->firstOrFail();
+
+        // Gallery banners — uploaded gallery images (placeholder shown as the
+        // hero when none exist yet).
+        $gallery = $project->images
+            ->filter(fn (ProjectImage $img) => $img->media !== null)
+            ->map(fn (ProjectImage $img) => [
+                'id' => $img->id,
+                'url' => route('media.serve', $img->media_id, false),
+                'alt' => $project->title_en,
+            ])
+            ->values()
+            ->all();
+
+        $heroUrl = $gallery[0]['url'] ?? "/images/projects/{$project->slug}.svg";
+
+        // Related listings — other active projects (for the "Find homes…" row).
+        $related = Project::active()
+            ->where('id', '!=', $project->id)
+            ->ordered()
+            ->take(6)
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'listing_status'])
+            ->map(fn (Project $p) => [
+                'id' => $p->id,
+                'slug' => $p->slug,
+                'title_en' => $p->title_en,
+                'title_ar' => $p->title_ar,
+                'listing_status' => $p->listing_status,
+                'image_url' => "/images/projects/{$p->slug}.svg",
+            ])
+            ->all();
+
+        return Inertia::render('Public/PropertyDetail', [
+            'project' => [
+                'id' => $project->id,
+                'slug' => $project->slug,
+                'title_en' => $project->title_en,
+                'title_ar' => $project->title_ar,
+                'listing_status' => $project->listing_status,
+                'address_en' => $project->address_en,
+                'address_ar' => $project->address_ar,
+                'location_en' => $project->location_en,
+                'location_ar' => $project->location_ar,
+                'description_en' => $project->description_en,
+                'description_ar' => $project->description_ar,
+                'area_sqm' => $project->area_sqm,
+                'completion_year' => $project->completion_year,
+                'floors' => $project->floors,
+                'bedrooms' => $project->bedrooms,
+                'bathrooms' => $project->bathrooms,
+                'hero_url' => $heroUrl,
+            ],
+            'gallery' => $gallery,
+            'related' => $related,
+            'mapEmbedUrl' => Setting::get('google_maps_embed_url', ''),
+        ]);
+    }
+
+    /**
      * Builds the "Projects Gallery" image set. The pool is every active
      * project's gallery images, falling back to each project's placeholder
      * render when it has no uploaded gallery yet. `gallery_mode` decides between

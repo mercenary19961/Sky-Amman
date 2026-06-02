@@ -18,6 +18,9 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/properties', [PropertiesController::class, 'index'])->name('properties');
+Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
+    ->where('slug', '[a-z0-9-]+')
+    ->name('properties.show');
 
 // Public media serving — scoped to image/pdf MIME types, SVG excluded.
 Route::get('/media/{id}', [MediaServeController::class, 'show'])
