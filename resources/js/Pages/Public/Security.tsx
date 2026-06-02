@@ -16,6 +16,18 @@ function makeText(content: SiteContentBundle, t: (k: string) => string) {
     };
 }
 
+/**
+ * Section-visibility predicate (innovation #5): a section counts as visible
+ * unless every one of its CMS rows has been toggled off. Unseeded sections
+ * default to visible so missing rows never hide code-only UI.
+ */
+function sectionVisible(section: Record<string, ContentValue> | undefined): boolean {
+    if (!section) return true;
+    const rows = Object.values(section);
+    if (rows.length === 0) return true;
+    return rows.some((r) => r.is_visible);
+}
+
 // The three pillars, in display order. Each gets a building backdrop (admin can
 // swap these renders later) and reads its copy from `site_content` section `key`.
 const PILLARS = [
@@ -34,23 +46,53 @@ export default function Security() {
 
     const heroTitle = text('hero', 'title', 'security.hero.title');
     const heroSubtitle = text('hero', 'subtitle', 'security.hero.subtitle');
+    const showSubtitle = sectionVisible(content.hero);
+
+    // Drop any pillar whose section has been fully hidden in the admin.
+    const visiblePillars = PILLARS.filter((p) => sectionVisible(content[p.section]));
 
     // State-driven accordion (21st.dev "interactive image accordion" pattern).
-    // One pillar is always expanded; hovering (desktop) or tapping (touch) moves
-    // it. Construction is open by default to match the Figma. The detail bullets
-    // are conditionally RENDERED — they only exist in the DOM for the active
-    // pillar, so there's no chance of them showing on a collapsed one.
+    // One pillar is expanded; hovering (desktop) or tapping (touch) moves it.
+    // The last pillar (Construction) opens by default to match the Figma. The
+    // detail bullets are conditionally RENDERED — they only exist in the DOM for
+    // the active pillar, so a collapsed one can never show them.
     const [active, setActive] = useState(2);
+    const activeIndex = Math.min(active, visiblePillars.length - 1);
 
-    const seoTitle = `${heroTitle} · SkyAmman`;
+    // --- SEO: admin per-page values win, else fall back to the hero copy. ---
+    const ar = language === 'ar';
+    const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || `${heroTitle} · SkyAmman`;
+    const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || heroSubtitle;
+    const homeUrl = new URL(props.url).origin + '/';
+
+    // BreadcrumbList JSON-LD (Home › Security). `<` escaped so a stray
+    // "</script>" in the data can't break out of the tag.
+    const jsonLdHtml = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: t('nav.home'), item: homeUrl },
+            { '@type': 'ListItem', position: 2, name: heroTitle, item: props.url },
+        ],
+    }).replace(/</g, '\\u003c');
 
     return (
         <PublicLayout>
             <Head title={seoTitle}>
-                <meta name="description" content={heroSubtitle} />
+                <meta name="description" content={seoDescription} />
+                <link rel="canonical" href={props.url} />
                 <meta property="og:title" content={seoTitle} />
+                <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
+                <meta property="og:url" content={props.url} />
+                {/* Same URL serves both locales (session-driven), so all hreflang
+                    variants point at the canonical URL. */}
+                <link rel="alternate" hrefLang="en" href={props.url} />
+                <link rel="alternate" hrefLang="ar" href={props.url} />
+                <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
+
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml }} />
 
             {/* Brand-blue hero. The villa render sits centered and fades into the
                 blue at its edges (radial mask) — per the Figma design. The navbar
@@ -86,9 +128,11 @@ export default function Security() {
                         <h1 className="text-4xl font-light leading-[1.05] drop-shadow-sm sm:text-6xl lg:text-7xl">
                             {heroTitle}
                         </h1>
-                        <p className="mt-5 text-lg font-medium text-white/90 drop-shadow-sm sm:text-xl">
-                            {heroSubtitle}
-                        </p>
+                        {showSubtitle && (
+                            <p className="mt-5 text-lg font-medium text-white/90 drop-shadow-sm sm:text-xl">
+                                {heroSubtitle}
+                            </p>
+                        )}
                     </header>
 
                     {/* Pillars accordion (21st.dev interactive-image-accordion).
@@ -99,8 +143,8 @@ export default function Security() {
                         desktop; tap on touch. lg+ = horizontal row; below lg the
                         panels stack and expand by height. */}
                     <div className="mt-12 flex flex-col gap-4 sm:mt-16 lg:h-112 lg:flex-row lg:gap-4">
-                        {PILLARS.map((pillar, i) => {
-                            const isActive = i === active;
+                        {visiblePillars.map((pillar, i) => {
+                            const isActive = i === activeIndex;
                             const title = text(pillar.section, 'title', `security.${pillar.section}.title`);
                             const items = [1, 2, 3, 4].map((n) =>
                                 text(pillar.section, `item_${n}`, `security.${pillar.section}.item_${n}`),
