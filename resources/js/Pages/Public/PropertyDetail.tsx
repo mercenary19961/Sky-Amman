@@ -58,7 +58,7 @@ export default function PropertyDetail() {
                             className="absolute -bottom-5 -inset-e-5 sm:-bottom-8 sm:-inset-e-8 h-2/3 w-2/3 rounded-[64px] bg-primary lg:rounded-[120px]"
                         />
                         <motion.div
-                            className="relative overflow-hidden rounded-[32px] sm:rounded-[56px] lg:rounded-[86px]"
+                            className="relative overflow-hidden rounded-4xl sm:rounded-[56px] lg:rounded-[86px]"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -129,7 +129,7 @@ export default function PropertyDetail() {
                 <section className="bg-surface pb-12 sm:pb-16">
                     <div className="section-x flex flex-col gap-4 sm:gap-6">
                         {props.gallery.map((img) => (
-                            <div key={img.id} className="h-40 w-full overflow-hidden rounded-[32px] sm:h-52 lg:h-60">
+                            <div key={img.id} className="h-40 w-full overflow-hidden rounded-4xl sm:h-52 lg:h-60">
                                 <img
                                     src={img.url}
                                     alt={img.alt}

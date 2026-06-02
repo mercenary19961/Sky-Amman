@@ -69,7 +69,7 @@ class PropertiesController extends Controller
             ->values()
             ->all();
 
-        $heroUrl = $gallery[0]['url'] ?? "/images/projects/{$project->slug}.svg";
+        $heroUrl = $gallery[0]['url'] ?? '/images/properties/detail-hero.webp';
 
         // Related listings — other active projects (for the "Find homes…" row).
         $related = Project::active()
