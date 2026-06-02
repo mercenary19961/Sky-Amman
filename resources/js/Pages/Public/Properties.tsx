@@ -312,10 +312,8 @@ export default function Properties() {
             {(text(bottomCta, 'title') || text(bottomCta, 'subtitle')) && (
                 <section className="bg-surface pb-12 sm:pb-16">
                     <div className="section-x">
-                        <Link
-                            href="/contact"
-                            aria-label={text(bottomCta, 'title') || t('properties.bottomCta.title')}
-                            className="group relative mx-auto block aspect-574/323 w-full max-w-7xl overflow-hidden rounded-[40px] sm:rounded-[80px] lg:rounded-[120px] xl:rounded-[151px]"
+                        <div
+                            className="relative mx-auto block aspect-574/323 w-full max-w-7xl overflow-hidden rounded-[40px] sm:rounded-[80px] lg:rounded-[120px] xl:rounded-[151px]"
                         >
                             {/* Banner image — slightly reduced opacity so it
                                 softens against the page background. */}
@@ -336,11 +334,11 @@ export default function Properties() {
                                 </p>
                             </div>
 
-                            {/* Arrow on the trailing edge. */}
-                            <span className="absolute top-1/2 inset-e-6 sm:inset-e-10 lg:inset-e-16 -translate-y-1/2 text-white transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
+                            {/* Decorative arrow on the trailing edge. */}
+                            <span className="absolute top-1/2 inset-e-6 sm:inset-e-10 lg:inset-e-16 -translate-y-1/2 text-white">
                                 <ArrowRight className="h-7 w-7 sm:h-9 sm:w-9 rtl:rotate-180" />
                             </span>
-                        </Link>
+                        </div>
                     </div>
                 </section>
             )}
