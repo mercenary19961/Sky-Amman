@@ -48,27 +48,38 @@ export default function Security() {
                 <meta property="og:type" content="website" />
             </Head>
 
-            {/* Hero — villa render backdrop with a brand-sky gradient wash. The
-                navbar overlays this, so it opts into the dark/white treatment. */}
-            <section data-nav-bg="dark" className="relative isolate overflow-hidden">
+            {/* Brand-blue hero. The villa render sits centered and fades into the
+                blue at its edges (radial mask) — per the Figma design. The navbar
+                overlays the blue, so it opts into the dark/white treatment. */}
+            <section
+                data-nav-bg="dark"
+                className="relative isolate overflow-hidden bg-linear-to-b from-[#7FB4DD] via-primary to-primary-light"
+            >
+                {/* Centered villa — masked so only the middle shows and the edges
+                    dissolve into the brand blue. */}
                 <img
                     src="/images/security/secure-bg.webp"
                     alt=""
-                    className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+                    className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-90"
+                    style={{
+                        WebkitMaskImage:
+                            'radial-gradient(ellipse 70% 62% at 50% 44%, #000 32%, transparent 80%)',
+                        maskImage:
+                            'radial-gradient(ellipse 70% 62% at 50% 44%, #000 32%, transparent 80%)',
+                    }}
                 />
-                {/* Sky-blue gradient wash — strong at top (under the navbar),
-                    fading toward the cards so the photo reads through. */}
+                {/* Subtle blue tint to keep the photo cohesive with the bg. */}
                 <div
                     aria-hidden="true"
-                    className="absolute inset-0 -z-10 bg-linear-to-b from-[#5299CC]/95 via-primary/70 to-primary/30"
+                    className="absolute inset-0 -z-10 bg-linear-to-b from-primary/25 via-transparent to-primary-light/40"
                 />
 
-                <div className="section-x pt-36 pb-16 sm:pt-40 sm:pb-20 lg:pt-44 lg:pb-24">
-                    <header className="max-w-2xl text-white">
-                        <h1 className="text-4xl font-bold leading-[1.1] drop-shadow-sm sm:text-5xl lg:text-6xl">
+                <div className="section-x pt-36 pb-16 sm:pt-40 sm:pb-20 lg:pt-44 lg:pb-28">
+                    <header className="max-w-3xl text-white">
+                        <h1 className="text-4xl font-light leading-[1.05] drop-shadow-sm sm:text-6xl lg:text-7xl">
                             {heroTitle}
                         </h1>
-                        <p className="mt-4 text-lg font-medium text-white/90 drop-shadow-sm sm:text-xl">
+                        <p className="mt-5 text-lg font-medium text-white/90 drop-shadow-sm sm:text-xl">
                             {heroSubtitle}
                         </p>
                     </header>
@@ -76,7 +87,7 @@ export default function Security() {
                     {/* Pillars accordion. Mobile: stacked full cards (touch has no
                         hover). lg+: horizontal accordion — the active panel grows,
                         the others collapse to vertical-title bars. */}
-                    <div className="mt-12 flex flex-col gap-4 sm:mt-16 lg:h-115 lg:flex-row">
+                    <div className="mt-12 flex flex-col gap-4 sm:mt-16 lg:h-130 lg:flex-row">
                         {PILLARS.map((pillar, i) => {
                             const isActive = i === active;
                             const title = text(pillar.section, 'title', `security.${pillar.section}.title`);
@@ -93,10 +104,12 @@ export default function Security() {
                                     onClick={() => setActive(i)}
                                     aria-expanded={isActive}
                                     className={cn(
-                                        'group relative block w-full overflow-hidden rounded-4xl text-start',
+                                        'group relative block w-full overflow-hidden rounded-[44px] text-start',
                                         'transition-all duration-500 ease-in-out',
                                         'min-h-56 lg:h-full lg:min-h-0',
-                                        isActive ? 'lg:grow-3' : 'lg:grow',
+                                        isActive
+                                            ? 'lg:grow-3 lg:border-2 lg:border-[#5299CC]'
+                                            : 'lg:grow',
                                     )}
                                 >
                                     <img
@@ -111,8 +124,10 @@ export default function Security() {
                                         aria-hidden="true"
                                         className={cn(
                                             'absolute inset-0 transition-colors duration-500',
-                                            'bg-linear-to-t from-black/85 via-black/55 to-black/30',
-                                            isActive ? 'lg:from-black/80 lg:via-black/50 lg:to-black/10' : 'lg:from-black/75 lg:via-black/65 lg:to-black/55',
+                                            'bg-linear-to-t from-black/80 via-black/55 to-black/35',
+                                            isActive
+                                                ? 'lg:from-black/70 lg:via-black/40 lg:to-black/20'
+                                                : 'lg:from-black/80 lg:via-black/70 lg:to-black/60',
                                         )}
                                     />
 
@@ -132,17 +147,17 @@ export default function Security() {
                                         fades in only for the active panel. */}
                                     <div
                                         className={cn(
-                                            'relative flex h-full flex-col justify-center gap-5 p-7 transition-opacity duration-300 sm:p-9',
+                                            'relative flex h-full flex-col justify-center gap-6 p-8 transition-opacity duration-300 sm:p-10',
                                             isActive ? 'lg:opacity-100' : 'lg:pointer-events-none lg:opacity-0',
                                         )}
                                     >
-                                        <h2 className="text-2xl font-bold text-white drop-shadow-sm sm:text-3xl">
+                                        <h2 className="text-3xl font-bold text-white drop-shadow-sm sm:text-4xl">
                                             {title}
                                         </h2>
-                                        <ul className="space-y-3">
+                                        <ul className="space-y-4">
                                             {items.map((item, n) => (
                                                 <li key={n} className="flex items-start gap-3 text-white/95">
-                                                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-white" />
+                                                    <span className="mt-2 h-2 w-2 flex-none rounded-full bg-white" />
                                                     <span className="text-sm leading-relaxed sm:text-base">{item}</span>
                                                 </li>
                                             ))}
