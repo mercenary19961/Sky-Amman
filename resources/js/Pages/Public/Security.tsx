@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Head, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -112,7 +113,7 @@ export default function Security() {
                                     aria-expanded={isActive}
                                     className={cn(
                                         'relative block w-full overflow-hidden rounded-[44px] text-start',
-                                        'transition-all duration-700 ease-in-out',
+                                        'transition-all duration-500 ease-in-out',
                                         // Mobile: expand by height. lg+: expand by width.
                                         isActive ? 'min-h-90' : 'min-h-20',
                                         'lg:h-full lg:min-h-0 lg:flex-1',
@@ -141,8 +142,17 @@ export default function Security() {
                                     )}
 
                                     {isActive ? (
-                                        // Expanded — heading + detail bullets.
-                                        <div className="relative flex h-full flex-col justify-center gap-5 p-7 sm:gap-6 sm:p-9 lg:p-10">
+                                        // Expanded — heading + detail bullets. The card
+                                        // grows over 1s; if the text rendered at the narrow
+                                        // start width it would wrap then reflow. So we hold
+                                        // it invisible and fade it in once the card has
+                                        // mostly widened (delay ≈ the width transition).
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ duration: 0.3, delay: 0.3 }}
+                                            className="relative flex h-full flex-col justify-center gap-5 p-7 sm:gap-6 sm:p-9 lg:p-10"
+                                        >
                                             <h2 className="text-2xl font-bold text-white drop-shadow-sm sm:text-3xl lg:text-5xl">
                                                 {title}
                                             </h2>
@@ -154,7 +164,7 @@ export default function Security() {
                                                     </li>
                                                 ))}
                                             </ul>
-                                        </div>
+                                        </motion.div>
                                     ) : (
                                         // Collapsed — title only. Horizontal on the short
                                         // mobile bar; rotated 90° on the tall lg bar.
