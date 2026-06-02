@@ -60,7 +60,7 @@ export default function Security() {
                 pages keep the footer's top margin. */}
             <section
                 data-nav-bg="dark"
-                className="relative isolate -mb-16 min-h-screen overflow-hidden bg-linear-to-b from-[#7FB4DD] via-primary to-primary-light"
+                className="relative isolate -mb-16 min-h-screen overflow-hidden bg-primary-deep"
             >
                 {/* Centered villa — masked so only the middle shows and the edges
                     dissolve into the brand blue. */}
@@ -75,10 +75,10 @@ export default function Security() {
                             'radial-gradient(ellipse 70% 62% at 50% 44%, #000 32%, transparent 80%)',
                     }}
                 />
-                {/* Subtle blue tint to keep the photo cohesive with the bg. */}
+                {/* Subtle #78AFCE wash to keep the photo cohesive with the bg. */}
                 <div
                     aria-hidden="true"
-                    className="absolute inset-0 -z-10 bg-linear-to-b from-primary/25 via-transparent to-primary-light/40"
+                    className="absolute inset-0 -z-10 bg-primary-deep/30"
                 />
 
                 <div className="section-x pt-36 pb-16 sm:pt-40 sm:pb-20 lg:pt-44 lg:pb-28">
