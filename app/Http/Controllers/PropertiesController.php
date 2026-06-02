@@ -83,10 +83,13 @@ class PropertiesController extends Controller
             ])->all();
         }
 
-        // Related listings — other active projects (for the "Find homes…" row).
+        // Related listings — same-category projects first, then the rest, for
+        // the "Find homes…" row.
         $related = Project::active()
             ->where('id', '!=', $project->id)
-            ->ordered()
+            ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$project->category])
+            ->orderBy('sort_order')
+            ->orderBy('id', 'desc')
             ->take(6)
             ->get(['id', 'slug', 'title_en', 'title_ar', 'listing_status'])
             ->map(fn (Project $p) => [
@@ -117,6 +120,14 @@ class PropertiesController extends Controller
                 'floors' => $project->floors,
                 'bedrooms' => $project->bedrooms,
                 'bathrooms' => $project->bathrooms,
+                // Per-listing SEO (falls back to title/description on the client).
+                'seo_title_en' => $project->seo_title_en,
+                'seo_title_ar' => $project->seo_title_ar,
+                'seo_description_en' => $project->seo_description_en,
+                'seo_description_ar' => $project->seo_description_ar,
+                // Absolute URLs for canonical link + OG image + JSON-LD.
+                'url' => route('properties.show', $project->slug),
+                'og_image' => url($images[0]['url']),
             ],
             'images' => $images,
             'related' => $related,

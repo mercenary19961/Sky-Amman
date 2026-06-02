@@ -60,6 +60,12 @@ export interface PropertyDetail {
     floors: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
+    seo_title_en: string | null;
+    seo_title_ar: string | null;
+    seo_description_en: string | null;
+    seo_description_ar: string | null;
+    url: string;
+    og_image: string;
 }
 
 export interface RelatedProject {

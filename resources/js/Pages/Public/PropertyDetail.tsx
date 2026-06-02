@@ -45,15 +45,46 @@ export default function PropertyDetail() {
     if (p.bedrooms != null) specs.push({ label: t('properties.detail.bedrooms'), value: String(p.bedrooms) });
     if (p.bathrooms != null) specs.push({ label: t('properties.detail.bathrooms'), value: String(p.bathrooms) });
 
-    const seoTitle = `${title} · SkyAmman`;
+    // Per-listing SEO with sensible fallbacks to the project's own content.
+    const seoTitle = (ar ? p.seo_title_ar : p.seo_title_en) || `${title} · SkyAmman`;
+    const seoDescription = (ar ? p.seo_description_ar : p.seo_description_en) || description;
+
+    // JSON-LD structured data (RealEstateListing). `<` is escaped so a stray
+    // "</script>" in the data can't break out of the tag.
+    const jsonLd: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': 'RealEstateListing',
+        name: title,
+        url: p.url,
+    };
+    if (seoDescription) jsonLd.description = seoDescription;
+    if (p.og_image) jsonLd.image = [p.og_image];
+    if (address) {
+        jsonLd.address = {
+            '@type': 'PostalAddress',
+            streetAddress: address,
+            addressLocality: 'Amman',
+            addressCountry: 'JO',
+        };
+    }
+    if (p.area_sqm != null) {
+        jsonLd.floorSize = { '@type': 'QuantitativeValue', value: p.area_sqm, unitCode: 'MTK' };
+    }
+    const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 
     return (
         <PublicLayout>
             <Head title={seoTitle}>
-                <meta name="description" content={description} />
+                <meta name="description" content={seoDescription} />
+                <link rel="canonical" href={p.url} />
                 <meta property="og:title" content={seoTitle} />
-                <meta property="og:type" content="website" />
+                <meta property="og:description" content={seoDescription} />
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={p.url} />
+                {p.og_image && <meta property="og:image" content={p.og_image} />}
             </Head>
+
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml }} />
 
             {/* ---------------- TITLE + HERO ---------------- */}
             <section data-nav-bg="light" className="bg-surface">
@@ -111,8 +142,10 @@ export default function PropertyDetail() {
                                 {description}
                             </p>
                         )}
+                        {/* Carries the project so the (future) Contact form can
+                            pre-fill + stamp project_id — "Contact about this project". */}
                         <Link
-                            href="/contact"
+                            href={`/contact?property=${p.slug}`}
                             className="mt-7 inline-flex w-fit items-center justify-center rounded-2xl bg-[#1A3954] px-10 py-4 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#13293d]"
                         >
                             {t('nav.contact')}
