@@ -3,6 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { FacebookIcon, InstagramIcon, TwitterIcon } from '@/Components/Layout/SocialIcons';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
@@ -74,8 +75,8 @@ export default function Contact() {
             <section data-nav-bg="light" className="bg-surface">
                 <div className="section-x pt-28 pb-16 sm:pt-32 sm:pb-24 lg:pt-36">
                     <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-                        {/* Left: intro + contact methods */}
-                        <div className="max-w-lg">
+                        {/* Left: intro + contact methods + socials + map */}
+                        <div className="flex h-full max-w-lg flex-col">
                             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
                                 {t('contact.label')}
                             </p>
@@ -113,6 +114,33 @@ export default function Contact() {
                                     </ContactMethod>
                                 )}
                             </ul>
+
+                            {/* Social links */}
+                            <div className="mt-7 flex items-center gap-3">
+                                <SocialLink href={settings?.facebook_url} label="Facebook">
+                                    <FacebookIcon size={18} />
+                                </SocialLink>
+                                <SocialLink href={settings?.instagram_url} label="Instagram">
+                                    <InstagramIcon size={18} />
+                                </SocialLink>
+                                <SocialLink href={settings?.twitter_url} label="X">
+                                    <TwitterIcon size={18} />
+                                </SocialLink>
+                            </div>
+
+                            {/* Map — grows to fill the column so its bottom lines up
+                                with the form (Send Message) instead of overshooting. */}
+                            {settings?.google_maps_embed_url && (
+                                <div className="mt-8 min-h-56 flex-1 overflow-hidden rounded-2xl">
+                                    <iframe
+                                        src={settings.google_maps_embed_url}
+                                        title={t('home.location.title')}
+                                        className="h-full min-h-56 w-full border-0"
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {/* Right: form */}
@@ -203,6 +231,29 @@ export default function Contact() {
                 </div>
             </section>
         </PublicLayout>
+    );
+}
+
+/** Circular social icon — a link when the URL is set, a dim placeholder otherwise. */
+function SocialLink({ href, label, children }: { href?: string; label: string; children: React.ReactNode }) {
+    const base = 'flex h-11 w-11 items-center justify-center rounded-full border transition-colors';
+    if (href) {
+        return (
+            <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className={cn(base, 'border-primary/30 text-primary hover:bg-primary hover:text-white')}
+            >
+                {children}
+            </a>
+        );
+    }
+    return (
+        <span aria-label={label} className={cn(base, 'border-ink/10 text-ink/25')}>
+            {children}
+        </span>
     );
 }
 
