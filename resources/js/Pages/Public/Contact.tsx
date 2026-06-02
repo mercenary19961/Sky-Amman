@@ -3,6 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { Select } from '@/Components/Public/Select';
 import { FacebookIcon, InstagramIcon, TwitterIcon } from '@/Components/Layout/SocialIcons';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
@@ -185,17 +186,16 @@ export default function Contact() {
 
                             <div>
                                 <label className="block text-sm font-medium text-ink">{t('contact.form.requestType')}</label>
-                                <select
+                                <Select
                                     value={form.data.request_type}
-                                    onChange={(e) => form.setData('request_type', e.target.value)}
-                                    className={inputClass}
-                                >
-                                    {props.requestTypes.map((rt) => (
-                                        <option key={rt} value={rt}>
-                                            {t(`contact.form.requestTypes.${rt}`)}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(v) => form.setData('request_type', v)}
+                                    options={props.requestTypes.map((rt) => ({
+                                        value: rt,
+                                        label: t(`contact.form.requestTypes.${rt}`),
+                                    }))}
+                                    className="mt-2"
+                                    buttonClassName="w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink outline-none transition-colors focus:border-primary"
+                                />
                                 {form.errors.request_type && <p className="mt-1 text-sm text-red-600">{form.errors.request_type}</p>}
                             </div>
 
