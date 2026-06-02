@@ -60,7 +60,6 @@ export interface PropertyDetail {
     floors: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
-    hero_url: string;
 }
 
 export interface RelatedProject {
@@ -74,7 +73,7 @@ export interface RelatedProject {
 
 export interface PropertyDetailPageProps extends PageProps {
     project: PropertyDetail;
-    gallery: GalleryImage[];
+    images: GalleryImage[];
     related: RelatedProject[];
     mapEmbedUrl: string;
 }

@@ -57,19 +57,31 @@ class PropertiesController extends Controller
             ->with(['images.media'])
             ->firstOrFail();
 
-        // Gallery banners — uploaded gallery images (placeholder shown as the
-        // hero when none exist yet).
-        $gallery = $project->images
+        // Full image set for the hero + thumbnail row + lightbox. Uses the
+        // project's uploaded gallery; falls back to a demo set of villa renders
+        // until real galleries are uploaded so the gallery/lightbox is testable.
+        $images = $project->images
             ->filter(fn (ProjectImage $img) => $img->media !== null)
             ->map(fn (ProjectImage $img) => [
-                'id' => $img->id,
+                'id' => "img-{$img->id}",
                 'url' => route('media.serve', $img->media_id, false),
                 'alt' => $project->title_en,
             ])
             ->values()
             ->all();
 
-        $heroUrl = $gallery[0]['url'] ?? '/images/properties/detail-hero.webp';
+        if (empty($images)) {
+            $images = collect([
+                '/images/properties/detail-hero.webp',
+                '/images/properties/properties-hero.webp',
+                '/images/properties/find-the-right-space.webp',
+                '/images/home/hero-villa-trimmed.webp',
+            ])->map(fn (string $url, int $i) => [
+                'id' => "demo-{$i}",
+                'url' => $url,
+                'alt' => $project->title_en,
+            ])->all();
+        }
 
         // Related listings — other active projects (for the "Find homes…" row).
         $related = Project::active()
@@ -105,9 +117,8 @@ class PropertiesController extends Controller
                 'floors' => $project->floors,
                 'bedrooms' => $project->bedrooms,
                 'bathrooms' => $project->bathrooms,
-                'hero_url' => $heroUrl,
             ],
-            'gallery' => $gallery,
+            'images' => $images,
             'related' => $related,
             'mapEmbedUrl' => Setting::get('google_maps_embed_url', ''),
         ]);

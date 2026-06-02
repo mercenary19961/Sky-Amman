@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { Lightbox } from '@/Components/Public/Lightbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import type { PropertyDetailPageProps, RelatedProject } from '@/types/home';
@@ -19,6 +21,13 @@ export default function PropertyDetail() {
     const ar = language === 'ar';
 
     const p = props.project;
+    const images = props.images;
+    const hero = images[0];
+    const thumbs = images.slice(1); // "the rest" shown as squares
+
+    // Lightbox: holds the index of the image being viewed, or null when closed.
+    const [lightbox, setLightbox] = useState<number | null>(null);
+
     const title = ar ? p.title_ar : p.title_en;
     const address = (ar ? p.address_ar : p.address_en) || (ar ? p.location_ar : p.location_en) || '';
     const description = (ar ? p.description_ar : p.description_en) || '';
@@ -57,14 +66,17 @@ export default function PropertyDetail() {
                             aria-hidden="true"
                             className="absolute -bottom-5 -inset-e-5 sm:-bottom-8 sm:-inset-e-8 h-2/3 w-2/3 rounded-[64px] bg-primary lg:rounded-[120px]"
                         />
-                        <motion.div
-                            className="relative overflow-hidden rounded-4xl sm:rounded-[56px] lg:rounded-[86px]"
+                        <motion.button
+                            type="button"
+                            onClick={() => hero && setLightbox(0)}
+                            aria-label={title}
+                            className="relative block w-full cursor-zoom-in overflow-hidden rounded-4xl sm:rounded-[56px] lg:rounded-[86px]"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                         >
                             <img
-                                src={p.hero_url}
+                                src={hero?.url}
                                 alt={title}
                                 className="aspect-1131/636 w-full object-cover object-center"
                                 loading="eager"
@@ -74,7 +86,7 @@ export default function PropertyDetail() {
                                     {t(status)}
                                 </span>
                             )}
-                        </motion.div>
+                        </motion.button>
                     </div>
                 </div>
             </section>
@@ -124,20 +136,28 @@ export default function PropertyDetail() {
                 </div>
             </section>
 
-            {/* ---------------- GALLERY BANNERS ---------------- */}
-            {props.gallery.length > 0 && (
+            {/* ---------------- GALLERY (square thumbnails) ---------------- */}
+            {thumbs.length > 0 && (
                 <section className="bg-surface pb-12 sm:pb-16">
-                    <div className="section-x flex flex-col gap-4 sm:gap-6">
-                        {props.gallery.map((img) => (
-                            <div key={img.id} className="h-40 w-full overflow-hidden rounded-4xl sm:h-52 lg:h-60">
-                                <img
-                                    src={img.url}
-                                    alt={img.alt}
-                                    loading="lazy"
-                                    className="h-full w-full object-cover object-center"
-                                />
-                            </div>
-                        ))}
+                    <div className="section-x">
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                            {thumbs.map((img, i) => (
+                                <button
+                                    key={img.id}
+                                    type="button"
+                                    onClick={() => setLightbox(i + 1)}
+                                    aria-label={`${title} — image ${i + 2}`}
+                                    className="group relative aspect-square cursor-zoom-in overflow-hidden rounded-3xl"
+                                >
+                                    <img
+                                        src={img.url}
+                                        alt={img.alt}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}
@@ -184,6 +204,18 @@ export default function PropertyDetail() {
                     </div>
                 </section>
             )}
+
+            {/* ---------------- LIGHTBOX ---------------- */}
+            <AnimatePresence>
+                {lightbox !== null && (
+                    <Lightbox
+                        images={images}
+                        index={lightbox}
+                        onClose={() => setLightbox(null)}
+                        onChange={setLightbox}
+                    />
+                )}
+            </AnimatePresence>
         </PublicLayout>
     );
 }
