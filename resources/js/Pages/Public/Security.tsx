@@ -55,9 +55,12 @@ export default function Security() {
             {/* Brand-blue hero. The villa render sits centered and fades into the
                 blue at its edges (radial mask) — per the Figma design. The navbar
                 overlays the blue, so it opts into the dark/white treatment. */}
+            {/* -mb-16 cancels the Footer's mt-16 on this page only (the section
+                is blue, so the footer should sit flush — no white gap). Other
+                pages keep the footer's top margin. */}
             <section
                 data-nav-bg="dark"
-                className="relative isolate overflow-hidden bg-linear-to-b from-[#7FB4DD] via-primary to-primary-light"
+                className="relative isolate -mb-16 min-h-screen overflow-hidden bg-linear-to-b from-[#7FB4DD] via-primary to-primary-light"
             >
                 {/* Centered villa — masked so only the middle shows and the edges
                     dissolve into the brand blue. */}
