@@ -66,13 +66,13 @@ export default function PropertyDetail() {
                     <div className="relative mt-6 sm:mt-8">
                         <div
                             aria-hidden="true"
-                            className="absolute -bottom-5 -inset-e-5 sm:-bottom-8 sm:-inset-e-8 h-2/3 w-2/3 rounded-[64px] bg-primary lg:rounded-[120px]"
+                            className="pointer-events-none absolute -bottom-5 -inset-e-5 sm:-bottom-8 sm:-inset-e-8 h-2/3 w-2/3 rounded-[64px] bg-primary lg:rounded-[120px]"
                         />
                         <motion.button
                             type="button"
                             onClick={() => hero && setLightbox(0)}
                             aria-label={title}
-                            className="relative block w-full cursor-zoom-in overflow-hidden rounded-4xl sm:rounded-[56px] lg:rounded-[86px]"
+                            className="group relative z-10 block w-full cursor-zoom-in overflow-hidden rounded-4xl sm:rounded-[56px] lg:rounded-[86px]"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -80,7 +80,7 @@ export default function PropertyDetail() {
                             <img
                                 src={hero?.url}
                                 alt={title}
-                                className="aspect-1131/636 w-full object-cover object-center"
+                                className="aspect-1131/636 w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                                 loading="eager"
                             />
                             {status && (
