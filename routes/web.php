@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
 use App\Http\Controllers\LocaleController;
@@ -21,6 +22,13 @@ Route::get('/properties', [PropertiesController::class, 'index'])->name('propert
 Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('properties.show');
+
+// Contact — single inbox for all public inquiries. POST is rate-limited like
+// every public form; Turnstile-gated server-side in the controller.
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('contact.submit');
 
 // Public media serving — scoped to image/pdf MIME types, SVG excluded.
 Route::get('/media/{id}', [MediaServeController::class, 'show'])

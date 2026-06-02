@@ -77,6 +77,13 @@ export interface RelatedProject {
     image_url: string;
 }
 
+export interface ContactPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+    requestTypes: string[];
+    project: { id: number; slug: string; title_en: string; title_ar: string } | null;
+}
+
 export interface PropertyDetailPageProps extends PageProps {
     project: PropertyDetail;
     images: GalleryImage[];
