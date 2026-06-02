@@ -146,6 +146,9 @@ const en = {
         },
         resultCount: '{{count}} properties',
         empty: 'No properties match this filter yet.',
+        gallery: {
+            title: 'Projects Gallery',
+        },
         bottomCta: {
             title: 'Find The Right Space, Made Simple',
             subtitle: 'Explore residential and commercial properties with clear details and guided support.',

@@ -305,6 +305,36 @@ export default function Properties() {
                 </div>
             </section>
 
+            {/* ---------------- PROJECTS GALLERY ---------------- */}
+            {/* Pool comes from project galleries (shuffled per visit by the
+                controller). Hover-expand row on lg+; responsive grid below,
+                where hover isn't available on touch. */}
+            {props.galleryImages.length > 0 && (
+                <section className="bg-surface pb-4 sm:pb-8">
+                    <div className="section-x">
+                        <h2 className="text-center text-3xl sm:text-4xl lg:text-5xl font-bold text-primary tracking-wide uppercase">
+                            {t('properties.gallery.title')}
+                        </h2>
+
+                        <div className="mt-10 sm:mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:h-115 lg:gap-3">
+                            {props.galleryImages.map((img) => (
+                                <div
+                                    key={img.id}
+                                    className="group relative aspect-3/4 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full lg:flex-1 lg:transition-[flex-grow] lg:duration-500 lg:ease-out lg:hover:grow-3"
+                                >
+                                    <img
+                                        src={img.url}
+                                        alt={img.alt}
+                                        loading="lazy"
+                                        className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* ---------------- BOTTOM CTA BANNER ---------------- */}
             {/* Per HERO SECTION.svg: a 1148×646 rounded image (rx≈151, all
                 corners) at 74% opacity over a brand-blue card — giving the blue

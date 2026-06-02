@@ -42,6 +42,17 @@ class DefaultSettingsSeeder extends Seeder
             ['key' => 'seo_description_ar', 'value' => 'اشترِ، استأجر أو ابنِ عقاراً في عمّان بأمان ومصداقية وشفافية.', 'type' => 'textarea', 'group' => 'seo'],
             ['key' => 'og_image_url', 'value' => '', 'type' => 'url', 'group' => 'seo'],
 
+            // Projects Gallery (Properties page closing section). Pool is built
+            // from project galleries (fallback to each project's placeholder).
+            //  • gallery_enabled — show/hide the whole section
+            //  • gallery_count   — how many tiles to display
+            //  • gallery_mode    — 'shuffle' (random subset per visit) | 'manual'
+            //  • gallery_manual  — JSON ordered list of pool image ids (manual mode)
+            ['key' => 'gallery_enabled', 'value' => '1', 'type' => 'boolean', 'group' => 'gallery'],
+            ['key' => 'gallery_count', 'value' => '6', 'type' => 'number', 'group' => 'gallery'],
+            ['key' => 'gallery_mode', 'value' => 'shuffle', 'type' => 'text', 'group' => 'gallery'],
+            ['key' => 'gallery_manual', 'value' => '[]', 'type' => 'json', 'group' => 'gallery'],
+
             // Lead routing map — request_type -> recipient email(s). JSON-encoded.
             // Empty entries fall back to company_email.
             ['key' => 'lead_routing', 'value' => json_encode([

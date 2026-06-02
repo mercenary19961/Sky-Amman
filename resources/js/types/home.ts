@@ -30,10 +30,17 @@ export interface InstagramPost {
     permalink: string;
 }
 
+export interface GalleryImage {
+    id: string;
+    url: string;
+    alt: string;
+}
+
 export interface PropertiesPageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
     projects: FeaturedProject[];
+    galleryImages: GalleryImage[];
 }
 
 export interface HomePageProps extends PageProps {
