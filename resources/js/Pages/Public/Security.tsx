@@ -34,8 +34,11 @@ export default function Security() {
     const heroTitle = text('hero', 'title', 'security.hero.title');
     const heroSubtitle = text('hero', 'subtitle', 'security.hero.subtitle');
 
-    // Active panel (the one expanded on lg+). Construction matches the design's
-    // default-open state; hovering any panel takes over.
+    // State-driven accordion (21st.dev "interactive image accordion" pattern).
+    // One pillar is always expanded; hovering (desktop) or tapping (touch) moves
+    // it. Construction is open by default to match the Figma. The detail bullets
+    // are conditionally RENDERED — they only exist in the DOM for the active
+    // pillar, so there's no chance of them showing on a collapsed one.
     const [active, setActive] = useState(2);
 
     const seoTitle = `${heroTitle} · SkyAmman`;
@@ -84,10 +87,14 @@ export default function Security() {
                         </p>
                     </header>
 
-                    {/* Pillars accordion. Mobile: stacked full cards (touch has no
-                        hover). lg+: horizontal accordion — the active panel grows,
-                        the others collapse to vertical-title bars. */}
-                    <div className="mt-12 flex flex-col gap-4 sm:mt-16 lg:h-130 lg:flex-row">
+                    {/* Pillars accordion (21st.dev interactive-image-accordion).
+                        One pillar is expanded at a time; the others collapse to
+                        narrow bars showing only the rotated title. The active panel
+                        is the only one that renders its detail bullets, so a
+                        collapsed pillar can never show them. Hover drives it on
+                        desktop; tap on touch. lg+ = horizontal row; below lg the
+                        panels stack and expand by height. */}
+                    <div className="mt-12 flex flex-col gap-4 sm:mt-16 lg:h-112 lg:flex-row lg:gap-4">
                         {PILLARS.map((pillar, i) => {
                             const isActive = i === active;
                             const title = text(pillar.section, 'title', `security.${pillar.section}.title`);
@@ -104,65 +111,51 @@ export default function Security() {
                                     onClick={() => setActive(i)}
                                     aria-expanded={isActive}
                                     className={cn(
-                                        'group relative block w-full overflow-hidden rounded-[44px] text-start',
-                                        'transition-all duration-500 ease-in-out',
-                                        'min-h-56 lg:h-full lg:min-h-0',
-                                        isActive
-                                            ? 'lg:grow-3 lg:border-2 lg:border-[#5299CC]'
-                                            : 'lg:grow',
+                                        'relative block w-full overflow-hidden rounded-[44px] text-start',
+                                        'transition-all duration-700 ease-in-out',
+                                        // Mobile: expand by height. lg+: expand by width.
+                                        isActive ? 'min-h-90' : 'min-h-20',
+                                        'lg:h-full lg:min-h-0 lg:flex-1',
+                                        isActive && 'lg:grow-3',
                                     )}
                                 >
+                                    {/* Photo backdrop. */}
                                     <img
                                         src={pillar.image}
                                         alt=""
                                         loading="lazy"
-                                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        className="absolute inset-0 h-full w-full object-cover"
                                     />
-                                    {/* Darkening overlay — heavier on collapsed bars
-                                        so the vertical title reads, lighter when open. */}
+                                    {/* Darkening overlay for text legibility. */}
                                     <div
                                         aria-hidden="true"
-                                        className={cn(
-                                            'absolute inset-0 transition-colors duration-500',
-                                            'bg-linear-to-t from-black/80 via-black/55 to-black/35',
-                                            isActive
-                                                ? 'lg:from-black/70 lg:via-black/40 lg:to-black/20'
-                                                : 'lg:from-black/80 lg:via-black/70 lg:to-black/60',
-                                        )}
+                                        className="absolute inset-0 bg-linear-to-t from-black/85 via-black/55 to-black/40"
                                     />
 
-                                    {/* Collapsed vertical title — lg only, hidden when active. */}
-                                    <div
-                                        className={cn(
-                                            'absolute inset-0 hidden items-center justify-center',
-                                            !isActive && 'lg:flex',
-                                        )}
-                                    >
-                                        <span className="rotate-180 text-2xl font-semibold tracking-wide text-white [writing-mode:vertical-rl]">
-                                            {title}
-                                        </span>
-                                    </div>
-
-                                    {/* Expanded content — always shown on mobile; on lg
-                                        fades in only for the active panel. */}
-                                    <div
-                                        className={cn(
-                                            'relative flex h-full flex-col justify-center gap-6 p-8 transition-opacity duration-300 sm:p-10',
-                                            isActive ? 'lg:opacity-100' : 'lg:pointer-events-none lg:opacity-0',
-                                        )}
-                                    >
-                                        <h2 className="text-3xl font-bold text-white drop-shadow-sm sm:text-4xl">
-                                            {title}
-                                        </h2>
-                                        <ul className="space-y-4">
-                                            {items.map((item, n) => (
-                                                <li key={n} className="flex items-start gap-3 text-white/95">
-                                                    <span className="mt-2 h-2 w-2 flex-none rounded-full bg-white" />
-                                                    <span className="text-sm leading-relaxed sm:text-base">{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                    {isActive ? (
+                                        // Expanded — heading + detail bullets.
+                                        <div className="relative flex h-full flex-col justify-center gap-5 p-7 sm:gap-6 sm:p-9 lg:p-10">
+                                            <h2 className="text-2xl font-bold text-white drop-shadow-sm sm:text-3xl lg:text-4xl">
+                                                {title}
+                                            </h2>
+                                            <ul className="space-y-3 sm:space-y-4">
+                                                {items.map((item, n) => (
+                                                    <li key={n} className="flex items-start gap-3 text-white/95">
+                                                        <span className="mt-2 h-2 w-2 flex-none rounded-full bg-white" />
+                                                        <span className="text-sm leading-relaxed sm:text-base">{item}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ) : (
+                                        // Collapsed — title only. Horizontal on the short
+                                        // mobile bar; rotated 90° on the tall lg bar.
+                                        <div className="relative flex h-full items-center justify-center p-4">
+                                            <span className="whitespace-nowrap text-lg font-semibold tracking-wide text-white drop-shadow-sm sm:text-xl lg:-rotate-90 lg:text-2xl">
+                                                {title}
+                                            </span>
+                                        </div>
+                                    )}
                                 </button>
                             );
                         })}
