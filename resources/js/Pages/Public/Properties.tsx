@@ -333,11 +333,6 @@ export default function Properties() {
                                     {text(bottomCta, 'subtitle') || t('properties.bottomCta.subtitle')}
                                 </p>
                             </div>
-
-                            {/* Decorative arrow on the trailing edge. */}
-                            <span className="absolute top-1/2 inset-e-6 sm:inset-e-10 lg:inset-e-16 -translate-y-1/2 text-white">
-                                <ArrowRight className="h-7 w-7 sm:h-9 sm:w-9 rtl:rotate-180" />
-                            </span>
                         </div>
                     </div>
                 </section>

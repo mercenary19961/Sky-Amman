@@ -129,7 +129,27 @@ class SiteContentSeeder extends Seeder
             ['self_build', 'process', 'step_7', 'Handover', 'التسليم'],
 
             // ---------------- SECURITY ----------------
-            ['security', 'hero', 'title', 'Security With SkyAmman', 'الأمان مع سكاي عمان'],
+            ['security', 'hero', 'title', 'Secure Ownership With SkyAmman', 'تملّك آمن مع سكاي عمان'],
+            ['security', 'hero', 'subtitle', 'With Security, Credibility and Transparency', 'بالأمان والمصداقية والشفافية'],
+
+            // Three pillars — each is a hover-expanding panel (title + 4 points).
+            ['security', 'legal', 'title', 'Legal Security', 'الأمان القانوني'],
+            ['security', 'legal', 'item_1', 'Contracts are drafted and verified by a dedicated legal department', 'صياغة وتوثيق العقود من خلال الدائرة القانونية المختصة'],
+            ['security', 'legal', 'item_2', 'All payments are officially documented', 'توثيق جميع الدفعات بشكل رسمي'],
+            ['security', 'legal', 'item_3', 'Full support through the property registration process', 'متابعة إجراءات تسجيل العقار حتى نقل الملكية بالكامل'],
+            ['security', 'legal', 'item_4', 'Legal verification of land ownership before project initiation', 'التحقق من سلامة الأرض قانونياً قبل بدء أي مشروع'],
+
+            ['security', 'financial', 'title', 'Financial Security', 'الأمان المالي'],
+            ['security', 'financial', 'item_1', 'Client payments are protected until ownership registration', 'ضمان حقوق العميل في جميع الدفعات حتى موعد التسجيل'],
+            ['security', 'financial', 'item_2', 'Flexible financing solutions through banking partners', 'حلول تمويل مرنة بالتعاون مع شركاء مصرفيين'],
+            ['security', 'financial', 'item_3', 'Full transparency in pricing and payment schedules', 'وضوح كامل في التكاليف و جدول الدفعات'],
+            ['security', 'financial', 'item_4', 'No hidden costs or unexpected obligations', 'عدم وجود رسوم أو التزامات غير معلنة'],
+
+            ['security', 'construction', 'title', 'Construction Security', 'الأمان الإنشائي'],
+            ['security', 'construction', 'item_1', 'Projects executed under certified engineering supervision', 'تنفيذ المشاريع بإشراف مكاتب هندسية معتمدة'],
+            ['security', 'construction', 'item_2', 'Approved execution partners recognized by official authorities', 'درع تنفيذي مصنف من الجهات الرسمية (وزارة الأشغال، نقابة المهندسين، نقابة المقاولين)'],
+            ['security', 'construction', 'item_3', 'Strict adherence to technical specifications', 'الالتزام بالمواصفات الفنية المعتمدة'],
+            ['security', 'construction', 'item_4', 'Use of trusted and verified suppliers', 'استخدام مواد من موردين موثوقين ومعتمدين'],
 
             // ---------------- ABOUT ----------------
             ['about', 'hero', 'title', 'About Us', 'من نحن'],

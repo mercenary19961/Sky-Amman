@@ -76,6 +76,6 @@ class Page extends Model
 
     public static function getBySlug(string $slug): ?self
     {
-        return static::where('slug', $slug)->first();
+        return static::query()->where('slug', $slug)->first();
     }
 }
