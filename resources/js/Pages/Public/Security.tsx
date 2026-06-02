@@ -18,9 +18,9 @@ function makeText(content: SiteContentBundle, t: (k: string) => string) {
 // The three pillars, in display order. Each gets a building backdrop (admin can
 // swap these renders later) and reads its copy from `site_content` section `key`.
 const PILLARS = [
-    { section: 'legal', image: '/images/properties/detail-hero.webp' },
-    { section: 'financial', image: '/images/properties/properties-hero.webp' },
-    { section: 'construction', image: '/images/properties/find-the-right-space.webp' },
+    { section: 'legal', image: '/images/security/legal.webp' },
+    { section: 'financial', image: '/images/security/financial.webp' },
+    { section: 'construction', image: '/images/security/construction.webp' },
 ] as const;
 
 export default function Security() {
