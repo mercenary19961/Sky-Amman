@@ -119,30 +119,38 @@ export default function Security() {
                                         isActive && 'lg:grow-3',
                                     )}
                                 >
-                                    {/* Photo backdrop. */}
-                                    <img
-                                        src={pillar.image}
-                                        alt=""
-                                        loading="lazy"
-                                        className="absolute inset-0 h-full w-full object-cover"
-                                    />
-                                    {/* Darkening overlay for text legibility. */}
-                                    <div
-                                        aria-hidden="true"
-                                        className="absolute inset-0 bg-linear-to-t from-black/85 via-black/55 to-black/40"
-                                    />
+                                    {isActive ? (
+                                        // Expanded — translucent black "glass" (the
+                                        // photo is dropped so the page shows through).
+                                        <div aria-hidden="true" className="absolute inset-0 bg-black/70" />
+                                    ) : (
+                                        // Collapsed — photo backdrop + darkening overlay
+                                        // so the rotated title stays legible.
+                                        <>
+                                            <img
+                                                src={pillar.image}
+                                                alt=""
+                                                loading="lazy"
+                                                className="absolute inset-0 h-full w-full object-cover"
+                                            />
+                                            <div
+                                                aria-hidden="true"
+                                                className="absolute inset-0 bg-linear-to-t from-black/85 via-black/55 to-black/40"
+                                            />
+                                        </>
+                                    )}
 
                                     {isActive ? (
                                         // Expanded — heading + detail bullets.
                                         <div className="relative flex h-full flex-col justify-center gap-5 p-7 sm:gap-6 sm:p-9 lg:p-10">
-                                            <h2 className="text-2xl font-bold text-white drop-shadow-sm sm:text-3xl lg:text-4xl">
+                                            <h2 className="text-2xl font-bold text-white drop-shadow-sm sm:text-3xl lg:text-5xl">
                                                 {title}
                                             </h2>
                                             <ul className="space-y-3 sm:space-y-4">
                                                 {items.map((item, n) => (
                                                     <li key={n} className="flex items-start gap-3 text-white/95">
-                                                        <span className="mt-2 h-2 w-2 flex-none rounded-full bg-white" />
-                                                        <span className="text-sm leading-relaxed sm:text-base">{item}</span>
+                                                        <span className="mt-2 h-2 w-2 flex-none rounded-full bg-white lg:h-2.5 lg:w-2.5" />
+                                                        <span className="text-sm leading-relaxed sm:text-base lg:text-xl">{item}</span>
                                                     </li>
                                                 ))}
                                             </ul>
@@ -151,7 +159,7 @@ export default function Security() {
                                         // Collapsed — title only. Horizontal on the short
                                         // mobile bar; rotated 90° on the tall lg bar.
                                         <div className="relative flex h-full items-center justify-center p-4">
-                                            <span className="whitespace-nowrap text-lg font-semibold tracking-wide text-white drop-shadow-sm sm:text-xl lg:-rotate-90 lg:text-2xl">
+                                            <span className="whitespace-nowrap text-lg font-semibold tracking-wide text-white drop-shadow-sm sm:text-xl lg:-rotate-90 lg:text-3xl">
                                                 {title}
                                             </span>
                                         </div>
