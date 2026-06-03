@@ -127,7 +127,7 @@ export default function Investment() {
                 <section className="bg-surface py-12 sm:py-16 lg:py-20">
                     <div className="section-x grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
                         {/* Amman city cluster: one tall image + two stacked. */}
-                        <div className="grid w-full max-w-2xl grid-cols-2 grid-rows-2 gap-4 sm:gap-5">
+                        <div className="grid w-full grid-cols-2 grid-rows-2 gap-4 sm:gap-5">
                             <div className="row-span-2 overflow-hidden rounded-[40px]">
                                 <img src="/images/investment/city-1.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
