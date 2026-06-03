@@ -155,7 +155,16 @@ class SiteContentSeeder extends Seeder
             ['security', 'construction', 'item_4', 'Use of trusted and verified suppliers', 'استخدام مواد من موردين موثوقين ومعتمدين'],
 
             // ---------------- ABOUT ----------------
-            ['about', 'hero', 'title', 'About Us', 'من نحن'],
+            ['about', 'hero', 'title', 'ABOUT US', 'من نحن'],
+            ['about', 'intro', 'body', 'Sky Amman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في تصميم وتطوير مساحات سكنية وتجارية ومكتبية وطبية عالية الجودة.'],
+            ['about', 'crafted', 'title', 'Crafted Developments for Elevated Living', 'تطويرات مصمّمة لحياة راقية'],
+            ['about', 'crafted', 'body', 'We deliver integrated real estate solutions tailored to meet diverse client needs, while maintaining high standards in quality and execution. In addition, we support property ownership through flexible financing solutions in collaboration with leading financial institutions in Jordan.', 'نقدّم حلولاً عقارية متكاملة مصمّمة لتلبية احتياجات العملاء المتنوعة، مع الحفاظ على معايير عالية في الجودة والتنفيذ. كما ندعم تملّك العقار من خلال حلول تمويل مرنة بالتعاون مع مؤسسات مالية رائدة في الأردن.'],
+            ['about', 'mission', 'title', 'Mission', 'رسالتنا'],
+            ['about', 'mission', 'body', 'To empower clients, both locally and internationally, to own or lease or build property in Amman with confidence and ease, by adhering to legal standards, collaborating with trusted partners, and ensuring financial, legal, and construction security throughout the entire process.', 'تمكين العملاء، محلياً ودولياً، من تملّك أو استئجار أو بناء عقار في عمّان بثقة ويسر، عبر الالتزام بالمعايير القانونية والتعاون مع شركاء موثوقين وضمان الأمان المالي والقانوني والإنشائي طوال العملية بأكملها.'],
+            ['about', 'vision', 'title', 'Vision', 'رؤيتنا'],
+            ['about', 'vision', 'body', 'To lead the real estate development sector in Amman by expanding our services to include property management and leveraging data driven insights and business intelligence tools to support informed real estate decisions in buying, selling, leasing, and investment.', 'الريادة في قطاع التطوير العقاري في عمّان من خلال توسيع خدماتنا لتشمل إدارة الممتلكات والاستفادة من رؤى البيانات وأدوات ذكاء الأعمال لدعم القرارات العقارية المدروسة في الشراء والبيع والإيجار والاستثمار.'],
+            ['about', 'leadership', 'title', 'Leadership Rooted in Trust and Market Experience', 'قيادة راسخة في الثقة وخبرة السوق'],
+            ['about', 'leadership', 'body', 'Founded on a clear vision of trust and security in property ownership, Sky Amman operates under the leadership of its founder, who brings over 30 years of experience in real estate development and investment portfolio management in the Jordanian market.', 'تأسست سكاي عمّان على رؤية واضحة قوامها الثقة والأمان في تملّك العقار، وتعمل بقيادة مؤسّسها الذي يمتلك أكثر من 30 عاماً من الخبرة في التطوير العقاري وإدارة المحافظ الاستثمارية في السوق الأردني.'],
 
             // ---------------- CONTACT ----------------
             ['contact', 'hero', 'title', 'Get in Touch', 'تواصل معنا'],

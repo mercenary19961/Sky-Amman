@@ -13,6 +13,7 @@ use App\Http\Controllers\PropertiesController;
 // Investment page parked — route + import disabled for now (see CLAUDE.md). Re-enable both to relist.
 // use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\SelfBuildController;
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
@@ -36,6 +37,9 @@ Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-buil
 
 // Security With SkyAmman — content-only page (three security pillars).
 Route::get('/security', [SecurityController::class, 'show'])->name('security');
+
+// About Us — content-only page (intro, crafted, mission, vision, leadership).
+Route::get('/about', [AboutController::class, 'show'])->name('about');
 
 // Contact — single inbox for all public inquiries. POST is rate-limited like
 // every public form; Turnstile-gated server-side in the controller.
