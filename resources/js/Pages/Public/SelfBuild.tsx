@@ -89,13 +89,13 @@ export default function SelfBuild() {
                                 peeking bottom-end (per the design). */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-12 -inset-s-6 z-0 hidden h-64 w-[55%] max-w-172 rounded-full bg-primary lg:block"
+                                className="pointer-events-none absolute -top-14 -inset-s-16 z-0 hidden h-80 w-[68%] max-w-4xl rounded-full bg-primary lg:block"
                             />
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-12 -inset-e-6 z-0 hidden h-64 w-[55%] max-w-172 rounded-full bg-[#1A3954] lg:block"
+                                className="pointer-events-none absolute -bottom-14 -inset-e-16 z-0 hidden h-80 w-[68%] max-w-4xl rounded-full bg-[#1A3954] lg:block"
                             />
-                            <div className="relative isolate min-h-64 overflow-hidden rounded-4xl sm:min-h-72 sm:rounded-[60px] lg:min-h-0 lg:aspect-1130/312 lg:rounded-[90px]">
+                            <div className="relative isolate min-h-64 overflow-hidden rounded-full sm:min-h-72 lg:min-h-0 lg:aspect-1130/312">
                                 <img
                                     src="/images/self-build/hero.webp"
                                     alt=""
