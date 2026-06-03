@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Menu, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { PageProps } from '@/types';
@@ -206,33 +207,69 @@ export function Header() {
 
             {/* Mobile menu panel — drops below the bar on lg-down when the
                 hamburger is open. Solid white surface so links read clearly
-                over any section. */}
-            <div
-                className={cn(
-                    'lg:hidden relative overflow-hidden bg-white shadow-lg transition-[max-height,opacity] duration-300 ease-out',
-                    mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
+                over any section. Items stagger in; the active row gets a brand
+                pill + left accent bar + chevron. */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        key="mobile-panel"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="lg:hidden overflow-hidden border-t border-ink/5 bg-white shadow-xl"
+                    >
+                        <motion.nav
+                            className="section-x flex flex-col divide-y divide-ink/6 py-3"
+                            initial="closed"
+                            animate="open"
+                            variants={{ open: { transition: { staggerChildren: 0.045, delayChildren: 0.06 } } }}
+                        >
+                            {NAV_ITEMS.map((item) => {
+                                const active = url === item.href;
+                                return (
+                                    <motion.div
+                                        key={item.key}
+                                        variants={{
+                                            closed: { opacity: 0, x: -14 },
+                                            open: { opacity: 1, x: 0 },
+                                        }}
+                                    >
+                                        <Link
+                                            href={item.href}
+                                            className={cn(
+                                                'group relative flex items-center justify-between rounded-xl py-3.5 ps-5 pe-3 text-base transition-colors duration-200',
+                                                active
+                                                    ? 'bg-primary/10 font-semibold text-primary'
+                                                    : 'text-ink hover:bg-surface-muted hover:text-primary',
+                                            )}
+                                        >
+                                            {/* Left accent bar — only on the active row. */}
+                                            <span
+                                                aria-hidden="true"
+                                                className={cn(
+                                                    'absolute inset-y-2 inset-s-0 w-1 rounded-full bg-primary transition-opacity duration-200',
+                                                    active ? 'opacity-100' : 'opacity-0',
+                                                )}
+                                            />
+                                            <span>{t(`nav.${item.key}`)}</span>
+                                            <ChevronRight
+                                                size={18}
+                                                className={cn(
+                                                    'flex-none transition-transform duration-200 rtl:rotate-180',
+                                                    active
+                                                        ? 'text-primary'
+                                                        : 'text-ink-muted/50 group-hover:translate-x-0.5 group-hover:text-primary rtl:group-hover:-translate-x-0.5',
+                                                )}
+                                            />
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.nav>
+                    </motion.div>
                 )}
-            >
-                <nav className="section-x flex flex-col py-2">
-                    {NAV_ITEMS.map((item) => {
-                        const active = url === item.href;
-                        return (
-                            <Link
-                                key={item.key}
-                                href={item.href}
-                                className={cn(
-                                    'rounded-md px-2 py-3 text-base transition-colors duration-200',
-                                    active
-                                        ? 'font-semibold text-primary'
-                                        : 'text-ink hover:bg-surface-muted hover:text-primary',
-                                )}
-                            >
-                                {t(`nav.${item.key}`)}
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </div>
+            </AnimatePresence>
         </header>
     );
 }
