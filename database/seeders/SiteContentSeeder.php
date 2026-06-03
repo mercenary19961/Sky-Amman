@@ -112,7 +112,9 @@ class SiteContentSeeder extends Seeder
 
             // ---------------- INVESTMENT ----------------
             ['investment', 'hero', 'title', 'WHY TO INVEST IN AMMAN THROUGH PROPERTIES (BUY/ RENT OR BUILD)?', 'لماذا الاستثمار في عمّان عبر العقارات (شراء / إيجار / بناء)؟'],
-            ['investment', 'editorial', 'heading', 'Amman Continues To Position Itself As One Of The Most Stable And Promising Real Estate Markets In The Region', 'تواصل عمّان ترسيخ موقعها كواحدة من أكثر أسواق العقارات استقراراً وواعدية في المنطقة'],
+            ['investment', 'hero', 'cta', 'Contact Us', 'تواصل معنا'],
+            ['investment', 'editorial', 'heading', 'Amman Continues To Position Itself As One', 'تواصل عمّان ترسيخ موقعها كواحدة'],
+            ['investment', 'editorial', 'heading_accent', 'Of The Most Stable And Promising Real Estate Markets In The Region', 'من أكثر أسواق العقارات استقراراً وواعدية في المنطقة'],
             ['investment', 'editorial', 'body', 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.', 'موقعها الاستراتيجي واستقرارها السياسي وبنيتها التحتية المتنامية تجعلها وجهة جاذبة للمستثمرين المحليين والدوليين على حدٍّ سواء.'],
             ['investment', 'cta', 'heading', 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.', 'للمستثمرين الباحثين عن سوق متوازن مع نمو مستقر ومخاطر متحكَّم بها، توفر سكاي عمان بيئة استثمارية موثوقة.'],
             ['investment', 'cta', 'button', 'Self Build Service', 'خدمة البناء الذاتي'],

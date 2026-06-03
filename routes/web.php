@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
+use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
@@ -23,6 +24,9 @@ Route::get('/properties', [PropertiesController::class, 'index'])->name('propert
 Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
     ->where('slug', '[a-z0-9-]+')
     ->name('properties.show');
+
+// Investment — content-only editorial page (why invest in Amman).
+Route::get('/investment', [InvestmentController::class, 'show'])->name('investment');
 
 // Security With SkyAmman — content-only page (three security pillars).
 Route::get('/security', [SecurityController::class, 'show'])->name('security');
