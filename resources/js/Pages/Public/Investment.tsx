@@ -40,6 +40,11 @@ export default function Investment() {
     const pIdx = heroTitle.indexOf('(');
     const heroMain = pIdx > 0 ? heroTitle.slice(0, pIdx).trim() : heroTitle;
     const heroSuffix = pIdx > 0 ? heroTitle.slice(pIdx) : '';
+    // Force the "…Amman" / "through properties" two-line break on the main part
+    // (English). Arabic has no "through", so it falls back to natural wrapping.
+    const thruIdx = heroMain.toLowerCase().indexOf(' through ');
+    const heroLine1 = thruIdx > -1 ? heroMain.slice(0, thruIdx) : heroMain;
+    const heroLine2 = thruIdx > -1 ? heroMain.slice(thruIdx + 1) : '';
     const heroCta = text('hero', 'cta', 'investment.hero.cta');
 
     const edHeading = text('editorial', 'heading', 'investment.editorial.heading');
@@ -104,9 +109,10 @@ export default function Investment() {
                                     its own shadow for legibility instead of dimming the
                                     image. */}
                                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
-                                    <h1 className="max-w-3xl text-3xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl">
-                                        {heroMain}{' '}
-                                        {heroSuffix && <span className="font-light">{heroSuffix}</span>}
+                                    <h1 className="max-w-5xl text-4xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-6xl lg:text-7xl">
+                                        {heroLine1}
+                                        {heroLine2 && (<><br />{heroLine2}</>)}
+                                        {heroSuffix && (<><br /><span className="font-light">{heroSuffix}</span></>)}
                                     </h1>
                                     <Link
                                         href="/contact"
