@@ -109,7 +109,7 @@ export default function Security() {
                 <img
                     src="/images/security/secure-bg.webp"
                     alt=""
-                    className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-center opacity-90"
+                    className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-screen w-full object-cover object-center opacity-90"
                     style={{
                         WebkitMaskImage:
                             'radial-gradient(ellipse 70% 62% at 50% 44%, #000 32%, transparent 80%)',
