@@ -116,10 +116,10 @@ export default function Investment() {
                                     </h1>
                                     <Link
                                         href="/contact"
-                                        className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-primary px-7 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark sm:mt-8 sm:text-lg"
+                                        className="mt-8 inline-flex items-center gap-3 rounded-3xl bg-primary px-10 py-4 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark sm:mt-10 sm:px-12 sm:py-5 sm:text-2xl"
                                     >
                                         {heroCta}
-                                        <ArrowRight size={20} className="rtl:rotate-180" />
+                                        <ArrowRight size={26} className="rtl:rotate-180" />
                                     </Link>
                                 </div>
                             </div>
