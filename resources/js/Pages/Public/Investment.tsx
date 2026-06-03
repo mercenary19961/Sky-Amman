@@ -127,7 +127,7 @@ export default function Investment() {
                 <section className="bg-surface py-12 sm:py-16 lg:py-20">
                     <div className="section-x grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
                         {/* Amman city cluster: one tall image + two stacked. */}
-                        <div className="grid max-w-lg grid-cols-2 grid-rows-2 gap-3 sm:gap-4">
+                        <div className="grid w-full max-w-2xl grid-cols-2 grid-rows-2 gap-4 sm:gap-5">
                             <div className="row-span-2 overflow-hidden rounded-[40px]">
                                 <img src="/images/investment/city-1.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
@@ -140,12 +140,12 @@ export default function Investment() {
                         </div>
 
                         {/* Two-tone heading + body. */}
-                        <div className="max-w-xl">
-                            <h2 className="text-2xl font-bold leading-snug sm:text-3xl">
+                        <div className="max-w-2xl">
+                            <h2 className="text-3xl font-bold leading-snug sm:text-4xl lg:text-5xl">
                                 <span className="text-ink">{edHeading} </span>
                                 <span className="text-primary">{edAccent}</span>
                             </h2>
-                            <p className="mt-5 text-base leading-relaxed text-ink-muted sm:text-lg">
+                            <p className="mt-6 text-lg leading-relaxed text-ink-muted sm:text-xl lg:text-2xl">
                                 {edBody}
                             </p>
                         </div>
