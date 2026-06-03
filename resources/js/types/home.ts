@@ -77,6 +77,18 @@ export interface RelatedProject {
     image_url: string;
 }
 
+export interface SelfBuildPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+    seo: {
+        title_en: string | null;
+        title_ar: string | null;
+        description_en: string | null;
+        description_ar: string | null;
+    };
+    url: string;
+}
+
 export interface InvestmentPageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;

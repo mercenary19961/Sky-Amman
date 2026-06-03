@@ -11,6 +11,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
 use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\SelfBuildController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
@@ -27,6 +28,9 @@ Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
 
 // Investment — content-only editorial page (why invest in Amman).
 Route::get('/investment', [InvestmentController::class, 'show'])->name('investment');
+
+// Self Build — content-only service page (8-step process-flow timeline).
+Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-build');
 
 // Security With SkyAmman — content-only page (three security pillars).
 Route::get('/security', [SecurityController::class, 'show'])->name('security');

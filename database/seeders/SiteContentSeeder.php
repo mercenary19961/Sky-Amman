@@ -129,6 +129,7 @@ class SiteContentSeeder extends Seeder
             ['self_build', 'process', 'step_5', 'Execution', 'التنفيذ'],
             ['self_build', 'process', 'step_6', 'Documentation', 'التوثيق'],
             ['self_build', 'process', 'step_7', 'Handover', 'التسليم'],
+            ['self_build', 'process', 'step_8', 'After-Sales Service', 'خدمة ما بعد البيع'],
 
             // ---------------- SECURITY ----------------
             ['security', 'hero', 'title', 'Secure Ownership With SkyAmman', 'تملّك آمن مع سكاي عمان'],
