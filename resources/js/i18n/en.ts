@@ -234,7 +234,7 @@ const en = {
             title: 'ABOUT US',
         },
         intro: {
-            body: 'Sky Amman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.',
+            body: 'SkyAmman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.',
         },
         crafted: {
             title: 'Crafted Developments for Elevated Living',
@@ -250,7 +250,7 @@ const en = {
         },
         leadership: {
             title: 'Leadership Rooted in Trust and Market Experience',
-            body: 'Founded on a clear vision of trust and security in property ownership, Sky Amman operates under the leadership of its founder, who brings over 30 years of experience in real estate development and investment portfolio management in the Jordanian market.',
+            body: 'Founded on a clear vision of trust and security in property ownership, SkyAmman operates under the leadership of its founder, who brings over 30 years of experience in real estate development and investment portfolio management in the Jordanian market.',
         },
     },
     contact: {

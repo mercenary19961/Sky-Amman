@@ -119,10 +119,10 @@ export default function About() {
                 <section className="bg-surface pb-12 sm:pb-16">
                     <div className="section-x">
                         <div
-                            className="rounded-[36px] px-8 py-10 sm:rounded-[60px] sm:px-14 sm:py-14 lg:rounded-[90px] lg:px-20 lg:py-16"
+                            className="rounded-[36px] px-8 py-14 sm:rounded-[60px] sm:px-14 sm:py-20 lg:rounded-[90px] lg:px-20 lg:py-28"
                             style={{ backgroundColor: NAVY }}
                         >
-                            <p className="mx-auto max-w-4xl text-center text-lg leading-relaxed text-white sm:text-xl lg:text-2xl">
+                            <p className="mx-auto max-w-4xl text-center text-xl leading-relaxed text-white sm:text-2xl lg:text-3xl">
                                 {introBody}
                             </p>
                         </div>
