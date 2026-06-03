@@ -15,9 +15,9 @@ export function HomeHero({ content }: HomeHeroProps) {
 
     return (
         <section className="relative overflow-hidden" data-nav-bg="dark">
-            {/* Sky gradient: deep sky blue at top, fading through primary into
-                white near the villa — matches the target picker (#5299CC). */}
-            <div className="absolute inset-0 bg-linear-to-b from-[#5299CC] via-primary to-surface" aria-hidden="true" />
+            {/* Sky gradient: brand sky blue (#7DB5E2) at top fading to white near
+                the villa. */}
+            <div className="absolute inset-0 bg-linear-to-b from-[#7DB5E2] to-white" aria-hidden="true" />
 
             {/* Headline block — constrained by section-x padding. */}
             <div className="relative section-x pt-24 sm:pt-32 lg:pt-40 text-center">
@@ -42,10 +42,13 @@ export function HomeHero({ content }: HomeHeroProps) {
               top of the <img> box.
             */}
             <div className="relative mt-4 sm:mt-6 lg:mt-8">
+                {/* brightness-75 darkens only the villa pixels (same ~30% as the
+                    Investment hero) without dimming the sky gradient behind the
+                    transparent areas. */}
                 <motion.img
-                    src="/images/home/hero-villa-trimmed.webp"
+                    src="/images/home/hero-villa-artboard.webp"
                     alt=""
-                    className="w-full h-auto select-none pointer-events-none"
+                    className="w-full h-auto select-none pointer-events-none brightness-75"
                     loading="eager"
                     initial={{ y: '12%', opacity: 0 }}
                     animate={{ y: '0%', opacity: 1 }}
