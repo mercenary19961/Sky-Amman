@@ -89,10 +89,10 @@ export default function Investment() {
                             {/* Decorative navy pill peeking behind the top edge. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-6 inset-e-6 -z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
+                                className="pointer-events-none absolute -top-6 inset-e-6 z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
-                            <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-0 sm:rounded-[80px] sm:aspect-1253/705 lg:rounded-[120px]">
+                            <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-140 sm:rounded-[80px] sm:aspect-1253/705 lg:rounded-[120px]">
                                 <img
                                     src="/images/investment/hero.webp"
                                     alt=""
@@ -162,10 +162,10 @@ export default function Investment() {
                             {/* Decorative navy pill peeking behind the bottom-start edge. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-6 inset-s-6 -z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
+                                className="pointer-events-none absolute -bottom-6 inset-s-6 z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
-                            <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-0 sm:rounded-[70px] sm:aspect-1247/486 lg:rounded-[97px]">
+                            <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-100 sm:rounded-[70px] sm:aspect-1247/486 lg:rounded-[97px]">
                                 <img
                                     src="/images/investment/banner.webp"
                                     alt=""
