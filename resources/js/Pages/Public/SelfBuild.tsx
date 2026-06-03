@@ -121,7 +121,7 @@ export default function SelfBuild() {
             {sectionVisible(content.process) && (
                 <section className="bg-surface pb-20 sm:pb-28">
                     <div className="section-x">
-                        <div className="relative mx-auto max-w-3xl py-6">
+                        <div className="relative mx-auto max-w-6xl py-6">
                             {/* Central vertical line. */}
                             <div
                                 aria-hidden="true"
@@ -161,7 +161,7 @@ export default function SelfBuild() {
                                                     src={`/images/self-build/${step.image}`}
                                                     alt=""
                                                     loading="lazy"
-                                                    className="h-auto w-28 object-contain sm:w-36 lg:w-44"
+                                                    className="h-auto w-56 object-contain sm:w-96 lg:w-lg"
                                                 />
                                                 <span className="mt-2 text-base font-semibold text-ink sm:text-lg lg:text-xl">
                                                     {label}
