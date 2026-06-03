@@ -171,7 +171,7 @@ export default function Investment() {
                                     className="absolute inset-0 h-full w-full object-cover object-center"
                                     loading="lazy"
                                 />
-                                <div aria-hidden="true" className="absolute inset-0" style={{ backgroundColor: `${NAVY}8C` }} />
+                                <div aria-hidden="true" className="absolute inset-0 bg-black/35" />
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6 text-center sm:p-10">
                                     <h2 className="max-w-3xl text-xl font-bold leading-snug text-white drop-shadow-sm sm:text-3xl lg:text-4xl">
                                         {ctaHeading}
