@@ -111,11 +111,13 @@ class SiteContentSeeder extends Seeder
             ['properties', 'bottom_cta', 'subtitle', 'Explore residential and commercial properties with clear details and guided support.', 'استكشف العقارات السكنية والتجارية بتفاصيل واضحة ودعم متكامل.'],
 
             // ---------------- INVESTMENT ----------------
-            ['investment', 'hero', 'title', 'WHY TO INVEST IN AMMAN THROUGH PROPERTIES (BUY/ RENT OR BUILD)?', 'لماذا الاستثمار في عمّان عبر العقارات (شراء / إيجار / بناء)؟'],
-            ['investment', 'editorial', 'heading', 'Amman Continues To Position Itself As One Of The Most Stable And Promising Real Estate Markets In The Region', 'تواصل عمّان ترسيخ موقعها كواحدة من أكثر أسواق العقارات استقراراً وواعدية في المنطقة'],
-            ['investment', 'editorial', 'body', 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.', 'موقعها الاستراتيجي واستقرارها السياسي وبنيتها التحتية المتنامية تجعلها وجهة جاذبة للمستثمرين المحليين والدوليين على حدٍّ سواء.'],
-            ['investment', 'cta', 'heading', 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.', 'للمستثمرين الباحثين عن سوق متوازن مع نمو مستقر ومخاطر متحكَّم بها، توفر سكاي عمان بيئة استثمارية موثوقة.'],
-            ['investment', 'cta', 'button', 'Self Build Service', 'خدمة البناء الذاتي'],
+            ['investment', 'hero', 'title', "WHY TO INVEST IN AMMAN\nTHROUGH PROPERTIES\n(BUY/ RENT OR BUILD)?", "لماذا يُعدّ الاستثمار\nالعقاري في عمّان\nخيارًا مثاليًا؟"],
+            ['investment', 'hero', 'cta', 'Contact Us', 'تواصل معنا'],
+            ['investment', 'editorial', 'heading', 'Amman Continues To Position Itself As One', 'تُعد عمّان واحدة من أكثر'],
+            ['investment', 'editorial', 'heading_accent', 'Of The Most Stable And Promising Real Estate Markets In The Region', 'الأسواق العقارية استقراراً في المنطقة'],
+            ['investment', 'editorial', 'body', 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.', 'حيث تجمع بين الموقع الاستراتيجي والاستقرار السياسي والنمو العمراني المستمر، مما يجعلها وجهة جاذبة للمستثمرين المحليين والدوليين.'],
+            ['investment', 'cta', 'heading', 'For Investors Seeking A Balanced Market With Steady Appreciation And Controlled Risk, SkyAmman Provides A Reliable Investment Environment.', 'للمستثمرين الباحثين عن سوق متوازن يجمع بين الاستقرار والعائد، توفر سكاي عمّان بيئة استثمارية.'],
+            ['investment', 'cta', 'button', 'Self Build Service', 'البناء الذاتي'],
 
             // ---------------- SELF BUILD ----------------
             ['self_build', 'hero', 'title', 'BUILD YOUR PROPERTY, YOUR VISION', 'ابنِ عقارك، حقّق رؤيتك'],

@@ -173,10 +173,12 @@ const en = {
     },
     investment: {
         hero: {
-            title: 'WHY TO INVEST IN AMMAN THROUGH PROPERTIES (BUY/ RENT OR BUILD)?',
+            title: 'WHY TO INVEST IN AMMAN\nTHROUGH PROPERTIES\n(BUY/ RENT OR BUILD)?',
+            cta: 'Contact Us',
         },
         editorial: {
-            heading: 'Amman Continues To Position Itself As One Of The Most Stable And Promising Real Estate Markets In The Region',
+            heading: 'Amman Continues To Position Itself As One',
+            heading_accent: 'Of The Most Stable And Promising Real Estate Markets In The Region',
             body: 'Its strategic location, political stability, and growing infrastructure make it an attractive destination for both local and international investors.',
         },
         cta: {

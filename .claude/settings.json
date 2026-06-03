@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/sabba/Downloads/**)",
+      "Bash(awk '{print $5}')",
+      "Bash(node -e \"const s=require\\('./node_modules/sharp'\\); s\\('C:/Users/sabba/Downloads/investment_hero.webp'\\).metadata\\(\\).then\\(m=>console.log\\('dims',m.width+'x'+m.height\\)\\).catch\\(e=>console.log\\(e.message\\)\\)\")",
+      "Bash(cp \"C:/Users/sabba/Downloads/investment_hero.webp\" public/images/investment/hero.webp)",
+      "Bash(node -e \"const s=require\\('./node_modules/sharp'\\); s\\('public/images/investment/hero.webp'\\).metadata\\(\\).then\\(m=>console.log\\(m.width+'x'+m.height\\)\\)\")",
+      "Bash(echo \"copied $\\(node -e \"const s=require\\('./node_modules/sharp'\\); s\\('public/images/investment/hero.webp'\\).metadata\\(\\).then\\(m=>console.log\\(m.width+'x'+m.height\\)\\)\"\\)\")"
+    ]
+  }
+}
