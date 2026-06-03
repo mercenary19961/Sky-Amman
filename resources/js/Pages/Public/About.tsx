@@ -194,27 +194,30 @@ function CloudBar({ title, body, side }: { title: string; body: string; side: 's
     return (
         <section className="bg-surface py-10 sm:py-12">
             <div className="section-x">
-                <div className="relative mt-8 sm:mt-12">
-                    {/* Large faded title, overlapping the top of the bar. */}
+                <div className="relative mt-12 sm:mt-18 lg:mt-24">
+                    {/* Large faded title — sits ABOVE the bar, only its bottom edge
+                        touching the top of the shape. */}
                     <h2
                         className={cn(
-                            'absolute -top-6 z-20 text-5xl font-bold uppercase text-primary-light sm:-top-9 sm:text-7xl lg:-top-12 lg:text-8xl',
-                            side === 'start' ? 'inset-s-2 text-start sm:inset-s-8' : 'inset-e-2 text-end sm:inset-e-8',
+                            'absolute -top-9 z-20 text-5xl font-bold uppercase text-primary-light sm:-top-14 sm:text-7xl lg:-top-20 lg:text-8xl',
+                            side === 'start' ? 'inset-s-4 text-start sm:inset-s-10' : 'inset-e-4 text-end sm:inset-e-10',
                         )}
                     >
                         {title}
                     </h2>
                     <div className="relative isolate overflow-hidden rounded-[40px] bg-primary sm:rounded-[70px] lg:rounded-[97px]">
+                        {/* Cloud tucked into the bottom corner (start side for Mission,
+                            end side for Vision). */}
                         <img
                             src="/images/home/footer-clouds.webp"
                             alt=""
                             aria-hidden="true"
                             className={cn(
-                                'pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-80',
-                                side === 'start' ? 'object-left' : 'object-right',
+                                'pointer-events-none absolute bottom-0 -z-10 h-[85%] w-[58%] object-contain opacity-80',
+                                side === 'start' ? 'inset-s-0 object-bottom-left' : 'inset-e-0 object-bottom-right',
                             )}
                         />
-                        <p className="mx-auto max-w-4xl px-8 py-10 text-center text-base leading-relaxed text-white sm:px-14 sm:py-12 sm:text-lg lg:text-xl">
+                        <p className="mx-auto max-w-4xl px-8 py-12 text-center text-base leading-relaxed text-white sm:px-14 sm:py-14 sm:text-lg lg:py-16 lg:text-xl">
                             {body}
                         </p>
                     </div>
