@@ -134,24 +134,25 @@ export default function About() {
             {sectionVisible(content.crafted) && (
                 <section className="bg-surface py-12 sm:py-16 lg:py-20">
                     <div className="section-x grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                        {/* Image cluster: one tall + two stacked. */}
-                        <div className="grid w-full grid-cols-2 grid-rows-2 gap-3 sm:gap-4">
-                            <div className="row-span-2 overflow-hidden rounded-[36px]">
-                                <img src="/images/about/crafted-1.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
-                            </div>
-                            <div className="overflow-hidden rounded-3xl aspect-200/182">
+                        {/* Image cluster: two small stacked on the start side, one
+                            big box filling the rest. */}
+                        <div className="grid w-full grid-cols-3 grid-rows-2 gap-3 sm:gap-4">
+                            <div className="overflow-hidden rounded-3xl aspect-square">
                                 <img src="/images/about/crafted-2.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
-                            <div className="overflow-hidden rounded-3xl aspect-200/182">
+                            <div className="col-span-2 row-span-2 overflow-hidden rounded-[36px]">
+                                <img src="/images/about/crafted-1.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
+                            </div>
+                            <div className="overflow-hidden rounded-3xl aspect-square">
                                 <img src="/images/about/crafted-3.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
                         </div>
 
-                        <div className="max-w-xl">
-                            <h2 className="text-2xl font-bold leading-snug text-ink sm:text-3xl lg:text-4xl">
+                        <div>
+                            <h2 className="text-3xl font-bold leading-snug sm:text-4xl lg:text-5xl" style={{ color: NAVY }}>
                                 {craftedTitle}
                             </h2>
-                            <p className="mt-5 text-base leading-relaxed text-ink-muted sm:text-lg">
+                            <p className="mt-6 text-justify text-lg leading-relaxed text-ink-muted sm:text-xl lg:text-2xl">
                                 {craftedBody}
                             </p>
                         </div>
