@@ -90,7 +90,7 @@ export default function Investment() {
                                 stadium) peeking above the top-end corner. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-16 inset-e-0 z-0 hidden h-80 w-[54%] max-w-172 rounded-full lg:block"
+                                className="pointer-events-none absolute -top-16 inset-e-0 z-0 hidden h-80 w-[65%] max-w-206 rounded-full lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
                             <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-140 sm:rounded-[80px] sm:aspect-1253/705 lg:rounded-[120px]">
