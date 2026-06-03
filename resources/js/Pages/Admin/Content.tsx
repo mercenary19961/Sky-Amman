@@ -52,6 +52,11 @@ const SECTION_LABEL_OVERRIDES: Record<string, Record<string, string>> = {
         sections:  'Column Headings',
         copyright: 'Copyright Strip',
     },
+    investment: {
+        hero:      'Hero',
+        editorial: 'Editorial (image cluster + text)',
+        cta:       'CTA Banner',
+    },
 };
 
 function sectionLabel(page: string, section: string): string {
