@@ -167,7 +167,7 @@ export default function Investment() {
                             {/* Decorative navy pill peeking behind the bottom-start edge. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-16 -inset-s-6 z-0 hidden h-96 w-[80%] max-w-248 rounded-full lg:block"
+                                className="pointer-events-none absolute -bottom-16 -inset-s-6 z-0 hidden h-96 w-[80%] max-w-248 rounded-4xl sm:rounded-[70px] lg:rounded-[97px] lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
                             <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-100 sm:rounded-[70px] sm:aspect-1247/486 lg:rounded-[97px]">
