@@ -32,7 +32,7 @@ Nuor Steel's `CLAUDE.md` is large (~44k tokens) — read targeted sections via G
 
 1. **Homepage** — content via `site_content` + Project Showcase carousel pulling from `projects` table
 2. **Properties** — listings page, pulls from `projects` filtered by `category`. Filter pills (Projects Under Development / Ready / Investment Opportunities) toggle the category filter.
-3. **Investment** — **content-only editorial page** (NOT a listings page). Explains why to invest in Amman, with CTAs.
+3. **Investment** — **content-only editorial page** (NOT a listings page). Explains why to invest in Amman, with CTAs. **⚠️ Temporarily hidden from the public nav (2026-06-03) — see Build Progress for how to relist.**
 4. **Self Build** — **content-only service page**. Renders a 7-step Process Flow timeline (Land Selection → Legal Verification → Engineering Design → Specifications → Execution → Documentation → Handover) from `site_content` rows.
 5. **Security with Sky Amman** — content-only page (financial + legal + construction safety bullets).
 6. **About Us** — content-only.
@@ -387,8 +387,8 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
   - **LocationMap** — Google Maps embed
 - [x] Properties (listings) — [PropertiesController](app/Http/Controllers/PropertiesController.php) → `Public/Properties` with EN+AR bundles + all active projects. **Hero** matches `prop_hero.svg` (headline left + subtitle/Contact-Us right, then a wide banner cropped to the SVG's `1148×442` window — rounded TOP corners only, flat bottom, `object-cover object-top`). **Two-tier filter** (see innovation #17): segmented For Sale / For Rent control + "Available only" switch + light-blue development **group** chips. **Listings grid** (1/2/3-col) with the `PROJECTS SHOWCASE.svg` card (`#E5EBF0` rx52, square image rx44, white status badge, whole card is the link — no button), client-side pagination 6/page, framer-motion card transitions. **Bottom CTA banner** matches `HERO SECTION.svg` (full `1148×646` rounded image, all corners; image shown at reduced opacity, centered overlay text + trailing arrow). **Detail page (`/properties/{slug}`) NOT built yet** — cards link to it but it 404s.
 - [ ] Properties **detail** page (`/properties/{slug}`) — gallery + specs + "Contact about this project" CTA
-- [ ] Investment (content-only editorial)
-- [ ] Self Build (content-only with 7-step Process Flow timeline)
+- [x] Investment (content-only editorial) — [InvestmentController](app/Http/Controllers/InvestmentController.php) → `Public/Investment`, route `GET /investment`. **⚠️ TEMPORARILY HIDDEN (2026-06-03):** the public nav link is commented out in [Header.tsx](resources/js/Components/Layout/Header.tsx) `NAV_ITEMS`. The route, controller, page, seeded content + images all remain intact — **to relist it, just uncomment the `{ key: 'investment', href: '/investment' }` line.** Reason: parked for content/design review before launch. (Page itself still works at `/investment` and is admin-editable/previewable.)
+- [x] Self Build (content-only with **8-step** Process Flow timeline) — [SelfBuildController](app/Http/Controllers/SelfBuildController.php) → `Public/SelfBuild`, route `GET /self-build`. Hero = stadium-shaped (`rounded-full`) banner image (`12 7.webp`) with navy overlay + two-tone corner pills (light-blue top-start, navy bottom-end) + centered text (light tagline over bold "PROCESS FLOW"). Timeline = central navy line + circular nodes, 8 steps zigzagging left/right with 3D icons (`public/images/self-build/`), each icon **directional slide-in** on `whileInView` (from its own side, RTL-aware). Bottom fades white→`primary-deep` (#78AFCE) into the footer (`-mb-16` cancels footer margin). Added `step_8` "After-Sales Service" to seeder + i18n (steps restructured to `step_1..step_8` keys).
 - [ ] Security with Sky Amman (content-only)
 - [ ] About Us (content-only)
 - [ ] Contact Us (with Turnstile + lead routing)

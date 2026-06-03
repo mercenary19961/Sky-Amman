@@ -10,7 +10,8 @@ import type { PageProps } from '@/types';
 const NAV_ITEMS = [
     { key: 'home', href: '/' },
     { key: 'properties', href: '/properties' },
-    { key: 'investment', href: '/investment' },
+    // Investment temporarily hidden — re-add this item to relist it (see CLAUDE.md).
+    // { key: 'investment', href: '/investment' },
     { key: 'selfBuild', href: '/self-build' },
     { key: 'security', href: '/security' },
     { key: 'about', href: '/about' },
