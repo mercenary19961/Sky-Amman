@@ -133,16 +133,13 @@ export default function SelfBuild() {
                                 {STEPS.map((step, i) => {
                                     const right = i % 2 === 0;
                                     const label = text('process', step.key, `selfBuild.process.${step.key}`);
+                                    // Slide in from the step's own (outer) side. Flip the
+                                    // physical direction in RTL since the grid mirrors.
+                                    const slideFrom = right ? 64 : -64;
+                                    const fromX = ar ? -slideFrom : slideFrom;
 
                                     return (
-                                        <motion.div
-                                            key={step.key}
-                                            initial={{ opacity: 0, y: 24 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true, amount: 0.5 }}
-                                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                            className="relative grid grid-cols-2"
-                                        >
+                                        <div key={step.key} className="relative grid grid-cols-2">
                                             {/* Node on the central line. */}
                                             <span
                                                 aria-hidden="true"
@@ -150,8 +147,12 @@ export default function SelfBuild() {
                                                 style={{ borderColor: NAVY }}
                                             />
 
-                                            {/* Icon + label, on alternating sides. */}
-                                            <div
+                                            {/* Icon + label — slides in from its own side. */}
+                                            <motion.div
+                                                initial={{ opacity: 0, x: fromX }}
+                                                whileInView={{ opacity: 1, x: 0 }}
+                                                viewport={{ once: true, amount: 0.5 }}
+                                                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                                                 className={cn(
                                                     'flex flex-col items-center text-center',
                                                     right ? 'col-start-2 ps-4 sm:ps-8' : 'col-start-1 pe-4 sm:pe-8',
@@ -166,8 +167,8 @@ export default function SelfBuild() {
                                                 <span className="mt-2 text-base font-semibold text-ink sm:text-lg lg:text-xl">
                                                     {label}
                                                 </span>
-                                            </div>
-                                        </motion.div>
+                                            </motion.div>
+                                        </div>
                                     );
                                 })}
                             </div>
