@@ -84,12 +84,13 @@ export default function Investment() {
             {/* ---------------- HERO ---------------- */}
             {sectionVisible(content.hero) && (
                 <section data-nav-bg="light" className="bg-surface">
-                    <div className="section-x pt-28 pb-12 sm:pt-32 sm:pb-16 lg:pt-36">
+                    <div className="section-x pt-28 pb-12 sm:pt-32 sm:pb-16 lg:pt-44">
                         <div className="relative">
-                            {/* Decorative navy pill peeking behind the top edge. */}
+                            {/* Decorative navy pill (Figma "Rectangle 38": 688×329
+                                stadium) peeking above the top-end corner. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-6 inset-e-6 z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
+                                className="pointer-events-none absolute -top-16 inset-e-0 z-0 hidden h-80 w-[54%] max-w-172 rounded-full lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
                             <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-140 sm:rounded-[80px] sm:aspect-1253/705 lg:rounded-[120px]">
@@ -99,22 +100,20 @@ export default function Investment() {
                                     className="absolute inset-0 h-full w-full object-cover object-center"
                                     loading="eager"
                                 />
-                                <div
-                                    aria-hidden="true"
-                                    className="absolute inset-0"
-                                    style={{ background: `linear-gradient(to top, ${NAVY}E6, ${NAVY}59 45%, transparent)` }}
-                                />
+                                {/* No overlay — the photo is shown untouched. Text uses
+                                    its own shadow for legibility instead of dimming the
+                                    image. */}
                                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
-                                    <h1 className="max-w-3xl text-2xl font-bold uppercase leading-tight text-white drop-shadow-sm sm:text-4xl lg:text-5xl">
+                                    <h1 className="max-w-3xl text-3xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-6xl">
                                         {heroMain}{' '}
                                         {heroSuffix && <span className="font-light">{heroSuffix}</span>}
                                     </h1>
                                     <Link
                                         href="/contact"
-                                        className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark sm:mt-7 sm:text-base"
+                                        className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-primary px-7 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark sm:mt-8 sm:text-lg"
                                     >
                                         {heroCta}
-                                        <ArrowRight size={18} className="rtl:rotate-180" />
+                                        <ArrowRight size={20} className="rtl:rotate-180" />
                                     </Link>
                                 </div>
                             </div>
@@ -162,7 +161,7 @@ export default function Investment() {
                             {/* Decorative navy pill peeking behind the bottom-start edge. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-6 inset-s-6 z-0 hidden h-40 w-2/3 max-w-2xl rounded-full lg:block"
+                                className="pointer-events-none absolute -bottom-16 inset-s-0 z-0 hidden h-80 w-[54%] max-w-172 rounded-full lg:block"
                                 style={{ backgroundColor: NAVY }}
                             />
                             <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-100 sm:rounded-[70px] sm:aspect-1247/486 lg:rounded-[97px]">
