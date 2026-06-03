@@ -10,7 +10,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
-use App\Http\Controllers\InvestmentController;
+// Investment page parked — route + import disabled for now (see CLAUDE.md). Re-enable both to relist.
+// use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\SelfBuildController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\LocaleController;
@@ -27,7 +28,8 @@ Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
     ->name('properties.show');
 
 // Investment — content-only editorial page (why invest in Amman).
-Route::get('/investment', [InvestmentController::class, 'show'])->name('investment');
+// PARKED for now — route disabled (see CLAUDE.md). Uncomment + restore the import to relist.
+// Route::get('/investment', [InvestmentController::class, 'show'])->name('investment');
 
 // Self Build — content-only service page (8-step process-flow timeline).
 Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-build');
