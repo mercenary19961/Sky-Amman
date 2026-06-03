@@ -103,11 +103,11 @@ export default function SelfBuild() {
                                     loading="eager"
                                 />
                                 <div aria-hidden="true" className="absolute inset-0" style={{ backgroundColor: `${NAVY}A6` }} />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-                                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/90 drop-shadow-sm sm:text-base lg:text-lg">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center sm:gap-3">
+                                    <p className="text-2xl font-light uppercase text-white drop-shadow-sm sm:text-4xl lg:text-7xl">
                                         {heroTagline}
                                     </p>
-                                    <h1 className="text-4xl font-bold uppercase text-white drop-shadow-sm sm:text-5xl lg:text-6xl">
+                                    <h1 className="text-2xl font-bold uppercase text-white drop-shadow-sm sm:text-4xl lg:text-7xl">
                                         {processTitle}
                                     </h1>
                                 </div>
