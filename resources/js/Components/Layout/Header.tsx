@@ -120,7 +120,9 @@ export function Header() {
             <div
                 aria-hidden="true"
                 className={cn(
-                    'absolute inset-0 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
+                    // Bar height only (h-24) so it never bleeds into the expanded
+                    // mobile menu panel below — keeps that panel a clean white.
+                    'absolute inset-x-0 top-0 h-24 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
                     isDark ? 'opacity-0' : 'opacity-100',
                 )}
             />
@@ -219,54 +221,41 @@ export function Header() {
                         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                         className="lg:hidden overflow-hidden border-t border-ink/5 bg-white shadow-xl"
                     >
-                        <motion.nav
-                            className="section-x flex flex-col divide-y divide-ink/6 py-3"
-                            initial="closed"
-                            animate="open"
-                            variants={{ open: { transition: { staggerChildren: 0.045, delayChildren: 0.06 } } }}
-                        >
-                            {NAV_ITEMS.map((item) => {
+                        <nav className="section-x flex flex-col divide-y divide-ink/6 py-3">
+                            {NAV_ITEMS.map((item, i) => {
                                 const active = url === item.href;
                                 return (
                                     <motion.div
                                         key={item.key}
-                                        variants={{
-                                            closed: { opacity: 0, x: -14 },
-                                            open: { opacity: 1, x: 0 },
-                                        }}
+                                        initial={{ opacity: 0, x: -14 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.25, delay: 0.06 + i * 0.045, ease: 'easeOut' }}
                                     >
                                         <Link
                                             href={item.href}
+                                            aria-current={active ? 'page' : undefined}
                                             className={cn(
-                                                'group relative flex items-center justify-between rounded-xl py-3.5 ps-5 pe-3 text-base transition-colors duration-200',
+                                                'group flex items-center justify-between rounded-xl py-3.5 ps-5 pe-3 text-base transition-colors duration-200',
                                                 active
-                                                    ? 'bg-primary/10 font-semibold text-primary'
-                                                    : 'text-ink hover:bg-surface-muted hover:text-primary',
+                                                    ? 'bg-primary-strong font-semibold text-white shadow-md'
+                                                    : 'text-ink hover:bg-white/60 hover:text-primary-strong',
                                             )}
                                         >
-                                            {/* Left accent bar — only on the active row. */}
-                                            <span
-                                                aria-hidden="true"
-                                                className={cn(
-                                                    'absolute inset-y-2 inset-s-0 w-1 rounded-full bg-primary transition-opacity duration-200',
-                                                    active ? 'opacity-100' : 'opacity-0',
-                                                )}
-                                            />
                                             <span>{t(`nav.${item.key}`)}</span>
                                             <ChevronRight
                                                 size={18}
                                                 className={cn(
                                                     'flex-none transition-transform duration-200 rtl:rotate-180',
                                                     active
-                                                        ? 'text-primary'
-                                                        : 'text-ink-muted/50 group-hover:translate-x-0.5 group-hover:text-primary rtl:group-hover:-translate-x-0.5',
+                                                        ? 'text-white'
+                                                        : 'text-ink/40 group-hover:translate-x-0.5 group-hover:text-primary-strong rtl:group-hover:-translate-x-0.5',
                                                 )}
                                             />
                                         </Link>
                                     </motion.div>
                                 );
                             })}
-                        </motion.nav>
+                        </nav>
                     </motion.div>
                 )}
             </AnimatePresence>
