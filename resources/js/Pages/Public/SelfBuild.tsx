@@ -85,20 +85,19 @@ export default function SelfBuild() {
                 <section data-nav-bg="light" className="overflow-hidden bg-surface">
                     <div className="section-x pt-28 pb-10 sm:pt-32 sm:pb-14 lg:pt-40">
                         <div className="relative">
-                            {/* Decorative navy pills peeking behind the corners. */}
+                            {/* Decorative pills: light-blue peeking top-start, navy
+                                peeking bottom-end (per the design). */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-12 inset-s-0 z-0 hidden h-64 w-[55%] max-w-172 rounded-e-full lg:block"
-                                style={{ backgroundColor: NAVY }}
+                                className="pointer-events-none absolute -top-12 -inset-s-6 z-0 hidden h-64 w-[55%] max-w-172 rounded-full bg-primary lg:block"
                             />
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-12 inset-e-0 z-0 hidden h-64 w-[55%] max-w-172 rounded-s-full lg:block"
-                                style={{ backgroundColor: NAVY }}
+                                className="pointer-events-none absolute -bottom-12 -inset-e-6 z-0 hidden h-64 w-[55%] max-w-172 rounded-full bg-[#1A3954] lg:block"
                             />
-                            <div className="relative isolate min-h-64 overflow-hidden rounded-4xl sm:min-h-72 sm:rounded-[60px] lg:min-h-0 lg:aspect-1148/360 lg:rounded-[90px]">
+                            <div className="relative isolate min-h-64 overflow-hidden rounded-4xl sm:min-h-72 sm:rounded-[60px] lg:min-h-0 lg:aspect-1130/312 lg:rounded-[90px]">
                                 <img
-                                    src="/images/properties/properties-hero.webp"
+                                    src="/images/self-build/hero.webp"
                                     alt=""
                                     className="absolute inset-0 h-full w-full object-cover object-center"
                                     loading="eager"
