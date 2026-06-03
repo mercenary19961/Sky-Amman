@@ -145,7 +145,7 @@ export default function Investment() {
                                 <span className="text-ink">{edHeading} </span>
                                 <span className="text-primary">{edAccent}</span>
                             </h2>
-                            <p className="mt-6 text-lg leading-relaxed text-ink-muted sm:text-xl lg:text-2xl">
+                            <p className="mt-6 text-xl leading-relaxed text-ink-muted sm:text-2xl lg:text-3xl">
                                 {edBody}
                             </p>
                         </div>
