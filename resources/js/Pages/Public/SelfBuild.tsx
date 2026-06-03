@@ -118,9 +118,10 @@ export default function SelfBuild() {
             )}
 
             {/* ---------------- PROCESS FLOW TIMELINE ---------------- */}
+            {/* Bottom fades from white into the footer blue (#78AFCE / primary-deep)
+                and -mb-16 cancels the footer's top margin so they connect flush. */}
             {sectionVisible(content.process) && (
-                <section className="bg-surface pb-20 sm:pb-28">
-                    <div className="section-x">
+                <section className="-mb-16 bg-linear-to-b from-white from-90% to-primary-deep pb-20 sm:pb-28">                    <div className="section-x">
                         <div className="relative mx-auto max-w-6xl py-6">
                             {/* Central vertical line. */}
                             <div
