@@ -170,12 +170,12 @@ export default function About() {
 
             {/* ---------------- LEADERSHIP (fades into footer) ---------------- */}
             {sectionVisible(content.leadership) && (
-                <section className="-mb-16 bg-linear-to-b from-white from-35% to-primary-deep pt-12 pb-24 sm:pt-16 sm:pb-32">
+                <section className="-mb-16 bg-linear-to-b from-white from-35% to-primary-deep pt-16 pb-28 sm:pt-24 sm:pb-40 lg:pt-28">
                     <div className="section-x text-center">
-                        <h2 className="mx-auto max-w-3xl text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
+                        <h2 className="mx-auto max-w-6xl text-4xl font-bold leading-tight text-ink sm:text-6xl lg:text-7xl">
                             {leadershipTitle}
                         </h2>
-                        <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-ink-muted sm:text-xl lg:text-2xl">
+                        <p className="mx-auto mt-8 max-w-5xl text-xl leading-relaxed text-ink-muted sm:text-2xl lg:text-3xl">
                             {leadershipBody}
                         </p>
                     </div>
