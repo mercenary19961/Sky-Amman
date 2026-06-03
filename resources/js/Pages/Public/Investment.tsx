@@ -37,14 +37,10 @@ export default function Investment() {
     // Hero heading — bold main + lighter "(BUY/ RENT OR BUILD)?" suffix. Split on
     // the parenthesis (present in both locales) so the weight change is automatic.
     const heroTitle = text('hero', 'title', 'investment.hero.title');
-    const pIdx = heroTitle.indexOf('(');
-    const heroMain = pIdx > 0 ? heroTitle.slice(0, pIdx).trim() : heroTitle;
-    const heroSuffix = pIdx > 0 ? heroTitle.slice(pIdx) : '';
-    // Force the "…Amman" / "through properties" two-line break on the main part
-    // (English). Arabic has no "through", so it falls back to natural wrapping.
-    const thruIdx = heroMain.toLowerCase().indexOf(' through ');
-    const heroLine1 = thruIdx > -1 ? heroMain.slice(0, thruIdx) : heroMain;
-    const heroLine2 = thruIdx > -1 ? heroMain.slice(thruIdx + 1) : '';
+    // Line breaks come from the content itself (newline-separated), so each
+    // locale controls its own wrapping. A line wrapped in parentheses (the EN
+    // "(BUY/ RENT OR BUILD)?") renders in a lighter weight.
+    const heroLines = heroTitle.split('\n').map((l) => l.trim()).filter(Boolean);
     const heroCta = text('hero', 'cta', 'investment.hero.cta');
 
     const edHeading = text('editorial', 'heading', 'investment.editorial.heading');
@@ -105,14 +101,15 @@ export default function Investment() {
                                     className="absolute inset-0 h-full w-full object-cover object-center"
                                     loading="eager"
                                 />
-                                {/* No overlay — the photo is shown untouched. Text uses
-                                    its own shadow for legibility instead of dimming the
-                                    image. */}
+                                {/* Slight darkening so the white heading stays legible. */}
+                                <div aria-hidden="true" className="absolute inset-0 bg-black/30" />
                                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
                                     <h1 className="max-w-5xl text-4xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-6xl lg:text-7xl">
-                                        {heroLine1}
-                                        {heroLine2 && (<><br />{heroLine2}</>)}
-                                        {heroSuffix && (<><br /><span className="font-light">{heroSuffix}</span></>)}
+                                        {heroLines.map((line, i) => (
+                                            <span key={i} className={line.startsWith('(') ? 'block font-light' : 'block'}>
+                                                {line}
+                                            </span>
+                                        ))}
                                     </h1>
                                     <Link
                                         href="/contact"

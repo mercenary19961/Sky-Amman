@@ -173,7 +173,7 @@ const en = {
     },
     investment: {
         hero: {
-            title: 'WHY TO INVEST IN AMMAN THROUGH PROPERTIES (BUY/ RENT OR BUILD)?',
+            title: 'WHY TO INVEST IN AMMAN\nTHROUGH PROPERTIES\n(BUY/ RENT OR BUILD)?',
             cta: 'Contact Us',
         },
         editorial: {
