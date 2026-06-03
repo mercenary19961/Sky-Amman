@@ -79,7 +79,7 @@ export default function About() {
             {/* ---------------- HERO ---------------- */}
             {sectionVisible(content.hero) && (
                 <section data-nav-bg="light" className="overflow-hidden bg-surface">
-                    <div className="section-x pt-28 pb-10 sm:pt-32 sm:pb-12 lg:pt-40">
+                    <div className="section-x pt-28 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-36">
                         {/* Wrapper sized to the banner; the two pills sit BEHIND it
                             (z-0) and peek diagonally — navy top-start, light-blue
                             bottom-end — per Desktop.svg rect geometry. */}
@@ -87,12 +87,12 @@ export default function About() {
                             <div
                                 aria-hidden="true"
                                 className="pointer-events-none absolute z-0 hidden rounded-full lg:block"
-                                style={{ top: '-13.3%', insetInlineStart: '-12.6%', width: '54.9%', height: '77.3%', backgroundColor: NAVY }}
+                                style={{ top: '-8%', insetInlineStart: '-7%', width: '64%', height: '88%', backgroundColor: NAVY }}
                             />
                             <div
                                 aria-hidden="true"
                                 className="pointer-events-none absolute z-0 hidden rounded-full bg-primary lg:block"
-                                style={{ top: '33.6%', insetInlineStart: '52.3%', width: '54.9%', height: '77.3%' }}
+                                style={{ top: '24%', insetInlineStart: '43%', width: '64%', height: '88%' }}
                             />
                             <div className="relative z-10 min-h-44 overflow-hidden rounded-[40px] sm:min-h-52 sm:rounded-[80px] lg:min-h-0 lg:aspect-1241/422 lg:rounded-[150px]">
                                 <img
@@ -102,8 +102,8 @@ export default function About() {
                                     loading="eager"
                                 />
                                 <div aria-hidden="true" className="absolute inset-0" style={{ backgroundColor: `${NAVY}B3` }} />
-                                <div className="absolute inset-0 flex items-center justify-center px-6">
-                                    <h1 className="text-center text-4xl uppercase leading-none text-white drop-shadow-sm sm:text-6xl lg:text-7xl xl:text-8xl">
+                                <div className="absolute inset-0 flex items-end justify-start p-6 sm:p-10 lg:p-14">
+                                    <h1 className="text-start text-6xl uppercase leading-none text-white drop-shadow-sm sm:text-8xl lg:text-[11rem] xl:text-[12rem]">
                                         <span className="font-bold">{heroFirst}</span>
                                         {heroRestStr && <span className="font-light"> {heroRestStr}</span>}
                                     </h1>
