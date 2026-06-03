@@ -343,7 +343,7 @@ export default function Properties() {
                 controller). Hover-expand row on lg+; responsive grid below,
                 where hover isn't available on touch. */}
             {props.galleryImages.length > 0 && (
-                <section className="bg-surface pb-20 sm:pb-28">
+                <section className="-mb-16 bg-linear-to-b from-white from-80% to-primary-deep pb-20 sm:pb-28">
                     <div className="section-x">
                         <h2 className="text-center text-3xl sm:text-4xl lg:text-5xl font-bold text-primary tracking-wide uppercase">
                             {t('properties.gallery.title')}

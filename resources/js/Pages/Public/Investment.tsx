@@ -84,17 +84,17 @@ export default function Investment() {
 
             {/* ---------------- HERO ---------------- */}
             {sectionVisible(content.hero) && (
-                <section data-nav-bg="light" className="bg-surface">
+                <section data-nav-bg="light" className="overflow-hidden bg-surface">
                     <div className="section-x pt-28 pb-12 sm:pt-32 sm:pb-16 lg:pt-44">
                         <div className="relative">
                             {/* Decorative navy pill (Figma "Rectangle 38": 688×329
                                 stadium) peeking above the top-end corner. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -top-16 inset-e-0 z-0 hidden h-80 w-[65%] max-w-206 rounded-full lg:block"
+                                className="pointer-events-none absolute -top-16 inset-e-0 z-0 hidden h-72 w-[50%] max-w-160 rounded-full lg:block xl:h-80 xl:w-[65%] xl:max-w-206"
                                 style={{ backgroundColor: NAVY }}
                             />
-                            <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-140 sm:rounded-[80px] sm:aspect-1253/705 lg:rounded-[120px]">
+                            <div className="relative isolate min-h-115 overflow-hidden rounded-4xl sm:min-h-130 sm:rounded-[80px] lg:min-h-0 lg:aspect-1253/705 lg:rounded-[120px]">
                                 <img
                                     src="/images/investment/hero.webp"
                                     alt=""
@@ -104,7 +104,7 @@ export default function Investment() {
                                 {/* Slight darkening so the white heading stays legible. */}
                                 <div aria-hidden="true" className="absolute inset-0 bg-black/30" />
                                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
-                                    <h1 className="max-w-5xl text-4xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-6xl lg:text-7xl">
+                                    <h1 className="max-w-5xl text-3xl font-bold uppercase leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.55)] sm:text-4xl md:text-5xl xl:text-7xl">
                                         {heroLines.map((line, i) => (
                                             <span key={i} className={line.startsWith('(') ? 'block font-light' : 'block'}>
                                                 {line}
@@ -158,16 +158,16 @@ export default function Investment() {
 
             {/* ---------------- BOTTOM CTA BANNER ---------------- */}
             {sectionVisible(content.cta) && (
-                <section className="bg-surface pb-16 sm:pb-24">
+                <section className="overflow-hidden bg-surface pb-16 sm:pb-24">
                     <div className="section-x">
                         <div className="relative">
                             {/* Decorative navy pill peeking behind the bottom-start edge. */}
                             <div
                                 aria-hidden="true"
-                                className="pointer-events-none absolute -bottom-16 -inset-s-6 z-0 hidden h-96 w-[80%] max-w-248 rounded-4xl sm:rounded-[70px] lg:rounded-[97px] lg:block"
+                                className="pointer-events-none absolute -bottom-16 -inset-s-6 z-0 hidden h-80 w-[58%] max-w-184 rounded-4xl sm:rounded-[70px] lg:block lg:rounded-[97px] xl:h-96 xl:w-[80%] xl:max-w-248"
                                 style={{ backgroundColor: NAVY }}
                             />
-                            <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-100 sm:rounded-[70px] sm:aspect-1247/486 lg:rounded-[97px]">
+                            <div className="relative isolate min-h-105 overflow-hidden rounded-4xl sm:min-h-115 sm:rounded-[70px] lg:min-h-0 lg:aspect-1247/486 lg:rounded-[97px]">
                                 <img
                                     src="/images/investment/banner.webp"
                                     alt=""
@@ -176,7 +176,7 @@ export default function Investment() {
                                 />
                                 <div aria-hidden="true" className="absolute inset-0 bg-black/35" />
                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6 text-center sm:p-10">
-                                    <h2 className="max-w-3xl text-xl font-bold leading-snug text-white drop-shadow-sm sm:text-3xl lg:text-4xl">
+                                    <h2 className="max-w-full text-lg font-bold leading-snug text-white drop-shadow-sm sm:text-xl md:text-2xl lg:max-w-3xl lg:text-3xl xl:text-4xl">
                                         {ctaHeading}
                                     </h2>
                                     <Link

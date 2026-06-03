@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
-import { Menu, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { PageProps } from '@/types';
@@ -9,7 +10,8 @@ import type { PageProps } from '@/types';
 const NAV_ITEMS = [
     { key: 'home', href: '/' },
     { key: 'properties', href: '/properties' },
-    { key: 'investment', href: '/investment' },
+    // Investment temporarily hidden — re-add this item to relist it (see CLAUDE.md).
+    // { key: 'investment', href: '/investment' },
     { key: 'selfBuild', href: '/self-build' },
     { key: 'security', href: '/security' },
     { key: 'about', href: '/about' },
@@ -119,7 +121,9 @@ export function Header() {
             <div
                 aria-hidden="true"
                 className={cn(
-                    'absolute inset-0 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
+                    // Bar height only (h-24) so it never bleeds into the expanded
+                    // mobile menu panel below — keeps that panel a clean white.
+                    'absolute inset-x-0 top-0 h-24 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
                     isDark ? 'opacity-0' : 'opacity-100',
                 )}
             />
@@ -206,33 +210,56 @@ export function Header() {
 
             {/* Mobile menu panel — drops below the bar on lg-down when the
                 hamburger is open. Solid white surface so links read clearly
-                over any section. */}
-            <div
-                className={cn(
-                    'lg:hidden relative overflow-hidden bg-white shadow-lg transition-[max-height,opacity] duration-300 ease-out',
-                    mobileOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0',
+                over any section. Items stagger in; the active row gets a brand
+                pill + left accent bar + chevron. */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        key="mobile-panel"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="lg:hidden overflow-hidden border-t border-ink/5 bg-white shadow-xl"
+                    >
+                        <nav className="section-x flex flex-col divide-y divide-ink/6 py-3">
+                            {NAV_ITEMS.map((item, i) => {
+                                const active = url === item.href;
+                                return (
+                                    <motion.div
+                                        key={item.key}
+                                        initial={{ opacity: 0, x: -14 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.25, delay: 0.06 + i * 0.045, ease: 'easeOut' }}
+                                    >
+                                        <Link
+                                            href={item.href}
+                                            aria-current={active ? 'page' : undefined}
+                                            className={cn(
+                                                'group flex items-center justify-between rounded-xl py-3.5 ps-5 pe-3 text-base transition-colors duration-200',
+                                                active
+                                                    ? 'bg-primary-strong font-semibold text-white shadow-md'
+                                                    : 'text-ink hover:bg-white/60 hover:text-primary-strong',
+                                            )}
+                                        >
+                                            <span>{t(`nav.${item.key}`)}</span>
+                                            <ChevronRight
+                                                size={18}
+                                                className={cn(
+                                                    'flex-none transition-transform duration-200 rtl:rotate-180',
+                                                    active
+                                                        ? 'text-white'
+                                                        : 'text-ink/40 group-hover:translate-x-0.5 group-hover:text-primary-strong rtl:group-hover:-translate-x-0.5',
+                                                )}
+                                            />
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
+                        </nav>
+                    </motion.div>
                 )}
-            >
-                <nav className="section-x flex flex-col py-2">
-                    {NAV_ITEMS.map((item) => {
-                        const active = url === item.href;
-                        return (
-                            <Link
-                                key={item.key}
-                                href={item.href}
-                                className={cn(
-                                    'rounded-md px-2 py-3 text-base transition-colors duration-200',
-                                    active
-                                        ? 'font-semibold text-primary'
-                                        : 'text-ink hover:bg-surface-muted hover:text-primary',
-                                )}
-                            >
-                                {t(`nav.${item.key}`)}
-                            </Link>
-                        );
-                    })}
-                </nav>
-            </div>
+            </AnimatePresence>
         </header>
     );
 }

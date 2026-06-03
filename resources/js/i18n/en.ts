@@ -192,15 +192,14 @@ const en = {
         },
         process: {
             title: 'Process Flow',
-            steps: [
-                'Land Selection',
-                'Legal Verification',
-                'Engineering Design',
-                'Specifications',
-                'Execution',
-                'Documentation',
-                'Handover',
-            ],
+            step_1: 'Land Selection',
+            step_2: 'Legal Verification',
+            step_3: 'Engineering Design',
+            step_4: 'Specifications',
+            step_5: 'Execution',
+            step_6: 'Documentation',
+            step_7: 'Handover',
+            step_8: 'After-Sales Service',
         },
     },
     security: {
