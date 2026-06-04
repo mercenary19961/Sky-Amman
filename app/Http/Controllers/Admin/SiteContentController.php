@@ -18,7 +18,8 @@ class SiteContentController extends Controller
         $pages = Page::ordered()->get()->keyBy('slug');
 
         $grouped = [];
-        SiteContent::orderBy('page')
+        SiteContent::query()
+            ->orderBy('page')
             ->orderBy('sort_order')
             ->orderBy('key')
             ->get()
@@ -48,7 +49,7 @@ class SiteContentController extends Controller
         ]);
 
         // Update page-level SEO and visibility.
-        Page::where('slug', $page)->firstOrFail()->update([
+        Page::query()->where('slug', $page)->firstOrFail()->update([
             'is_visible'         => $request->boolean('page_is_visible', true),
             'seo_title_en'       => $request->input('seo_title_en'),
             'seo_title_ar'       => $request->input('seo_title_ar'),
@@ -57,21 +58,37 @@ class SiteContentController extends Controller
             'updated_by'         => Auth::id(),
         ]);
 
-        // Guard: only allow updating rows that belong to this page.
-        $validIds = SiteContent::where('page', $page)
+        // Guard: only allow updating rows that belong to this page. Fetch the
+        // current rows so we can skip no-op writes (don't bump updated_by /
+        // updated_at on rows that didn't actually change).
+        $existing = SiteContent::query()
+            ->where('page', $page)
             ->whereIn('id', collect($request->rows)->pluck('id'))
-            ->pluck('id')
-            ->flip();
+            ->get()
+            ->keyBy('id');
 
         foreach ($request->rows as $row) {
-            if (! $validIds->has($row['id'])) {
+            $current = $existing->get($row['id']);
+            if ($current === null) {
                 continue;
             }
-            SiteContent::where('id', $row['id'])->update([
-                'content_en' => strip_tags($row['content_en'] ?? ''),
-                'content_ar' => strip_tags($row['content_ar'] ?? ''),
-                'is_visible'  => $row['is_visible'] ?? true,
-                'updated_by'  => Auth::id(),
+
+            $contentEn = strip_tags($row['content_en'] ?? '');
+            $contentAr = strip_tags($row['content_ar'] ?? '');
+            $isVisible = (bool) ($row['is_visible'] ?? true);
+
+            // Short-circuit unchanged rows.
+            if ($current->content_en === $contentEn
+                && $current->content_ar === $contentAr
+                && (bool) $current->is_visible === $isVisible) {
+                continue;
+            }
+
+            $current->update([
+                'content_en' => $contentEn,
+                'content_ar' => $contentAr,
+                'is_visible' => $isVisible,
+                'updated_by' => Auth::id(),
             ]);
         }
 
