@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AreaChart,
     Area,
@@ -507,7 +507,11 @@ export default function Dashboard() {
                             </thead>
                             <tbody className="divide-y divide-ink/5 dark:divide-white/5">
                                 {recentInquiries.map(inq => (
-                                    <tr key={inq.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                                    <tr
+                                        key={inq.id}
+                                        onClick={() => router.visit(`/admin/contacts/${inq.id}`)}
+                                        className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors cursor-pointer"
+                                    >
                                         <td className="px-5 py-3">
                                             <div className="font-medium text-ink">{inq.name}</div>
                                             <div className="text-xs text-ink-muted">{inq.email}</div>

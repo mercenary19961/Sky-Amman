@@ -57,7 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'Communication',
         items: [
-            { label: 'Contact Submissions', path: '/admin/contacts', icon: <MessageSquare size={18} />, built: false },
+            { label: 'Contact Submissions', path: '/admin/contacts', icon: <MessageSquare size={18} />, built: true },
         ],
     },
     {

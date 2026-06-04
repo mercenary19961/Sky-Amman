@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ContactSubmissionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
@@ -95,6 +96,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
+
+    // Contact Submissions — single inbox for all public forms (editors + admins).
+    // Literal `trash` must precede the {id} wildcard.
+    Route::get('/contacts', [ContactSubmissionController::class, 'index'])->name('contacts.index');
+    Route::get('/contacts/trash', [ContactSubmissionController::class, 'trash'])->name('contacts.trash');
+    Route::get('/contacts/{id}', [ContactSubmissionController::class, 'show'])->name('contacts.show')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/read', [ContactSubmissionController::class, 'toggleRead'])->name('contacts.read')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/archive', [ContactSubmissionController::class, 'toggleArchive'])->name('contacts.archive')->where('id', '[0-9]+');
+    Route::delete('/contacts/{id}', [ContactSubmissionController::class, 'destroy'])->name('contacts.destroy')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/restore', [ContactSubmissionController::class, 'restore'])->name('contacts.restore')->where('id', '[0-9]+');
+    Route::delete('/contacts/{id}/force', [ContactSubmissionController::class, 'forceDestroy'])->name('contacts.force-destroy')->where('id', '[0-9]+');
 
     // Settings — admin only.
     Route::middleware('admin')->group(function () {
