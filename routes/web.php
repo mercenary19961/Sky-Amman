@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContactController;
@@ -108,10 +109,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/contacts/{id}/restore', [ContactSubmissionController::class, 'restore'])->name('contacts.restore')->where('id', '[0-9]+');
     Route::delete('/contacts/{id}/force', [ContactSubmissionController::class, 'forceDestroy'])->name('contacts.force-destroy')->where('id', '[0-9]+');
 
-    // Settings — admin only.
+    // Settings + Users — admin only.
     Route::middleware('admin')->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->where('id', '[0-9]+');
+        Route::post('/users/{id}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->where('id', '[0-9]+');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->where('id', '[0-9]+');
     });
 
     // Projects — literal paths (trash, create) must come before the {id} wildcard.
