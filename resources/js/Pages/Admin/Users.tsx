@@ -223,7 +223,7 @@ export default function Users() {
                                     type="text"
                                     value={form.data.name}
                                     onChange={e => form.setData('name', e.target.value)}
-                                    placeholder="e.g. Sarah Khalil"
+                                    placeholder="First Last"
                                     maxLength={255}
                                     className={inputClass}
                                 />
