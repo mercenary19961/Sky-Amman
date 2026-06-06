@@ -58,10 +58,40 @@ class DashboardController extends Controller
             ->get(['id', 'title_en'])
             ->map(fn ($p) => ['id' => $p->id, 'title_en' => $p->title_en]);
 
+        // Which SEO fields (title/description, EN + AR) are empty on a record.
+        $seoGaps = function ($m): array {
+            $gaps = [];
+            if (blank($m->seo_title_en))       $gaps[] = 'Title';
+            if (blank($m->seo_description_en)) $gaps[] = 'Description';
+            if (blank($m->seo_title_ar))       $gaps[] = 'Title (AR)';
+            if (blank($m->seo_description_ar)) $gaps[] = 'Desc (AR)';
+
+            return $gaps;
+        };
+
+        // Pages with incomplete SEO. Footer is a layout pseudo-page (no public
+        // URL), so it's excluded; hidden pages aren't indexed so they're skipped.
+        $pagesMissingSeo = Page::query()
+            ->where('is_visible', true)
+            ->where('slug', '!=', 'footer')
+            ->orderBy('sort_order')
+            ->get(['slug', 'title_en', 'seo_title_en', 'seo_title_ar', 'seo_description_en', 'seo_description_ar'])
+            ->map(fn ($p) => ['slug' => $p->slug, 'title_en' => $p->title_en, 'missing' => $seoGaps($p)])
+            ->filter(fn ($p) => count($p['missing']) > 0)
+            ->values();
+
         $projectsMissingSeo = Project::active()
-            ->where(function ($q) {
-                $q->whereNull('seo_title_en')->orWhere('seo_title_en', '');
-            })
+            ->orderBy('sort_order')
+            ->get(['id', 'title_en', 'seo_title_en', 'seo_title_ar', 'seo_description_en', 'seo_description_ar'])
+            ->map(fn ($p) => ['id' => $p->id, 'title_en' => $p->title_en, 'missing' => $seoGaps($p)])
+            ->filter(fn ($p) => count($p['missing']) > 0)
+            ->take(8)
+            ->values();
+
+        // Per-project OG image (picked from the gallery) — empty means social
+        // shares of that listing get no preview image.
+        $projectsMissingOg = Project::active()
+            ->whereNull('og_image_id')
             ->orderBy('sort_order')
             ->take(8)
             ->get(['id', 'title_en'])
@@ -123,7 +153,9 @@ class DashboardController extends Controller
             'projectsByCategory' => $projectsByCategory,
             'contentHealth' => [
                 'projectsMissingImages' => $projectsMissingImages,
+                'pagesMissingSeo'       => $pagesMissingSeo,
                 'projectsMissingSeo'    => $projectsMissingSeo,
+                'projectsMissingOg'     => $projectsMissingOg,
                 'emptySocialKeys'       => $emptySocialKeys,
                 'missingInstagramCreds' => $missingInstagramCreds,
                 'hiddenPages'           => $hiddenPages,

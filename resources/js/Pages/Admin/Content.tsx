@@ -355,12 +355,23 @@ export default function ContentEditor() {
                                             Hidden
                                         </span>
                                     )}
-                                    {seo.is_visible && !seo.seo_title_en.trim() && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
-                                            <AlertTriangle size={10} />
-                                            No SEO title
-                                        </span>
-                                    )}
+                                    {slug !== 'footer' && seo.is_visible && (() => {
+                                        const miss: string[] = [];
+                                        if (!seo.seo_title_en.trim()) miss.push('title');
+                                        if (!seo.seo_description_en.trim()) miss.push('description');
+                                        if (!seo.seo_title_ar.trim()) miss.push('title AR');
+                                        if (!seo.seo_description_ar.trim()) miss.push('desc AR');
+                                        if (miss.length === 0) return null;
+                                        return (
+                                            <span
+                                                title={`Missing SEO: ${miss.join(', ')}`}
+                                                className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
+                                            >
+                                                <AlertTriangle size={10} />
+                                                {miss.length === 4 ? 'No SEO' : 'SEO incomplete'}
+                                            </span>
+                                        );
+                                    })()}
                                     {isOpen && (
                                         <div
                                             onClick={e => { e.stopPropagation(); if (canSave) savePage(slug); }}

@@ -29,9 +29,24 @@ export interface ContentHealthItem {
     title_en: string;
 }
 
+/** A project/page with one or more empty SEO fields (`missing` lists which). */
+export interface SeoHealthProject {
+    id: number;
+    title_en: string;
+    missing: string[];
+}
+
+export interface SeoHealthPage {
+    slug: string;
+    title_en: string;
+    missing: string[];
+}
+
 export interface ContentHealth {
     projectsMissingImages: ContentHealthItem[];
-    projectsMissingSeo: ContentHealthItem[];
+    pagesMissingSeo: SeoHealthPage[];
+    projectsMissingSeo: SeoHealthProject[];
+    projectsMissingOg: ContentHealthItem[];
     emptySocialKeys: string[];
     missingInstagramCreds: string[];
     hiddenPages: Array<{ slug: string; title_en: string }>;
