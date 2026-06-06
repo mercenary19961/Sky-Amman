@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
@@ -23,6 +24,11 @@ class HomeController extends Controller
 
     public function index(): Response
     {
+        // Page-level visibility (innovation #5) + per-page SEO (overrides the
+        // site-wide Settings defaults on the client when set).
+        $page = Page::getBySlug('home');
+        abort_if($page === null || ! $page->is_visible, 404);
+
         $featured = Project::active()
             ->featured()
             ->ordered()
@@ -61,6 +67,14 @@ class HomeController extends Controller
             // Instagram grid is now driven by the Graph API via InstagramService
             // (cached 1h); the old instagram_embed_url setting is no longer used.
             'instagramPosts' => $this->instagram->getRecentMedia(9),
+            // Per-page SEO (admin-editable; client falls back to site-wide defaults).
+            'seo' => [
+                'title_en' => $page->seo_title_en,
+                'title_ar' => $page->seo_title_ar,
+                'description_en' => $page->seo_description_en,
+                'description_ar' => $page->seo_description_ar,
+            ],
+            'url' => route('home'),
         ]);
     }
 }

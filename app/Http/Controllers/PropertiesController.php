@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Page;
 use App\Models\Project;
 use App\Models\ProjectImage;
 use App\Models\Setting;
@@ -19,6 +20,11 @@ class PropertiesController extends Controller
      */
     public function index(): Response
     {
+        // Page-level visibility (innovation #5) + per-page SEO (overrides the
+        // site-wide Settings defaults on the client when set).
+        $page = Page::getBySlug('properties');
+        abort_if($page === null || ! $page->is_visible, 404);
+
         $projects = Project::active()
             ->ordered()
             ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm'])
@@ -42,6 +48,14 @@ class PropertiesController extends Controller
             'content_ar' => SiteContent::getPage('properties', 'ar'),
             'projects' => $projects,
             'galleryImages' => $this->galleryImages(),
+            // Per-page SEO (admin-editable; client falls back to site-wide defaults).
+            'seo' => [
+                'title_en' => $page->seo_title_en,
+                'title_ar' => $page->seo_title_ar,
+                'description_en' => $page->seo_description_en,
+                'description_ar' => $page->seo_description_ar,
+            ],
+            'url' => route('properties'),
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ContactSubmissionReceived;
 use App\Models\ContactSubmission;
+use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
@@ -24,6 +25,11 @@ class ContactController extends Controller
      */
     public function show(Request $request): Response
     {
+        // Page-level visibility (innovation #5) + per-page SEO (overrides the
+        // site-wide Settings defaults on the client when set).
+        $page = Page::getBySlug('contact');
+        abort_if($page === null || ! $page->is_visible, 404);
+
         $project = null;
         if ($slug = $request->query('property')) {
             $p = Project::active()->where('slug', $slug)->first(['id', 'slug', 'title_en', 'title_ar']);
@@ -42,6 +48,14 @@ class ContactController extends Controller
             'content_ar' => SiteContent::getPage('contact', 'ar'),
             'requestTypes' => ContactSubmission::REQUEST_TYPES,
             'project' => $project,
+            // Per-page SEO (admin-editable; client falls back to site-wide defaults).
+            'seo' => [
+                'title_en' => $page->seo_title_en,
+                'title_ar' => $page->seo_title_ar,
+                'description_en' => $page->seo_description_en,
+                'description_ar' => $page->seo_description_ar,
+            ],
+            'url' => route('contact'),
         ]);
     }
 
