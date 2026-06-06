@@ -223,6 +223,8 @@ export default function Users() {
                                     type="text"
                                     value={form.data.name}
                                     onChange={e => form.setData('name', e.target.value)}
+                                    placeholder="e.g. Sarah Khalil"
+                                    maxLength={255}
                                     className={inputClass}
                                 />
                             </Field>
@@ -232,6 +234,8 @@ export default function Users() {
                                     type="email"
                                     value={form.data.email}
                                     onChange={e => form.setData('email', e.target.value)}
+                                    placeholder="name@example.com"
+                                    maxLength={255}
                                     className={inputClass}
                                 />
                             </Field>
@@ -270,6 +274,7 @@ export default function Users() {
                                     onChange={(v) => form.setData('password', v)}
                                     error={form.errors.password}
                                     hint={editing ? 'Leave blank to keep current password' : undefined}
+                                    placeholder={editing ? 'Leave blank to keep current' : 'Use a strong password or generate one'}
                                     withMeter
                                     withGenerate
                                 />
@@ -277,6 +282,7 @@ export default function Users() {
                                     label="Confirm password"
                                     value={form.data.password_confirmation}
                                     onChange={(v) => form.setData('password_confirmation', v)}
+                                    placeholder="Re-enter the password"
                                     matchAgainst={form.data.password}
                                 />
                             </div>

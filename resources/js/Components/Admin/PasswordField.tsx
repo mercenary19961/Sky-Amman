@@ -51,6 +51,7 @@ interface PasswordFieldProps {
     onChange: (value: string) => void;
     error?: string;
     hint?: string;
+    placeholder?: string;
     autoComplete?: string;
     /** Show the live requirements checklist + strength meter (use on the main field). */
     withMeter?: boolean;
@@ -61,7 +62,7 @@ interface PasswordFieldProps {
 }
 
 export function PasswordField({
-    label, value, onChange, error, hint, autoComplete = 'new-password',
+    label, value, onChange, error, hint, placeholder, autoComplete = 'new-password',
     withMeter = false, withGenerate = false, matchAgainst,
 }: PasswordFieldProps) {
     const [show, setShow] = useState(false);
@@ -101,9 +102,10 @@ export function PasswordField({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     autoComplete={autoComplete}
+                    placeholder={placeholder}
                     className={inputClass}
                 />
-                <div className="absolute inset-y-0 end-2 flex items-center gap-1">
+                <div className="absolute inset-y-0 inset-e-2 flex items-center gap-1">
                     {withGenerate && (
                         <button
                             type="button"
