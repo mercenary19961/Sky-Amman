@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
+import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ProjectFormProps, ProjectFormItem, ProjectImageItem } from '@/types/admin/project';
 
@@ -244,28 +245,28 @@ export default function ProjectForm() {
                     <div className="space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <Field label="Category" error={errors.category}>
-                                <select
+                                <Select
                                     value={data.category}
-                                    onChange={e => set('category', e.target.value as FormData['category'])}
-                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
-                                >
-                                    <option value="under_development">Under Development</option>
-                                    <option value="ready">Ready</option>
-                                    <option value="investment_opportunity">Investment Opportunity</option>
-                                </select>
+                                    onChange={(v) => set('category', v as FormData['category'])}
+                                    options={[
+                                        { value: 'under_development', label: 'Under Development' },
+                                        { value: 'ready', label: 'Ready' },
+                                        { value: 'investment_opportunity', label: 'Investment Opportunity' },
+                                    ]}
+                                />
                             </Field>
                             <Field label="Listing Status" error={errors.listing_status}>
-                                <select
+                                <Select
                                     value={data.listing_status ?? ''}
-                                    onChange={e => set('listing_status', (e.target.value || null) as FormData['listing_status'])}
-                                    className="w-full px-3 py-2 text-sm border border-ink/10 rounded focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white dark:bg-zinc-700 dark:text-zinc-100"
-                                >
-                                    <option value="">— None —</option>
-                                    <option value="for_sale">For Sale</option>
-                                    <option value="for_rent">For Rent</option>
-                                    <option value="sold">Sold</option>
-                                    <option value="reserved">Reserved</option>
-                                </select>
+                                    onChange={(v) => set('listing_status', (v || null) as FormData['listing_status'])}
+                                    options={[
+                                        { value: '', label: '— None —' },
+                                        { value: 'for_sale', label: 'For Sale' },
+                                        { value: 'for_rent', label: 'For Rent' },
+                                        { value: 'sold', label: 'Sold' },
+                                        { value: 'reserved', label: 'Reserved' },
+                                    ]}
+                                />
                             </Field>
                         </div>
                         <div className="flex flex-wrap items-center gap-5">

@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { useRef } from 'react';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 import type { FormEvent } from 'react';
@@ -60,14 +60,19 @@ export default function Login() {
                         {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password}</p>}
                     </div>
 
-                    <label className="flex items-center gap-2 text-sm text-ink-muted">
-                        <input
-                            type="checkbox"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                        />
-                        Remember me
-                    </label>
+                    <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 text-sm text-ink-muted">
+                            <input
+                                type="checkbox"
+                                checked={data.remember}
+                                onChange={(e) => setData('remember', e.target.checked)}
+                            />
+                            Remember me
+                        </label>
+                        <Link href="/admin/forgot-password" className="text-sm text-primary hover:underline">
+                            Forgot password?
+                        </Link>
+                    </div>
 
                     <Turnstile
                         ref={turnstileRef}

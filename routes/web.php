@@ -1,18 +1,23 @@
 <?php
 
+use App\Http\Controllers\Admin\ContactSubmissionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
 // Investment page parked — route + import disabled for now (see CLAUDE.md). Re-enable both to relist.
 // use App\Http\Controllers\InvestmentController;
 use App\Http\Controllers\SelfBuildController;
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\NewsletterController;
@@ -36,6 +41,9 @@ Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-buil
 
 // Security With SkyAmman — content-only page (three security pillars).
 Route::get('/security', [SecurityController::class, 'show'])->name('security');
+
+// About Us — content-only page (intro, crafted, mission, vision, leadership).
+Route::get('/about', [AboutController::class, 'show'])->name('about');
 
 // Contact — single inbox for all public inquiries. POST is rate-limited like
 // every public form; Turnstile-gated server-side in the controller.
@@ -71,6 +79,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/admin/login', [LoginController::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.submit');
+
+    // Password reset — Turnstile-gated request, then a tokenized reset form.
+    // Both POSTs are rate-limited like every public form.
+    Route::get('/admin/forgot-password', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('/admin/forgot-password', [ForgotPasswordController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+    Route::get('/admin/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
+    Route::post('/admin/reset-password', [ResetPasswordController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('password.update');
 });
 
 Route::post('/admin/logout', [LoginController::class, 'logout'])
@@ -92,10 +111,27 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
 
-    // Settings — admin only.
+    // Contact Submissions — single inbox for all public forms (editors + admins).
+    // Literal `trash` must precede the {id} wildcard.
+    Route::get('/contacts', [ContactSubmissionController::class, 'index'])->name('contacts.index');
+    Route::get('/contacts/trash', [ContactSubmissionController::class, 'trash'])->name('contacts.trash');
+    Route::get('/contacts/{id}', [ContactSubmissionController::class, 'show'])->name('contacts.show')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/read', [ContactSubmissionController::class, 'toggleRead'])->name('contacts.read')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/archive', [ContactSubmissionController::class, 'toggleArchive'])->name('contacts.archive')->where('id', '[0-9]+');
+    Route::delete('/contacts/{id}', [ContactSubmissionController::class, 'destroy'])->name('contacts.destroy')->where('id', '[0-9]+');
+    Route::post('/contacts/{id}/restore', [ContactSubmissionController::class, 'restore'])->name('contacts.restore')->where('id', '[0-9]+');
+    Route::delete('/contacts/{id}/force', [ContactSubmissionController::class, 'forceDestroy'])->name('contacts.force-destroy')->where('id', '[0-9]+');
+
+    // Settings + Users — admin only.
     Route::middleware('admin')->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->where('id', '[0-9]+');
+        Route::post('/users/{id}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->where('id', '[0-9]+');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->where('id', '[0-9]+');
     });
 
     // Projects — literal paths (trash, create) must come before the {id} wildcard.

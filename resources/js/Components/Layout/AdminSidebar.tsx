@@ -57,14 +57,14 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'Communication',
         items: [
-            { label: 'Contact Submissions', path: '/admin/contacts', icon: <MessageSquare size={18} />, built: false },
+            { label: 'Contact Submissions', path: '/admin/contacts', icon: <MessageSquare size={18} />, built: true },
         ],
     },
     {
         label: 'System',
         items: [
             { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: true },
-            { label: 'Users', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: false },
+            { label: 'Users', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: true },
             { label: 'Change Log', path: '/admin/change-log', icon: <History size={18} />, adminOnly: true, built: false },
         ],
     },

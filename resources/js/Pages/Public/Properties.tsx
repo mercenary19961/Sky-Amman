@@ -90,15 +90,23 @@ export default function Properties() {
         [filtered, page],
     );
 
-    const seoTitle = props.siteSettings?.seo_title ?? 'Properties · SkyAmman';
-    const seoDescription = props.siteSettings?.seo_description ?? '';
+    // SEO resolution: per-page override → site-wide Settings default → hardcoded.
+    const ar = language === 'ar';
+    const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || props.siteSettings?.seo_title || 'Properties · SkyAmman';
+    const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || props.siteSettings?.seo_description || '';
 
     return (
         <PublicLayout>
             <Head title={seoTitle}>
                 <meta name="description" content={seoDescription} />
+                <link rel="canonical" href={props.url} />
                 <meta property="og:title" content={seoTitle} />
+                <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
+                <meta property="og:url" content={props.url} />
+                <link rel="alternate" hrefLang="en" href={props.url} />
+                <link rel="alternate" hrefLang="ar" href={props.url} />
+                <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
 
             {/* ---------------- HERO ---------------- */}

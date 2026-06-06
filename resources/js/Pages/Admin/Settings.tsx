@@ -247,7 +247,13 @@ export default function Settings() {
                 : `${missing[0] === 'company_phone' ? 'phone' : 'email'} missing`;
         }
         if (group === 'seo') {
-            return !(values['seo_title_en'] ?? '').trim() ? 'Default title missing' : null;
+            const miss: string[] = [];
+            if (!(values['seo_title_en'] ?? '').trim()) miss.push('title');
+            if (!(values['seo_description_en'] ?? '').trim()) miss.push('description');
+            if (!(values['seo_title_ar'] ?? '').trim()) miss.push('title AR');
+            if (!(values['seo_description_ar'] ?? '').trim()) miss.push('desc AR');
+            if (!(values['og_image_url'] ?? '').trim()) miss.push('OG image');
+            return miss.length > 0 ? `Defaults missing: ${miss.join(', ')}` : null;
         }
         return null;
     }

@@ -60,7 +60,9 @@ export default function Contact() {
         });
     };
 
-    const seoTitle = settings?.seo_title || `${heroTitle} · SkyAmman`;
+    // SEO resolution: per-page override → site-wide Settings default → hardcoded.
+    const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || settings?.seo_title || `${heroTitle} · SkyAmman`;
+    const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || settings?.seo_description || heroSubtitle;
 
     const inputClass =
         'mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink transition-colors focus:outline-none focus:border-primary';
@@ -68,9 +70,15 @@ export default function Contact() {
     return (
         <PublicLayout>
             <Head title={seoTitle}>
-                <meta name="description" content={heroSubtitle} />
+                <meta name="description" content={seoDescription} />
+                <link rel="canonical" href={props.url} />
                 <meta property="og:title" content={seoTitle} />
+                <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
+                <meta property="og:url" content={props.url} />
+                <link rel="alternate" hrefLang="en" href={props.url} />
+                <link rel="alternate" hrefLang="ar" href={props.url} />
+                <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
 
             <section data-nav-bg="light" className="bg-surface">

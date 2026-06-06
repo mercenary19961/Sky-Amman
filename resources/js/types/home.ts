@@ -8,6 +8,15 @@ export interface ContentValue {
 
 export type SiteContentBundle = Record<string, Record<string, ContentValue>>;
 
+/** Per-page SEO overrides (from the `pages` table). Empty fields fall back to
+ *  the site-wide Settings defaults on the client. */
+export interface PageSeo {
+    title_en: string | null;
+    title_ar: string | null;
+    description_en: string | null;
+    description_ar: string | null;
+}
+
 export interface FeaturedProject {
     id: number;
     slug: string;
@@ -41,6 +50,8 @@ export interface PropertiesPageProps extends PageProps {
     content_ar: SiteContentBundle;
     projects: FeaturedProject[];
     galleryImages: GalleryImage[];
+    seo: PageSeo;
+    url: string;
 }
 
 export interface PropertyDetail {
@@ -75,6 +86,18 @@ export interface RelatedProject {
     title_ar: string;
     listing_status: 'for_sale' | 'for_rent' | 'sold' | 'reserved' | null;
     image_url: string;
+}
+
+export interface AboutPageProps extends PageProps {
+    content_en: SiteContentBundle;
+    content_ar: SiteContentBundle;
+    seo: {
+        title_en: string | null;
+        title_ar: string | null;
+        description_en: string | null;
+        description_ar: string | null;
+    };
+    url: string;
 }
 
 export interface SelfBuildPageProps extends PageProps {
@@ -118,6 +141,8 @@ export interface ContactPageProps extends PageProps {
     content_ar: SiteContentBundle;
     requestTypes: string[];
     project: { id: number; slug: string; title_en: string; title_ar: string } | null;
+    seo: PageSeo;
+    url: string;
 }
 
 export interface PropertyDetailPageProps extends PageProps {
@@ -137,4 +162,6 @@ export interface HomePageProps extends PageProps {
         linkedin: string;
     };
     instagramPosts: InstagramPost[];
+    seo: PageSeo;
+    url: string;
 }

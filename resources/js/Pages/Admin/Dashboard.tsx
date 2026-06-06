@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AreaChart,
     Area,
@@ -173,6 +173,29 @@ function HealthItem({ items, editPath, label, hash }: { items: ContentHealthItem
     );
 }
 
+/** SEO-gap list: each row shows the record name + which fields are empty, with a
+ *  Fix link. `to(item)` builds the deep-link target (project edit vs. content page). */
+function SeoHealthList<T extends { title_en: string; missing: string[] }>(
+    { items, to }: { items: T[]; to: (item: T) => string },
+) {
+    if (items.length === 0) return null;
+    return (
+        <ul className="space-y-1">
+            {items.map((item, i) => (
+                <li key={i} className="flex items-center justify-between gap-2">
+                    <span className="min-w-0 flex-1">
+                        <span className="text-sm text-ink truncate">{item.title_en}</span>
+                        <span className="block text-[11px] text-ink-muted truncate">missing: {item.missing.join(', ')}</span>
+                    </span>
+                    <Link href={to(item)} className="shrink-0 text-[11px] text-primary hover:underline flex items-center gap-0.5">
+                        Fix <ExternalLink size={10} />
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 // ── Custom tooltip for the area chart ─────────────────────────────────────────
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -196,7 +219,9 @@ export default function Dashboard() {
 
     const totalHealthIssues =
         contentHealth.projectsMissingImages.length +
+        contentHealth.pagesMissingSeo.length +
         contentHealth.projectsMissingSeo.length +
+        contentHealth.projectsMissingOg.length +
         contentHealth.emptySocialKeys.length +
         contentHealth.missingInstagramCreds.length +
         contentHealth.hiddenPages.length +
@@ -397,15 +422,43 @@ export default function Dashboard() {
                                 </div>
                             )}
 
-                            {/* Missing SEO */}
+                            {/* Pages — incomplete SEO */}
+                            {contentHealth.pagesMissingSeo.length > 0 && (
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 mb-2">
+                                        <Search size={13} />
+                                        <span className="text-xs font-semibold uppercase tracking-wide">Pages · Incomplete SEO</span>
+                                    </div>
+                                    <SeoHealthList
+                                        items={contentHealth.pagesMissingSeo}
+                                        to={(p) => `/admin/content#${p.slug}`}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Projects — incomplete SEO */}
                             {contentHealth.projectsMissingSeo.length > 0 && (
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 mb-2">
                                         <Search size={13} />
-                                        <span className="text-xs font-semibold uppercase tracking-wide">Missing SEO Title</span>
+                                        <span className="text-xs font-semibold uppercase tracking-wide">Projects · Incomplete SEO</span>
+                                    </div>
+                                    <SeoHealthList
+                                        items={contentHealth.projectsMissingSeo}
+                                        to={(p) => `/admin/projects/${p.id}/edit#section-seo`}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Projects — no OG image */}
+                            {contentHealth.projectsMissingOg.length > 0 && (
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 mb-2">
+                                        <ImageIcon size={13} />
+                                        <span className="text-xs font-semibold uppercase tracking-wide">Projects · No OG Image</span>
                                     </div>
                                     <HealthItem
-                                        items={contentHealth.projectsMissingSeo}
+                                        items={contentHealth.projectsMissingOg}
                                         editPath="/admin/projects/"
                                         label=""
                                         hash="#section-seo"
@@ -507,7 +560,11 @@ export default function Dashboard() {
                             </thead>
                             <tbody className="divide-y divide-ink/5 dark:divide-white/5">
                                 {recentInquiries.map(inq => (
-                                    <tr key={inq.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                                    <tr
+                                        key={inq.id}
+                                        onClick={() => router.visit(`/admin/contacts/${inq.id}`)}
+                                        className="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors cursor-pointer"
+                                    >
                                         <td className="px-5 py-3">
                                             <div className="font-medium text-ink">{inq.name}</div>
                                             <div className="text-xs text-ink-muted">{inq.email}</div>

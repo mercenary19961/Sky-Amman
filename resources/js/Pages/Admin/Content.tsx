@@ -246,6 +246,33 @@ export default function ContentEditor() {
         });
     }
 
+    // Has this page got unsaved edits? Compares the working state against the
+    // live props (which Inertia refreshes after each successful save, so the
+    // page returns to "clean" once persisted).
+    function isPageDirty(slug: string): boolean {
+        const sections = grouped[slug] ?? {};
+        for (const [section, sectionRows] of Object.entries(sections)) {
+            const origVisible = sectionRows.every(r => r.is_visible);
+            if ((sectionVisible[slug]?.[section] ?? true) !== origVisible) return true;
+            for (const r of sectionRows) {
+                const cur = rowValues[r.id];
+                if (!cur) continue;
+                if (cur.content_en !== (r.content_en ?? '')) return true;
+                if (cur.content_ar !== (r.content_ar ?? '')) return true;
+            }
+        }
+        const seo = pageSeo[slug];
+        const p = pages[slug];
+        if (seo && p) {
+            if (seo.is_visible !== p.is_visible) return true;
+            if (seo.seo_title_en !== (p.seo_title_en ?? '')) return true;
+            if (seo.seo_title_ar !== (p.seo_title_ar ?? '')) return true;
+            if (seo.seo_description_en !== (p.seo_description_en ?? '')) return true;
+            if (seo.seo_description_ar !== (p.seo_description_ar ?? '')) return true;
+        }
+        return false;
+    }
+
     const previewSlug = expandedPage ?? orderedPages[0] ?? 'home';
     const previewUrl = PAGE_URLS[previewSlug] ?? '/';
     const previewLabel = pages[previewSlug]?.title_en ?? toLabel(previewSlug);
@@ -294,6 +321,8 @@ export default function ContentEditor() {
                         const rowCount = Object.values(sections).flat().length;
                         const seo = pageSeo[slug] ?? { is_visible: true, seo_title_en: '', seo_title_ar: '', seo_description_en: '', seo_description_ar: '' };
                         const isSaving = processing === slug;
+                        const dirty = isOpen && isPageDirty(slug);
+                        const canSave = dirty && !isSaving;
 
                         return (
                             <div
@@ -326,27 +355,41 @@ export default function ContentEditor() {
                                             Hidden
                                         </span>
                                     )}
-                                    {seo.is_visible && !seo.seo_title_en.trim() && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
-                                            <AlertTriangle size={10} />
-                                            No SEO title
-                                        </span>
-                                    )}
+                                    {slug !== 'footer' && seo.is_visible && (() => {
+                                        const miss: string[] = [];
+                                        if (!seo.seo_title_en.trim()) miss.push('title');
+                                        if (!seo.seo_description_en.trim()) miss.push('description');
+                                        if (!seo.seo_title_ar.trim()) miss.push('title AR');
+                                        if (!seo.seo_description_ar.trim()) miss.push('desc AR');
+                                        if (miss.length === 0) return null;
+                                        return (
+                                            <span
+                                                title={`Missing SEO: ${miss.join(', ')}`}
+                                                className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400"
+                                            >
+                                                <AlertTriangle size={10} />
+                                                {miss.length === 4 ? 'No SEO' : 'SEO incomplete'}
+                                            </span>
+                                        );
+                                    })()}
                                     {isOpen && (
                                         <div
-                                            onClick={e => { e.stopPropagation(); savePage(slug); }}
+                                            onClick={e => { e.stopPropagation(); if (canSave) savePage(slug); }}
                                             role="button"
-                                            tabIndex={0}
-                                            onKeyDown={e => e.key === 'Enter' && savePage(slug)}
+                                            tabIndex={canSave ? 0 : -1}
+                                            aria-disabled={!canSave}
+                                            onKeyDown={e => e.key === 'Enter' && canSave && savePage(slug)}
                                             className={cn(
                                                 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors',
                                                 isSaving
                                                     ? 'bg-primary/50 text-white cursor-not-allowed'
-                                                    : 'bg-primary text-zinc-900 hover:bg-primary-dark',
+                                                    : canSave
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
                                             )}
                                         >
                                             <Save size={12} />
-                                            {isSaving ? 'Saving…' : 'Save'}
+                                            {isSaving ? 'Saving…' : dirty ? 'Save' : 'Saved'}
                                         </div>
                                     )}
                                 </button>
@@ -481,11 +524,16 @@ export default function ContentEditor() {
                                             <button
                                                 type="button"
                                                 onClick={() => savePage(slug)}
-                                                disabled={isSaving}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                                                disabled={!canSave}
+                                                className={cn(
+                                                    'inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+                                                    canSave
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
+                                                )}
                                             >
                                                 <Save size={14} />
-                                                {isSaving ? 'Saving…' : 'Save Changes'}
+                                                {isSaving ? 'Saving…' : dirty ? 'Save Changes' : 'All changes saved'}
                                             </button>
                                         </div>
                                     </div>
