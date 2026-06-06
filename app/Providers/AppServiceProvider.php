@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -29,5 +30,12 @@ class AppServiceProvider extends ServiceProvider
             ->numbers()
             ->symbols()
             ->uncompromised());
+
+        // Point the password-reset email link at our Inertia reset page (token in
+        // the path, email as a query param so the form can prefill it).
+        ResetPassword::createUrlUsing(fn (object $notifiable, string $token) => route('password.reset', [
+            'token' => $token,
+            'email' => $notifiable->getEmailForPasswordReset(),
+        ]));
     }
 }

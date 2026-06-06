@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PropertiesController;
@@ -77,6 +79,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/admin/login', [LoginController::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.submit');
+
+    // Password reset — Turnstile-gated request, then a tokenized reset form.
+    // Both POSTs are rate-limited like every public form.
+    Route::get('/admin/forgot-password', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('/admin/forgot-password', [ForgotPasswordController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+    Route::get('/admin/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
+    Route::post('/admin/reset-password', [ResetPasswordController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('password.update');
 });
 
 Route::post('/admin/logout', [LoginController::class, 'logout'])
