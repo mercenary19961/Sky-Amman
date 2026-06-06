@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Models\SiteContent;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ class SiteContentController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $page): RedirectResponse
+    public function update(Request $request, string $page, ChangeLogService $changeLog): RedirectResponse
     {
         $request->validate([
             'page_is_visible'    => 'boolean',
@@ -67,6 +68,10 @@ class SiteContentController extends Controller
             ->get()
             ->keyBy('id');
 
+        // Snapshots of changed rows (keyed by id) for the change log + revert.
+        $oldData = [];
+        $newData = [];
+
         foreach ($request->rows as $row) {
             $current = $existing->get($row['id']);
             if ($current === null) {
@@ -84,12 +89,31 @@ class SiteContentController extends Controller
                 continue;
             }
 
+            $label = ucfirst(str_replace('_', ' ', $current->section)) . ' · ' . $current->key;
+            $oldData[$current->id] = [
+                'content_en' => $current->content_en,
+                'content_ar' => $current->content_ar,
+                'is_visible' => (bool) $current->is_visible,
+                'label'      => $label,
+            ];
+            $newData[$current->id] = [
+                'content_en' => $contentEn,
+                'content_ar' => $contentAr,
+                'is_visible' => $isVisible,
+                'label'      => $label,
+            ];
+
             $current->update([
                 'content_en' => $contentEn,
                 'content_ar' => $contentAr,
                 'is_visible' => $isVisible,
                 'updated_by' => Auth::id(),
             ]);
+        }
+
+        if (! empty($newData)) {
+            $pageTitle = ucfirst(str_replace('_', ' ', $page));
+            $changeLog->log('site_content', $page, 'update', $oldData, $newData, $pageTitle . ' content');
         }
 
         return redirect()->back()->with('success', 'Content saved.');

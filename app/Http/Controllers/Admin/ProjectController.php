@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProjectRequest;
 use App\Http\Requests\Admin\UpdateProjectRequest;
 use App\Models\Project;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,7 +69,7 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function store(StoreProjectRequest $request): RedirectResponse
+    public function store(StoreProjectRequest $request, ChangeLogService $changeLog): RedirectResponse
     {
         $data = $request->validated();
 
@@ -90,6 +91,8 @@ class ProjectController extends Controller
         $data['updated_by'] = Auth::id();
 
         $project = Project::create($data);
+
+        $changeLog->log('project', $project->id, 'create', null, $project->attributesToArray(), $project->title_en);
 
         return redirect()
             ->route('admin.projects.edit', $project->id)
@@ -118,9 +121,10 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function update(UpdateProjectRequest $request, int $id): RedirectResponse
+    public function update(UpdateProjectRequest $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $project = Project::findOrFail($id);
+        $old = $project->attributesToArray();
         $data = $request->validated();
 
         foreach (['short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
@@ -133,12 +137,15 @@ class ProjectController extends Controller
 
         $project->update($data);
 
+        $changeLog->log('project', $project->id, 'update', $old, $project->fresh()->attributesToArray(), $project->title_en);
+
         return redirect()->back()->with('success', 'Project updated.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $project = Project::findOrFail($id);
+        $changeLog->log('project', $project->id, 'delete', $project->attributesToArray(), null, $project->title_en);
         $project->delete();
 
         return redirect()
@@ -146,10 +153,12 @@ class ProjectController extends Controller
             ->with('success', 'Project moved to trash.');
     }
 
-    public function restore(int $id): RedirectResponse
+    public function restore(int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $project = Project::onlyTrashed()->findOrFail($id);
         $project->restore();
+
+        $changeLog->log('project', $project->id, 'restore', null, $project->attributesToArray(), $project->title_en);
 
         return redirect()
             ->route('admin.projects.trash')
