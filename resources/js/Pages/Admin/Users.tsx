@@ -102,7 +102,11 @@ export default function Users() {
     const pwMeetsRules = PASSWORD_RULES.every((r) => r.test(form.data.password));
     const pwMatches = form.data.password === form.data.password_confirmation;
     const passwordOk = editing ? (!pwEntered || (pwMeetsRules && pwMatches)) : (pwMeetsRules && pwMatches);
-    const canSubmit = !form.processing && passwordOk;
+
+    // Name + email must also be valid before the button lights up.
+    const nameOk = form.data.name.trim().length > 0;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.data.email.trim());
+    const canSubmit = !form.processing && nameOk && emailOk && passwordOk;
 
     return (
         <AdminLayout title="Users">
