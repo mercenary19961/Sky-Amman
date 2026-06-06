@@ -4,6 +4,7 @@ import {
     Plus, Pencil, Trash2, ShieldCheck, ShieldAlert, X, Power, Lock,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { UsersPageProps, UserListItem, UserRole } from '@/types/admin/user';
 
@@ -223,14 +224,14 @@ export default function Users() {
                             </Field>
 
                             <Field label="Role" error={form.errors.role}>
-                                <select
+                                <Select
                                     value={form.data.role}
-                                    onChange={e => form.setData('role', e.target.value as UserRole)}
-                                    className={inputClass}
-                                >
-                                    <option value="editor">Editor — content only</option>
-                                    <option value="admin">Admin — full access</option>
-                                </select>
+                                    onChange={(v) => form.setData('role', v as UserRole)}
+                                    options={[
+                                        { value: 'editor', label: 'Editor — content only' },
+                                        { value: 'admin', label: 'Admin — full access' },
+                                    ]}
+                                />
                                 {grantingAdmin && (
                                     <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                         <ShieldCheck size={12} />

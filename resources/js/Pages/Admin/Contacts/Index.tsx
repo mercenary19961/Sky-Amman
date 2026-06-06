@@ -4,6 +4,7 @@ import {
     Search, Archive, Trash2, ArchiveRestore, Inbox, Mail, MailOpen, Building2, ChevronRight,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ContactIndexProps, ContactListItem, RequestType } from '@/types/admin/contact';
 
@@ -142,28 +143,30 @@ export default function ContactsIndex() {
                     </button>
                 </form>
 
-                <select
+                <Select
+                    className="w-40"
                     value={filters.request_type ?? ''}
-                    onChange={e => applyFilter('request_type', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                    <option value="">All Types</option>
-                    <option value="buy">Buy</option>
-                    <option value="rent">Rent</option>
-                    <option value="build">Build</option>
-                    <option value="investment">Investment</option>
-                    <option value="general">General</option>
-                </select>
+                    onChange={(v) => applyFilter('request_type', v)}
+                    options={[
+                        { value: '', label: 'All Types' },
+                        { value: 'buy', label: 'Buy' },
+                        { value: 'rent', label: 'Rent' },
+                        { value: 'build', label: 'Build' },
+                        { value: 'investment', label: 'Investment' },
+                        { value: 'general', label: 'General' },
+                    ]}
+                />
 
-                <select
+                <Select
+                    className="w-44"
                     value={filters.read ?? ''}
-                    onChange={e => applyFilter('read', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                    <option value="">Read & Unread</option>
-                    <option value="0">Unread only</option>
-                    <option value="1">Read only</option>
-                </select>
+                    onChange={(v) => applyFilter('read', v)}
+                    options={[
+                        { value: '', label: 'Read & Unread' },
+                        { value: '0', label: 'Unread only' },
+                        { value: '1', label: 'Read only' },
+                    ]}
+                />
 
                 {trashedCount > 0 && (
                     <Link
@@ -201,7 +204,7 @@ export default function ContactsIndex() {
                                     key={s.id}
                                     className={cn(
                                         'hover:bg-surface-muted/50 transition-colors',
-                                        !s.is_read && 'bg-primary/[0.03]',
+                                        !s.is_read && 'bg-primary/3',
                                     )}
                                 >
                                     {/* Unread dot */}

@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ProjectIndexProps, ProjectListItem, ProjectCategory, ProjectListingStatus } from '@/types/admin/project';
 
@@ -132,40 +133,43 @@ export default function ProjectsIndex() {
                 </form>
 
                 {/* Category filter */}
-                <select
+                <Select
+                    className="w-52"
                     value={filters.category ?? ''}
-                    onChange={e => applyFilter('category', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                    <option value="">All Categories</option>
-                    <option value="under_development">Under Development</option>
-                    <option value="ready">Ready</option>
-                    <option value="investment_opportunity">Investment Opportunity</option>
-                </select>
+                    onChange={(v) => applyFilter('category', v)}
+                    options={[
+                        { value: '', label: 'All Categories' },
+                        { value: 'under_development', label: 'Under Development' },
+                        { value: 'ready', label: 'Ready' },
+                        { value: 'investment_opportunity', label: 'Investment Opportunity' },
+                    ]}
+                />
 
                 {/* Status filter */}
-                <select
+                <Select
+                    className="w-40"
                     value={filters.listing_status ?? ''}
-                    onChange={e => applyFilter('listing_status', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                    <option value="">All Statuses</option>
-                    <option value="for_sale">For Sale</option>
-                    <option value="for_rent">For Rent</option>
-                    <option value="sold">Sold</option>
-                    <option value="reserved">Reserved</option>
-                </select>
+                    onChange={(v) => applyFilter('listing_status', v)}
+                    options={[
+                        { value: '', label: 'All Statuses' },
+                        { value: 'for_sale', label: 'For Sale' },
+                        { value: 'for_rent', label: 'For Rent' },
+                        { value: 'sold', label: 'Sold' },
+                        { value: 'reserved', label: 'Reserved' },
+                    ]}
+                />
 
                 {/* Active filter */}
-                <select
+                <Select
+                    className="w-44"
                     value={filters.active ?? ''}
-                    onChange={e => applyFilter('active', e.target.value)}
-                    className="px-3 py-2 text-sm border border-ink/10 rounded bg-white dark:bg-zinc-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                    <option value="">Active & Inactive</option>
-                    <option value="1">Active only</option>
-                    <option value="0">Inactive only</option>
-                </select>
+                    onChange={(v) => applyFilter('active', v)}
+                    options={[
+                        { value: '', label: 'Active & Inactive' },
+                        { value: '1', label: 'Active only' },
+                        { value: '0', label: 'Inactive only' },
+                    ]}
+                />
 
                 {trashedCount > 0 && (
                     <Link
