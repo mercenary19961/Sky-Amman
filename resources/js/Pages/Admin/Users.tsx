@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Select } from '@/Components/Admin/Select';
+import { PasswordField, PASSWORD_RULES } from '@/Components/Admin/PasswordField';
 import { cn } from '@/lib/cn';
 import type { UsersPageProps, UserListItem, UserRole } from '@/types/admin/user';
 
@@ -94,6 +95,14 @@ export default function Users() {
     }
 
     const confirmReady = confirmText.trim().toLowerCase() === form.data.email.trim().toLowerCase();
+
+    // Client-side password gate (mirrors the server policy, minus the breach check).
+    // On edit a blank password means "keep current", so it's allowed.
+    const pwEntered = form.data.password.length > 0;
+    const pwMeetsRules = PASSWORD_RULES.every((r) => r.test(form.data.password));
+    const pwMatches = form.data.password === form.data.password_confirmation;
+    const passwordOk = editing ? (!pwEntered || (pwMeetsRules && pwMatches)) : (pwMeetsRules && pwMatches);
+    const canSubmit = !form.processing && passwordOk;
 
     return (
         <AdminLayout title="Users">
@@ -196,7 +205,7 @@ export default function Users() {
             {panelOpen && (
                 <div className="fixed inset-0 z-40">
                     <div className="absolute inset-0 bg-black/40" onClick={closePanel} />
-                    <div className="absolute inset-y-0 end-0 w-full max-w-md bg-white dark:bg-zinc-800 shadow-xl flex flex-col">
+                    <div className="absolute inset-y-0 inset-e-0 w-full max-w-md bg-white dark:bg-zinc-800 shadow-xl flex flex-col">
                         <div className="flex items-center justify-between px-5 h-16 border-b border-ink/5 dark:border-white/10">
                             <h2 className="font-semibold text-ink">{editing ? 'Edit User' : 'Add User'}</h2>
                             <button type="button" onClick={closePanel} className="text-ink-muted hover:text-ink transition-colors">
@@ -250,31 +259,22 @@ export default function Users() {
                                 Active (can sign in)
                             </label>
 
-                            <div className="pt-2 border-t border-ink/5 dark:border-white/10">
-                                <Field
+                            <div className="space-y-3 pt-2 border-t border-ink/5 dark:border-white/10">
+                                <PasswordField
                                     label={editing ? 'New password' : 'Password'}
+                                    value={form.data.password}
+                                    onChange={(v) => form.setData('password', v)}
                                     error={form.errors.password}
-                                    hint={editing ? 'Leave blank to keep current password' : 'Minimum 8 characters'}
-                                >
-                                    <input
-                                        type="password"
-                                        autoComplete="new-password"
-                                        value={form.data.password}
-                                        onChange={e => form.setData('password', e.target.value)}
-                                        className={inputClass}
-                                    />
-                                </Field>
-                                <div className="mt-3">
-                                    <Field label="Confirm password">
-                                        <input
-                                            type="password"
-                                            autoComplete="new-password"
-                                            value={form.data.password_confirmation}
-                                            onChange={e => form.setData('password_confirmation', e.target.value)}
-                                            className={inputClass}
-                                        />
-                                    </Field>
-                                </div>
+                                    hint={editing ? 'Leave blank to keep current password' : undefined}
+                                    withMeter
+                                    withGenerate
+                                />
+                                <PasswordField
+                                    label="Confirm password"
+                                    value={form.data.password_confirmation}
+                                    onChange={(v) => form.setData('password_confirmation', v)}
+                                    matchAgainst={form.data.password}
+                                />
                             </div>
                         </form>
 
@@ -285,8 +285,8 @@ export default function Users() {
                             <button
                                 type="button"
                                 onClick={handleSave}
-                                disabled={form.processing}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                                disabled={!canSubmit}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                             >
                                 {form.processing ? 'Saving…' : editing ? 'Save Changes' : 'Create User'}
                             </button>
