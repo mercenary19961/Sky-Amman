@@ -66,12 +66,6 @@ const en = {
             title: 'Who We Are?',
             body: 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.',
         },
-        stats: {
-            clients: 'Clients',
-            projects: 'Projects Delivered',
-            years: 'Years Experience',
-            sqm: 'm² Developed',
-        },
         assurance: {
             financial: {
                 title: 'Financial Assurance',

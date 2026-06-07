@@ -43,15 +43,6 @@ class SiteContentSeeder extends Seeder
             ['home', 'about', 'title', 'Who We Are?', 'من نحن؟'],
             ['home', 'about', 'body', 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في المشاريع السكنية والتجارية والمكتبية والطبية. نُقدّم تطويرات عالية الجودة وحلولاً عقارية متكاملة، مع خيارات تملّك مرنة قائمة على الثقة والقيمة والرؤية بعيدة المدى.'],
 
-            ['home', 'stats', 'clients_value', '+1500', '+1500'],
-            ['home', 'stats', 'clients_label', 'Clients', 'عميل'],
-            ['home', 'stats', 'projects_value', '180', '180'],
-            ['home', 'stats', 'projects_label', 'Projects Delivered', 'مشروع منجز'],
-            ['home', 'stats', 'years_value', '+30', '+30'],
-            ['home', 'stats', 'years_label', 'Years Experience', 'عام من الخبرة'],
-            ['home', 'stats', 'sqm_value', '+500K', '+500 ألف'],
-            ['home', 'stats', 'sqm_label', 'm² Developed', 'م² تم تطويرها'],
-
             ['home', 'assurance_financial', 'number', '001', '001'],
             ['home', 'assurance_financial', 'title', 'Financial Assurance', 'الأمان المالي'],
             ['home', 'assurance_financial', 'bullet_1', 'Client payments are protected until ownership registration', 'ضمان حقوق العميل في جميع الدفعات حتى موعد التسجيل'],
