@@ -51,12 +51,19 @@ class ChangeLogService
         ]);
 
         if ($this->revertable($log)) {
-            session()->flash('undo', [
-                'id'      => $log->id,
-                'section' => self::SECTION_LABELS[$modelType] ?? $modelType,
-                'action'  => $action,
-                'label'   => $label,
-            ]);
+            $payload = [
+                'id'       => $log->id,
+                'section'  => self::SECTION_LABELS[$modelType] ?? $modelType,
+                'action'   => $action,
+                'label'    => $label,
+                'changes'  => $this->diff($log),
+                'saved_at' => $log->created_at->toIso8601String(),
+            ];
+
+            // Transient toast (all admin pages) + a persistent per-section pointer
+            // that backs the inline "Undo last save" button until used/dismissed.
+            session()->flash('undo', $payload);
+            session()->put("undo:{$modelType}", $payload);
         }
 
         return $log;
@@ -99,6 +106,11 @@ class ChangeLogService
 
         if ($ok) {
             $log->update(['reverted_at' => now(), 'reverted_by' => Auth::id()]);
+
+            // Clear the persistent undo pointer if it was for this entry.
+            if ((session("undo:{$log->model_type}")['id'] ?? null) === $log->id) {
+                session()->forget("undo:{$log->model_type}");
+            }
         }
 
         return $ok;

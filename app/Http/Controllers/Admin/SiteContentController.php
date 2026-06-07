@@ -29,8 +29,11 @@ class SiteContentController extends Controller
             });
 
         return Inertia::render('Admin/Content', [
-            'grouped' => $grouped,
-            'pages'   => $pages,
+            'grouped'  => $grouped,
+            'pages'    => $pages,
+            // Persistent "Undo last save" pointer for this section (set by
+            // ChangeLogService on the previous save; survives navigation).
+            'undoMeta' => session('undo:site_content'),
         ]);
     }
 

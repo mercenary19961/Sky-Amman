@@ -66,8 +66,8 @@ class ChangeLogController extends Controller
             ]);
 
         // Only users who actually appear in the log (keeps the filter tidy).
-        $userIds = ChangeLog::query()->whereNotNull('changed_by')->distinct()->pluck('changed_by');
-        $users = User::query()->whereIn('id', $userIds)->orderBy('name')->get(['id', 'name']);
+        $userIds = ChangeLog::query()->pluck('changed_by')->filter()->unique()->values();
+        $users = User::query()->whereKey($userIds)->orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Admin/ChangeLog', [
             'logs'          => $logs,
@@ -97,5 +97,13 @@ class ChangeLogController extends Controller
         ChangeLog::findOrFail($id)->delete();
 
         return back()->with('success', 'Log entry removed.');
+    }
+
+    /** Dismiss the persistent "Undo last save" pointer for a section (no revert). */
+    public function dismissUndo(string $modelType): RedirectResponse
+    {
+        session()->forget("undo:{$modelType}");
+
+        return back();
     }
 }

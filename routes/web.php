@@ -136,6 +136,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // Change Log + Revert (audit history).
         Route::get('/change-log', [ChangeLogController::class, 'index'])->name('change-log.index');
+        Route::delete('/change-log/undo/{modelType}', [ChangeLogController::class, 'dismissUndo'])->name('change-log.undo-dismiss')->where('modelType', '[a-z_]+');
         Route::post('/change-log/{id}/revert', [ChangeLogController::class, 'revert'])->name('change-log.revert')->where('id', '[0-9]+');
         Route::delete('/change-log/{id}', [ChangeLogController::class, 'destroy'])->name('change-log.destroy')->where('id', '[0-9]+');
     });

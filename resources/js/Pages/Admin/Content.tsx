@@ -2,10 +2,11 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
-    ExternalLink, MousePointerClick, ChevronRight, Undo2,
+    ExternalLink, MousePointerClick, ChevronRight,
     Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { UndoButton } from '@/Components/Admin/UndoButton';
 import { cn } from '@/lib/cn';
 import type { ContentPageProps, SiteContentRow } from '@/types/admin/content';
 
@@ -119,16 +120,8 @@ function RowInput({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ContentEditor() {
-    const { grouped, pages, undo } = usePage<ContentPageProps>().props;
+    const { grouped, pages, undoMeta } = usePage<ContentPageProps>().props;
     const orderedPages = PAGE_ORDER.filter(slug => pages[slug]);
-
-    // Inline "Undo last save" — surfaced from the one-shot `undo` flash set by
-    // ChangeLogService after a content save. Persists on the page (until the next
-    // navigation) so it's more discoverable than the transient bottom toast.
-    const contentUndo = undo && undo.section === 'Site Content' ? undo : null;
-    function undoLastSave() {
-        if (contentUndo) router.post(`/admin/change-log/${contentUndo.id}/revert`, {}, { preserveScroll: true });
-    }
 
     // Which page accordion is open — only one at a time
     const [expandedPage, setExpandedPage] = useState<string | null>(orderedPages[0] ?? null);
@@ -316,24 +309,6 @@ export default function ContentEditor() {
                     </button>
                 ))}
             </div>
-
-            {/* Undo last save — appears right after a content save (from the
-                one-shot `undo` flash) and stays until the next navigation. */}
-            {contentUndo && (
-                <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5">
-                    <span className="text-sm text-ink">
-                        Content saved.{contentUndo.label ? ` (${contentUndo.label})` : ''}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={undoLastSave}
-                        className="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
-                    >
-                        <Undo2 size={15} />
-                        Undo last save
-                    </button>
-                </div>
-            )}
 
             {/* Split layout */}
             <div className="flex gap-4 items-start">
@@ -582,6 +557,13 @@ export default function ContentEditor() {
                     'hidden xl:block xl:self-stretch shrink-0 transition-all duration-300',
                     previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
                 )}>
+                    {/* Persistent "Undo last save" — top-right above the preview. */}
+                    {undoMeta && (
+                        <div className="mb-3 flex justify-end">
+                            <UndoButton modelType="site_content" undoMeta={undoMeta} />
+                        </div>
+                    )}
+
                     {/* top-32 (8rem) clears the AdminLayout's h-16 top bar AND
                         the now-sticky quick-nav (~3.5rem incl. its own padding)
                         with a small buffer so the preview chrome stays visible. */}

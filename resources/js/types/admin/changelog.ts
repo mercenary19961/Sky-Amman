@@ -42,3 +42,14 @@ export interface UndoPayload {
     action: ChangeAction;
     label: string | null;
 }
+
+/** Persistent per-section undo pointer backing the inline UndoButton (carries
+ *  the field diffs + timestamp for the tooltip/confirm modal). */
+export interface UndoMeta {
+    id: number;
+    section: string;
+    action: ChangeAction;
+    label: string | null;
+    changes: ChangeEntry[];
+    saved_at: string;
+}
