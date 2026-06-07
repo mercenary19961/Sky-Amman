@@ -33,6 +33,28 @@ interface TestimonialsProps {
 
 type EditingState = TestimonialItem | 'new' | null;
 
+// Keep in sync with TestimonialController::validateData (server-side max).
+const NAME_MAX = 80;
+const QUOTE_MAX = 200;
+
+/** Field label with a live "used / max" counter that warns as it fills up. */
+function LabelWithCount({ label, value, max }: { label: string; value: string; max: number }) {
+    const len = value.length;
+    return (
+        <div className="mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-medium text-ink-muted">{label}</label>
+            <span
+                className={cn(
+                    'text-[11px] tabular-nums',
+                    len >= max ? 'text-red-500 font-medium' : len >= max * 0.85 ? 'text-amber-500' : 'text-ink-muted',
+                )}
+            >
+                {len}/{max}
+            </span>
+        </div>
+    );
+}
+
 export default function TestimonialsIndex() {
     const { testimonials } = usePage<TestimonialsProps>().props;
 
@@ -357,42 +379,49 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Name (EN)</label>
+                                <LabelWithCount label="Name (EN)" value={nameEn} max={NAME_MAX} />
                                 <input
                                     type="text"
                                     value={nameEn}
                                     onChange={(e) => setNameEn(e.target.value)}
+                                    maxLength={NAME_MAX}
                                     autoFocus
                                     placeholder="e.g. Ahmad Al-Masri"
                                     className={inputCls}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Name (AR)</label>
+                                <LabelWithCount label="Name (AR)" value={nameAr} max={NAME_MAX} />
                                 <input
                                     type="text"
                                     value={nameAr}
                                     onChange={(e) => setNameAr(e.target.value)}
+                                    maxLength={NAME_MAX}
                                     dir="rtl"
                                     placeholder="اسم العميل"
                                     className={inputCls}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Quote (EN)</label>
+                                <LabelWithCount label="Quote (EN)" value={quoteEn} max={QUOTE_MAX} />
                                 <textarea
                                     value={quoteEn}
                                     onChange={(e) => setQuoteEn(e.target.value)}
+                                    maxLength={QUOTE_MAX}
                                     rows={3}
                                     placeholder="What the client said…"
                                     className={cn(inputCls, 'resize-y')}
                                 />
+                                <p className="mt-1 text-[11px] text-ink-muted">
+                                    Keep it short — one or two sentences read best on the card.
+                                </p>
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Quote (AR)</label>
+                                <LabelWithCount label="Quote (AR)" value={quoteAr} max={QUOTE_MAX} />
                                 <textarea
                                     value={quoteAr}
                                     onChange={(e) => setQuoteAr(e.target.value)}
+                                    maxLength={QUOTE_MAX}
                                     rows={3}
                                     dir="rtl"
                                     placeholder="ما قاله العميل…"

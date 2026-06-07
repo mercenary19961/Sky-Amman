@@ -117,11 +117,13 @@ class TestimonialController extends Controller
 
     private function validateData(Request $request): array
     {
+        // Tight limits keep cards uniform — a long quote breaks the carousel UI.
+        // Mirror these in the form (NAME_MAX / QUOTE_MAX in Testimonials/Index.tsx).
         return $request->validate([
-            'name_en'  => ['required', 'string', 'max:255'],
-            'name_ar'  => ['nullable', 'string', 'max:255'],
-            'quote_en' => ['required', 'string', 'max:2000'],
-            'quote_ar' => ['nullable', 'string', 'max:2000'],
+            'name_en'  => ['required', 'string', 'max:80'],
+            'name_ar'  => ['nullable', 'string', 'max:80'],
+            'quote_en' => ['required', 'string', 'max:200'],
+            'quote_ar' => ['nullable', 'string', 'max:200'],
             'image'    => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
         ]);
     }
