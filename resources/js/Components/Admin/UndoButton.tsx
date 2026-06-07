@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
-import { History, AlertTriangle, ArrowRight, X } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { History, ArrowRight, X } from 'lucide-react';
 import type { UndoMeta } from '@/types/admin/changelog';
 
 interface UndoButtonProps {
@@ -106,8 +105,8 @@ export function UndoButton({ modelType, undoMeta }: UndoButtonProps) {
                     <div className="absolute inset-0 bg-black/50" onClick={() => !restoring && setShowConfirm(false)} />
                     <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-zinc-800">
                         <div className="mb-4 flex items-start gap-4">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
-                                <AlertTriangle size={20} className="text-amber-600 dark:text-amber-400" />
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary-strong dark:text-primary">
+                                <History size={20} />
                             </div>
                             <div className="flex-1">
                                 <h3 className="text-lg font-semibold text-ink">Restore previous version?</h3>
@@ -146,10 +145,7 @@ export function UndoButton({ modelType, undoMeta }: UndoButtonProps) {
                                 type="button"
                                 onClick={restore}
                                 disabled={restoring}
-                                className={cn(
-                                    'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50',
-                                    'bg-amber-600 hover:bg-amber-700',
-                                )}
+                                className="flex items-center gap-2 rounded-lg bg-primary-strong px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-strong-hover disabled:opacity-50"
                             >
                                 <History size={15} />
                                 {restoring ? 'Restoring…' : 'Restore'}

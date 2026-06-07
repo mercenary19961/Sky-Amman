@@ -143,8 +143,18 @@ export default function ContentEditor() {
     const [previewExpanded, setPreviewExpanded] = useState(false);
     const [previewInteractive, setPreviewInteractive] = useState(false);
 
-    // Row values keyed by id
-    const [rowValues, setRowValues] = useState<Record<number, { content_en: string; content_ar: string }>>(() => {
+    type PageSeoState = Record<string, {
+        is_visible: boolean;
+        seo_title_en: string;
+        seo_title_ar: string;
+        seo_description_en: string;
+        seo_description_ar: string;
+    }>;
+
+    // Builders derive local form state from the current server props. Reused on
+    // mount AND whenever props change (save / undo-revert) so the inputs always
+    // reflect the persisted truth.
+    function buildRowValues(): Record<number, { content_en: string; content_ar: string }> {
         const v: Record<number, { content_en: string; content_ar: string }> = {};
         Object.values(grouped).forEach(sections =>
             Object.values(sections).forEach(rows =>
@@ -152,10 +162,9 @@ export default function ContentEditor() {
             ),
         );
         return v;
-    });
+    }
 
-    // Section visibility per page
-    const [sectionVisible, setSectionVisible] = useState<Record<string, Record<string, boolean>>>(() => {
+    function buildSectionVisible(): Record<string, Record<string, boolean>> {
         const v: Record<string, Record<string, boolean>> = {};
         Object.entries(grouped).forEach(([page, sections]) => {
             v[page] = {};
@@ -164,23 +173,10 @@ export default function ContentEditor() {
             });
         });
         return v;
-    });
+    }
 
-    // Page-level SEO + visibility
-    const [pageSeo, setPageSeo] = useState<Record<string, {
-        is_visible: boolean;
-        seo_title_en: string;
-        seo_title_ar: string;
-        seo_description_en: string;
-        seo_description_ar: string;
-    }>>(() => {
-        const v: Record<string, {
-            is_visible: boolean;
-            seo_title_en: string;
-            seo_title_ar: string;
-            seo_description_en: string;
-            seo_description_ar: string;
-        }> = {};
+    function buildPageSeo(): PageSeoState {
+        const v: PageSeoState = {};
         Object.values(pages).forEach(p => {
             v[p.slug] = {
                 is_visible: p.is_visible,
@@ -191,7 +187,21 @@ export default function ContentEditor() {
             };
         });
         return v;
-    });
+    }
+
+    const [rowValues, setRowValues] = useState(buildRowValues);
+    const [sectionVisible, setSectionVisible] = useState(buildSectionVisible);
+    const [pageSeo, setPageSeo] = useState<PageSeoState>(buildPageSeo);
+
+    // Resync from server props after a save or an undo/revert. Props only change
+    // on an Inertia round-trip (never on local typing), so this won't clobber
+    // in-progress edits — it reflects what was actually persisted.
+    useEffect(() => {
+        setRowValues(buildRowValues());
+        setSectionVisible(buildSectionVisible());
+        setPageSeo(buildPageSeo());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [grouped, pages]);
 
     function setRow(id: number, field: 'content_en' | 'content_ar', value: string) {
         setRowValues(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
