@@ -105,7 +105,14 @@ export default function About() {
                                 <div className="absolute inset-0 flex items-end justify-start p-6 sm:p-10 lg:p-14">
                                     {/* First word on its own line (bold), the rest stacked below
                                         (light) — e.g. "ABOUT" / "SKY AMMAN", "عن" / "سكاي عمّان". */}
-                                    <h1 className="text-start text-5xl uppercase leading-[0.95] text-white drop-shadow-sm sm:text-7xl lg:text-8xl xl:text-9xl">
+                                    <h1
+                                        className={cn(
+                                            'text-start uppercase leading-[0.95] text-white drop-shadow-sm',
+                                            ar
+                                                ? 'text-5xl sm:text-7xl lg:text-8xl xl:text-9xl'
+                                                : 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl',
+                                        )}
+                                    >
                                         <span className="block -translate-y-1 font-bold sm:-translate-y-2 lg:-translate-y-3">{heroFirst}</span>
                                         {heroRestStr && <span className="block font-light">{heroRestStr}</span>}
                                     </h1>
