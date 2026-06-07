@@ -87,6 +87,23 @@ html[dir="rtl"] body {
     animation: save-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Floating WhatsApp button — slides in from the right, holds, then slides back
+   out on a long loop so it draws the eye without nagging (ported from HardRock). */
+@keyframes whatsapp-cycle {
+    0%   { opacity: 0; transform: translateX(100px); }
+    5%   { opacity: 1; transform: translateX(0); }
+    55%  { opacity: 1; transform: translateX(0); }
+    70%  { opacity: 0; transform: translateX(100px); }
+    100% { opacity: 0; transform: translateX(100px); }
+}
+
+.animate-whatsapp {
+    animation: whatsapp-cycle 18s ease-in-out infinite;
+    animation-delay: 5s;
+    opacity: 0;
+    transform: translateX(100px);
+}
+
 /* Slow horizontal drift for the footer cloud layers. We render two copies of
    the cloud strip side-by-side inside an overflow-hidden window and translate
    the whole pair by -50% (= one image width) so the loop is seamless without
