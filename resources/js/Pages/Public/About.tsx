@@ -208,7 +208,7 @@ function CloudBar({ title, body, side }: { title: string; body: string; side: 's
                         touching the top of the shape. */}
                     <h2
                         className={cn(
-                            'absolute -top-9 z-20 text-5xl font-bold uppercase text-primary sm:-top-14 sm:text-7xl lg:-top-20 lg:text-8xl',
+                            'absolute -top-12 z-20 text-5xl font-bold uppercase text-primary sm:-top-18 sm:text-7xl lg:-top-24 lg:text-8xl',
                             side === 'start' ? 'inset-s-4 text-start sm:inset-s-10' : 'inset-e-4 text-end sm:inset-e-10',
                         )}
                     >
