@@ -133,20 +133,13 @@ export function Header() {
                     className="flex items-center transition-opacity duration-200"
                     aria-label="SkyAmman"
                 >
-                    {isDark ? (
-                        // White logo for dark/blue sections (hero, footer overlap).
-                        <img
-                            src="/images/logo-white.png"
-                            alt="SkyAmman"
-                            className="h-16 sm:h-20 w-auto select-none"
-                        />
-                    ) : (
-                        // TODO: swap to /images/logo-primary.png once the designer
-                        // delivers the light-blue variant for white backgrounds.
-                        <span className="font-bold text-lg tracking-wide text-primary">
-                            SkyAmman
-                        </span>
-                    )}
+                    {/* White logo in both states — over dark/blue sections directly,
+                        and over light sections on the navbar's blue backdrop gradient. */}
+                    <img
+                        src="/images/logo-white.png"
+                        alt="SkyAmman"
+                        className="h-16 sm:h-20 w-auto select-none"
+                    />
                 </Link>
 
                 {/* Nav + language button grouped on the right; justify-between
