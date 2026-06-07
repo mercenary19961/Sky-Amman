@@ -94,7 +94,7 @@ export default function About() {
                                 className="pointer-events-none absolute z-0 hidden rounded-full bg-primary lg:block"
                                 style={{ top: '24%', insetInlineStart: '43%', width: '64%', height: '88%' }}
                             />
-                            <div className="relative z-10 min-h-44 overflow-hidden rounded-[40px] sm:min-h-52 sm:rounded-[80px] lg:min-h-0 lg:aspect-1241/422 lg:rounded-[150px]">
+                            <div className="relative z-10 min-h-56 overflow-hidden rounded-[40px] sm:min-h-72 sm:rounded-[80px] lg:min-h-0 lg:aspect-1241/422 lg:rounded-[150px]">
                                 <img
                                     src="/images/about/hero-banner.webp"
                                     alt=""
@@ -103,9 +103,11 @@ export default function About() {
                                 />
                                 <div aria-hidden="true" className="absolute inset-0" style={{ backgroundColor: `${NAVY}B3` }} />
                                 <div className="absolute inset-0 flex items-end justify-start p-6 sm:p-10 lg:p-14">
-                                    <h1 className="text-start text-6xl uppercase leading-none text-white drop-shadow-sm sm:text-8xl lg:text-[11rem] xl:text-[12rem]">
-                                        <span className="font-bold">{heroFirst}</span>
-                                        {heroRestStr && <span className="font-light"> {heroRestStr}</span>}
+                                    {/* First word on its own line (bold), the rest stacked below
+                                        (light) — e.g. "ABOUT" / "SKY AMMAN", "عن" / "سكاي عمّان". */}
+                                    <h1 className="text-start text-5xl uppercase leading-[0.95] text-white drop-shadow-sm sm:text-7xl lg:text-8xl xl:text-9xl">
+                                        <span className="block -translate-y-1 font-bold sm:-translate-y-2 lg:-translate-y-3">{heroFirst}</span>
+                                        {heroRestStr && <span className="block font-light">{heroRestStr}</span>}
                                     </h1>
                                 </div>
                             </div>

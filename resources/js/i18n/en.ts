@@ -231,7 +231,7 @@ const en = {
     },
     about: {
         hero: {
-            title: 'ABOUT US',
+            title: 'ABOUT SKY AMMAN',
         },
         intro: {
             body: 'SkyAmman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.',

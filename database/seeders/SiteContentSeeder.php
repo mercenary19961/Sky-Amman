@@ -155,7 +155,7 @@ class SiteContentSeeder extends Seeder
             ['security', 'construction', 'item_4', 'Use of trusted and verified suppliers', 'استخدام مواد من موردين موثوقين ومعتمدين'],
 
             // ---------------- ABOUT ----------------
-            ['about', 'hero', 'title', 'ABOUT US', 'من نحن'],
+            ['about', 'hero', 'title', 'ABOUT SKY AMMAN', 'عن سكاي عمّان'],
             ['about', 'intro', 'body', 'SkyAmman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في تصميم وتطوير مساحات سكنية وتجارية ومكتبية وطبية عالية الجودة.'],
             ['about', 'crafted', 'title', 'Crafted Developments for Elevated Living', 'تطويرات مصمّمة لحياة راقية'],
             ['about', 'crafted', 'body', 'We deliver integrated real estate solutions tailored to meet diverse client needs, while maintaining high standards in quality and execution. In addition, we support property ownership through flexible financing solutions in collaboration with leading financial institutions in Jordan.', 'نقدّم حلولاً عقارية متكاملة مصمّمة لتلبية احتياجات العملاء المتنوعة، مع الحفاظ على معايير عالية في الجودة والتنفيذ. كما ندعم تملّك العقار من خلال حلول تمويل مرنة بالتعاون مع مؤسسات مالية رائدة في الأردن.'],
