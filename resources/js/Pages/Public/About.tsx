@@ -223,7 +223,11 @@ function CloudBar({ title, body, side }: { title: string; body: string; side: 's
                             aria-hidden="true"
                             className={cn(
                                 'pointer-events-none absolute bottom-0 -z-10 h-[85%] w-[58%] object-contain opacity-80',
-                                side === 'start' ? 'inset-s-0 object-bottom-left' : 'inset-e-0 object-bottom-right',
+                                // object-position is physical, so flip it in RTL to keep the
+                                // cloud under the title (which moves via the logical inset-s/e).
+                                side === 'start'
+                                    ? 'inset-s-0 object-bottom-left rtl:object-bottom-right'
+                                    : 'inset-e-0 object-bottom-right rtl:object-bottom-left',
                             )}
                         />
                         <p className="mx-auto max-w-4xl px-8 py-12 text-center text-base leading-relaxed text-ink sm:px-14 sm:py-14 sm:text-lg lg:py-16 lg:text-xl">
