@@ -71,6 +71,7 @@ export interface ProjectIndexProps extends PageProps {
         listing_status?: string;
         active?: string;
         search?: string;
+        per_page?: number | string;
     };
     trashedCount: number;
 }

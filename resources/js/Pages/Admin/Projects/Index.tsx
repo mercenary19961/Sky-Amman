@@ -338,14 +338,25 @@ export default function ProjectsIndex() {
                 </div>
             )}
 
-            {/* Pagination */}
-            {projects.last_page > 1 && (
-                <div className="mt-4 flex items-center justify-between text-sm text-ink-muted">
-                    <span>
-                        Showing {projects.from}–{projects.to} of {projects.total}
-                    </span>
+            {/* Pagination + per-page */}
+            {projects.total > 0 && (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink-muted">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <span>Per page</span>
+                            <Select
+                                className="w-20"
+                                value={String(filters.per_page ?? 12)}
+                                onChange={(v) => applyFilter('per_page', v)}
+                                options={[8, 12, 16, 24, 32].map((n) => ({ value: String(n), label: String(n) }))}
+                            />
+                        </div>
+                        <span>
+                            Showing {projects.from}–{projects.to} of {projects.total}
+                        </span>
+                    </div>
                     <div className="flex items-center gap-1">
-                        {projects.links.map((link, i) => (
+                        {projects.last_page > 1 && projects.links.map((link, i) => (
                             link.url ? (
                                 <Link
                                     key={i}
@@ -392,8 +403,8 @@ function ProjectCard({ project, onDelete }: { project: ProjectListItem; onDelete
                 )}
 
                 {/* Active state — top end */}
-                <span className="absolute top-2 inset-e-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-medium text-ink shadow-sm">
-                    <span className={cn('w-1.5 h-1.5 rounded-full', project.is_active ? 'bg-emerald-500' : 'bg-ink/30')} />
+                <span className="absolute top-2 inset-e-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-medium text-zinc-800 shadow-sm">
+                    <span className={cn('w-1.5 h-1.5 rounded-full', project.is_active ? 'bg-emerald-500' : 'bg-zinc-400')} />
                     {project.is_active ? 'Active' : 'Inactive'}
                 </span>
             </div>
