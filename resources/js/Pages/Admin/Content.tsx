@@ -2,7 +2,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
-    ExternalLink, MousePointerClick, ChevronRight,
+    ExternalLink, MousePointerClick, ChevronRight, Undo2,
     Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -21,7 +21,11 @@ function toLabel(str: string): string {
 // 'footer' is a layout pseudo-page (no public URL of its own) — added here so
 // admins can edit shared footer copy from the Content editor. Its preview
 // iframe points at the homepage so changes show up at the bottom of the page.
-const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact', 'footer'];
+// NOTE: 'investment' is omitted because the Investment page is parked/disabled
+// (its route + nav item are commented out — see CLAUDE.md). Re-add it here to
+// surface its content in the editor when the page is un-parked. The icon/url/
+// label entries below are kept so re-adding is a one-line change.
+const PAGE_ORDER = ['home', 'properties', 'self_build', 'security', 'about', 'contact', 'footer'];
 
 const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     home:       Home,
@@ -115,8 +119,16 @@ function RowInput({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ContentEditor() {
-    const { grouped, pages } = usePage<ContentPageProps>().props;
+    const { grouped, pages, undo } = usePage<ContentPageProps>().props;
     const orderedPages = PAGE_ORDER.filter(slug => pages[slug]);
+
+    // Inline "Undo last save" — surfaced from the one-shot `undo` flash set by
+    // ChangeLogService after a content save. Persists on the page (until the next
+    // navigation) so it's more discoverable than the transient bottom toast.
+    const contentUndo = undo && undo.section === 'Site Content' ? undo : null;
+    function undoLastSave() {
+        if (contentUndo) router.post(`/admin/change-log/${contentUndo.id}/revert`, {}, { preserveScroll: true });
+    }
 
     // Which page accordion is open — only one at a time
     const [expandedPage, setExpandedPage] = useState<string | null>(orderedPages[0] ?? null);
@@ -304,6 +316,24 @@ export default function ContentEditor() {
                     </button>
                 ))}
             </div>
+
+            {/* Undo last save — appears right after a content save (from the
+                one-shot `undo` flash) and stays until the next navigation. */}
+            {contentUndo && (
+                <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5">
+                    <span className="text-sm text-ink">
+                        Content saved.{contentUndo.label ? ` (${contentUndo.label})` : ''}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={undoLastSave}
+                        className="inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                    >
+                        <Undo2 size={15} />
+                        Undo last save
+                    </button>
+                </div>
+            )}
 
             {/* Split layout */}
             <div className="flex gap-4 items-start">
