@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -111,6 +112,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
+
+    // Client testimonials (image + bilingual name/quote) — content management.
+    Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+    Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
+    Route::post('/testimonials/reorder', [TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+    Route::post('/testimonials/{id}/toggle', [TestimonialController::class, 'toggleActive'])->name('testimonials.toggle')->where('id', '[0-9]+');
+    // Image upload needs multipart, so update is POST + _method spoofing from the client.
+    Route::put('/testimonials/{id}', [TestimonialController::class, 'update'])->name('testimonials.update')->where('id', '[0-9]+');
+    Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy')->where('id', '[0-9]+');
 
     // Contact Submissions — single inbox for all public forms (editors + admins).
     // Literal `trash` must precede the {id} wildcard.

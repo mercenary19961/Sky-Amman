@@ -152,12 +152,21 @@ export interface PropertyDetailPageProps extends PageProps {
     mapEmbedUrl: string;
 }
 
+export interface TestimonialCard {
+    name_en: string;
+    name_ar: string | null;
+    quote_en: string;
+    quote_ar: string | null;
+    image_url: string | null;
+}
+
 export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
     featuredProjects: FeaturedProject[];
     featuredRentals: FeaturedProject[];
     testimonialVideos: string[];
+    testimonials: TestimonialCard[];
     mediaEmbeds: {
         linkedin: string;
     };

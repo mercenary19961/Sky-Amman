@@ -81,7 +81,7 @@ export default function Home() {
                 />
             )}
             {sectionVisible(content.testimonials) && (
-                <Testimonials content={content} videos={props.testimonialVideos} />
+                <Testimonials content={content} videos={props.testimonialVideos} testimonials={props.testimonials} />
             )}
             {sectionVisible(content.value_prop) && <ValueProposition content={content} />}
             {sectionVisible(content.media_room) && (

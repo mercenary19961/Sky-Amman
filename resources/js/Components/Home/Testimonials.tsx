@@ -1,18 +1,23 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, User as UserIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
-import type { SiteContentBundle } from '@/types/home';
+import type { SiteContentBundle, TestimonialCard } from '@/types/home';
 
 interface TestimonialsProps {
     content: SiteContentBundle;
     // Active, ordered video URLs from the admin Testimonial Videos section.
     videos: string[];
+    // Active, ordered client testimonials (image + bilingual name/quote) from
+    // the admin Testimonials section.
+    testimonials: TestimonialCard[];
 }
 
 interface Client {
     name: string;
     quote: string;
+    image: string | null;
 }
 
 // A direct media file (self-hosted /videos/x.mp4) renders in a <video> tag;
@@ -35,18 +40,22 @@ function youtubeId(url: string): string | null {
 const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const youtubeEmbed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
 
-export function Testimonials({ content, videos }: TestimonialsProps) {
+export function Testimonials({ content, videos, testimonials }: TestimonialsProps) {
+    const { language } = useLanguage();
+    const ar = language === 'ar';
     const t = content.testimonials ?? {};
     const title = t.title?.content ?? '';
 
-    const clients: Client[] = [1, 2, 3, 4].map((i) => ({
-        name: t[`client_${i}_name`]?.content ?? '',
-        quote: t[`client_${i}_quote`]?.content ?? '',
-    }));
+    // Pick the active language per card (AR falls back to EN when blank).
+    const clients: Client[] = testimonials
+        .map((c) => ({
+            name: (ar ? c.name_ar : c.name_en) || c.name_en || '',
+            quote: (ar ? c.quote_ar : c.quote_en) || c.quote_en || '',
+            image: c.image_url,
+        }))
+        .filter((c) => c.name || c.quote);
 
-    if (!title && videos.length === 0 && clients.every((c) => !c.name)) return null;
-
-    const hasClients = clients.some((c) => c.name);
+    if (!title && videos.length === 0 && clients.length === 0) return null;
 
     return (
         <section className="bg-surface py-16 sm:py-24">
@@ -59,17 +68,117 @@ export function Testimonials({ content, videos }: TestimonialsProps) {
 
                 <TestimonialVideos videos={videos} />
 
-                {/* Client cards row */}
-                {hasClients && (
-                    <div className="mt-14 sm:mt-20 grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                        {clients.map(
-                            (client, i) =>
-                                client.name && <ClientCard key={i} client={client} />,
-                        )}
-                    </div>
-                )}
+                {/* Client testimonial cards — carousel with prev/next + dots. */}
+                {clients.length > 0 && <ClientCardsCarousel clients={clients} />}
             </div>
         </section>
+    );
+}
+
+/** Visible card count by viewport: 1 (mobile) / 2 (sm) / 4 (lg+). */
+function useVisibleCount(): number {
+    const [count, setCount] = useState(4);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const update = () => {
+            const w = window.innerWidth;
+            setCount(w >= 1024 ? 4 : w >= 640 ? 2 : 1);
+        };
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+    return count;
+}
+
+/**
+ * Windowed carousel over the client cards. Shows `visible` cards starting at
+ * `activeIndex` and wraps around; arrows + dots step by one. When there are no
+ * more cards than fit, it renders a plain centred row with no controls.
+ */
+function ClientCardsCarousel({ clients }: { clients: Client[] }) {
+    const visible = useVisibleCount();
+    const [activeIndex, setActiveIndex] = useState(0);
+    const N = clients.length;
+    const showControls = N > visible;
+
+    // Keep activeIndex valid if the list size or viewport changes.
+    useEffect(() => {
+        setActiveIndex((i) => (N === 0 ? 0 : i % N));
+    }, [N]);
+
+    const wrap = (i: number) => ((i % N) + N) % N;
+    const next = () => setActiveIndex((i) => wrap(i + 1));
+    const prev = () => setActiveIndex((i) => wrap(i - 1));
+
+    const shown = showControls
+        ? Array.from({ length: visible }, (_, k) => ({ client: clients[wrap(activeIndex + k)], pos: wrap(activeIndex + k) }))
+        : clients.map((client, pos) => ({ client, pos }));
+
+    const cols = showControls ? visible : Math.min(N, 4);
+
+    return (
+        <div className="relative mt-14 sm:mt-20">
+            {/* Arrows sit outside the grid on lg, overlay on smaller screens. */}
+            {showControls && (
+                <>
+                    <button
+                        type="button"
+                        onClick={prev}
+                        aria-label="Previous testimonials"
+                        className="absolute z-20 -inset-s-1 sm:-inset-s-3 lg:-inset-s-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronLeft size={22} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={next}
+                        aria-label="Next testimonials"
+                        className="absolute z-20 -inset-e-1 sm:-inset-e-3 lg:-inset-e-5 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronRight size={22} />
+                    </button>
+                </>
+            )}
+
+            <div
+                className="grid gap-6 lg:gap-8"
+                style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+            >
+                <AnimatePresence mode="popLayout" initial={false}>
+                    {shown.map(({ client, pos }) => (
+                        <motion.div
+                            key={pos}
+                            layout
+                            initial={{ opacity: 0, scale: 0.96 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.96 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <ClientCard client={client} />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {/* Pagination dots — one per testimonial (the active window start). */}
+            {showControls && (
+                <div className="mt-8 flex justify-center items-center gap-3">
+                    {clients.map((_, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => setActiveIndex(i)}
+                            aria-label={`Go to testimonial ${i + 1}`}
+                            className={cn(
+                                'rounded-full transition-all cursor-pointer',
+                                i === activeIndex ? 'w-3 h-3 bg-primary' : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -432,12 +541,17 @@ function ClientCard({ client }: { client: Client }) {
             </div>
 
             {/* Avatar — DOM-last so it sits above the body. Top offset is
-                width-relative (mt-%) so it tracks the dome at any height. Swap to
-                <img> once portrait photos are delivered. */}
-            <div
-                className="absolute top-0 left-1/2 mt-[7%] w-[82%] -translate-x-1/2 aspect-square rounded-full bg-white shadow-[0_14px_28px_-8px_rgba(0,0,0,0.35)]"
-                aria-hidden="true"
-            />
+                width-relative (mt-%) so it tracks the dome at any height. Shows
+                the admin-uploaded photo, or a neutral placeholder when none. */}
+            <div className="absolute top-0 left-1/2 mt-[7%] w-[82%] -translate-x-1/2 aspect-square overflow-hidden rounded-full bg-white shadow-[0_14px_28px_-8px_rgba(0,0,0,0.35)]">
+                {client.image ? (
+                    <img src={client.image} alt={client.name} className="h-full w-full object-cover" loading="lazy" />
+                ) : (
+                    <div className="grid h-full w-full place-items-center text-primary/40">
+                        <UserIcon className="h-1/2 w-1/2" />
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

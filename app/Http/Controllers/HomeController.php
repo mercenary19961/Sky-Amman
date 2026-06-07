@@ -6,6 +6,7 @@ use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Models\Testimonial;
 use App\Models\TestimonialVideo;
 use App\Services\InstagramService;
 use Inertia\Inertia;
@@ -61,6 +62,15 @@ class HomeController extends Controller
             'featuredRentals' => $featuredRentals,
             // Testimonials carousel — the (max 3) active videos in admin order.
             'testimonialVideos' => TestimonialVideo::active()->ordered()->limit(3)->pluck('url')->all(),
+            // Client testimonial cards (image + bilingual name/quote), admin order.
+            'testimonials' => Testimonial::active()->ordered()->with('media:id,path,mime_type')->get()
+                ->map(fn (Testimonial $t) => [
+                    'name_en'   => $t->name_en,
+                    'name_ar'   => $t->name_ar,
+                    'quote_en'  => $t->quote_en,
+                    'quote_ar'  => $t->quote_ar,
+                    'image_url' => $t->media?->url,
+                ])->all(),
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
             ],
