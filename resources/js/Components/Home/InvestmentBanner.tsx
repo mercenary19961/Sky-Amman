@@ -1,4 +1,6 @@
 import { Link } from '@inertiajs/react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/lib/cn';
 import type { SiteContentBundle } from '@/types/home';
 
 interface InvestmentBannerProps {
@@ -7,6 +9,8 @@ interface InvestmentBannerProps {
 
 export function InvestmentBanner({ content }: InvestmentBannerProps) {
     const banner = content.investment_banner ?? {};
+    const { language } = useLanguage();
+    const ar = language === 'ar';
 
     // Tagline arrives as a single string ("Buy Early, Save More, Gain More").
     // Split on comma to render the inline strip image between segments. Accept
@@ -21,7 +25,14 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
                     {taglineParts[0] ?? ''}
                 </h2>
 
-                <div className="mt-4 flex items-center justify-center flex-wrap gap-3 sm:gap-4 text-xl sm:text-2xl lg:text-3xl text-ink font-medium">
+                {/* Arabic glyphs hang lower in the line box, so the headline visually
+                    crowds the strip below — give the AR row extra top spacing. */}
+                <div
+                    className={cn(
+                        'flex items-center justify-center flex-wrap gap-3 sm:gap-4 text-xl sm:text-2xl lg:text-3xl text-ink font-medium',
+                        ar ? 'mt-10 sm:mt-14 lg:mt-16' : 'mt-4',
+                    )}
+                >
                     <span>{taglineParts[1] ?? ''}</span>
                     {/* Leaf strip shape filled with the buy-early image: the SVG
                         masks a div whose background is the webp, so the photo only
