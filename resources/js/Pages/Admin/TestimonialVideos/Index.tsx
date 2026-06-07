@@ -13,6 +13,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Trash2, Pencil, Play, GripVertical, Video as VideoIcon, Eye, EyeOff, X, Check } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 
 interface VideoItem {
@@ -244,7 +245,6 @@ function SortableVideoCard({
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: video.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
-    const [confirmDelete, setConfirmDelete] = useState(false);
 
     return (
         <div
@@ -332,28 +332,17 @@ function SortableVideoCard({
                         >
                             <Trash2 size={15} />
                         </button>
-                    ) : confirmDelete ? (
-                        <span className="flex items-center gap-1 text-xs ps-1">
-                            <button type="button" onClick={onDelete} className="text-red-500 font-medium hover:underline">
-                                Delete
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setConfirmDelete(false)}
-                                className="text-ink-muted hover:underline"
-                            >
-                                Keep
-                            </button>
-                        </span>
                     ) : (
-                        <button
-                            type="button"
-                            onClick={() => setConfirmDelete(true)}
+                        <ConfirmDeleteButton
+                            onConfirm={onDelete}
                             title="Delete"
                             className="p-1.5 rounded text-ink-muted hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                            heading="Delete this video?"
+                            itemLabel={video.title || 'this video'}
+                            description="This video will be removed from the library."
                         >
                             <Trash2 size={15} />
-                        </button>
+                        </ConfirmDeleteButton>
                     )}
                 </div>
             </div>

@@ -1,9 +1,9 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     ArrowLeft, Mail, MailOpen, Archive, ArchiveRestore, Trash2, Phone, Building2, Globe, Reply,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 import type { ContactShowProps, RequestType } from '@/types/admin/contact';
 
@@ -37,7 +37,6 @@ function Field({ icon, label, children }: { icon: React.ReactNode; label: string
 
 export default function ContactShow() {
     const { submission: s } = usePage<ContactShowProps>().props;
-    const [confirmDelete, setConfirmDelete] = useState(false);
 
     const toggleRead = () => router.post(`/admin/contacts/${s.id}/read`, {}, { preserveScroll: true });
     const toggleArchive = () => router.post(`/admin/contacts/${s.id}/archive`, {}, { preserveScroll: true });
@@ -86,17 +85,16 @@ export default function ContactShow() {
                                 {s.is_archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
                                 {s.is_archived ? 'Unarchive' : 'Archive'}
                             </button>
-                            {confirmDelete ? (
-                                <span className="inline-flex items-center gap-1.5 text-sm">
-                                    <button type="button" onClick={destroy} className="text-red-600 font-medium hover:underline">Confirm</button>
-                                    <span className="text-ink-muted">/</span>
-                                    <button type="button" onClick={() => setConfirmDelete(false)} className="text-ink-muted hover:underline">Cancel</button>
-                                </span>
-                            ) : (
-                                <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex items-center justify-center p-1.5 text-ink-muted hover:text-red-500 transition-colors" title="Delete">
-                                    <Trash2 size={15} />
-                                </button>
-                            )}
+                            <ConfirmDeleteButton
+                                onConfirm={destroy}
+                                className="inline-flex items-center justify-center p-1.5 text-ink-muted hover:text-red-500 transition-colors"
+                                title="Delete"
+                                heading="Delete this submission?"
+                                itemLabel={s.name}
+                                description="The submission will be moved to Trash. You can restore it from there."
+                            >
+                                <Trash2 size={15} />
+                            </ConfirmDeleteButton>
                         </div>
                     </div>
 

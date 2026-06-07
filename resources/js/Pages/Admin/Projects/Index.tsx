@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ProjectIndexProps, ProjectListItem, ProjectCategory, ProjectListingStatus } from '@/types/admin/project';
@@ -40,45 +41,6 @@ function Badge({ label, color }: { label: string; color: string }) {
     );
 }
 
-function ConfirmButton({
-    onConfirm,
-    children,
-    className,
-}: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-}) {
-    const [pending, setPending] = useState(false);
-
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button
-                    type="button"
-                    onClick={() => { setPending(false); onConfirm(); }}
-                    className="text-red-600 font-medium hover:underline"
-                >
-                    Confirm
-                </button>
-                <span className="text-ink-muted">/</span>
-                <button
-                    type="button"
-                    onClick={() => setPending(false)}
-                    className="text-ink-muted hover:underline"
-                >
-                    Cancel
-                </button>
-            </span>
-        );
-    }
-
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className}>
-            {children}
-        </button>
-    );
-}
 
 export default function ProjectsIndex() {
     const { projects, filters, trashedCount } = usePage<ProjectIndexProps>().props;
@@ -296,6 +258,11 @@ export default function ProjectsIndex() {
                                             <ConfirmButton
                                                 onConfirm={() => deleteProject(project.id)}
                                                 className="text-ink-muted hover:text-red-500 transition-colors"
+                                                title="Delete"
+                                                heading="Move project to trash?"
+                                                actionLabel="Delete"
+                                                itemLabel={project.title_en}
+                                                description="The project will be moved to Trash. You can restore it from there."
                                             >
                                                 <Trash2 size={15} />
                                             </ConfirmButton>

@@ -13,6 +13,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Trash2, Pencil, GripVertical, Quote, Eye, EyeOff, X, User as UserIcon, ImagePlus } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 
 interface TestimonialItem {
@@ -168,7 +169,6 @@ function SortableCard({
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
-    const [confirmDelete, setConfirmDelete] = useState(false);
 
     return (
         <div
@@ -226,29 +226,16 @@ function SortableCard({
                     >
                         <Pencil size={15} />
                     </button>
-                    {confirmDelete ? (
-                        <span className="flex items-center gap-1 text-xs ps-1">
-                            <button type="button" onClick={onDelete} className="text-red-500 font-medium hover:underline">
-                                Delete
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setConfirmDelete(false)}
-                                className="text-ink-muted hover:underline"
-                            >
-                                Keep
-                            </button>
-                        </span>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => setConfirmDelete(true)}
-                            title="Delete"
-                            className="p-1.5 rounded text-ink-muted hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                        >
-                            <Trash2 size={15} />
-                        </button>
-                    )}
+                    <ConfirmDeleteButton
+                        onConfirm={onDelete}
+                        title="Delete"
+                        className="p-1.5 rounded text-ink-muted hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                        heading="Delete this testimonial?"
+                        itemLabel={item.name_en}
+                        description="This testimonial will be permanently removed from the homepage."
+                    >
+                        <Trash2 size={15} />
+                    </ConfirmDeleteButton>
                 </div>
             </div>
         </div>

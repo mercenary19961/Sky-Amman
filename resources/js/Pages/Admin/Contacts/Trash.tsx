@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 import type { ContactTrashProps, ContactListItem, RequestType } from '@/types/admin/contact';
 
@@ -12,29 +12,6 @@ const TYPE_LABELS: Record<RequestType, string> = {
     investment: 'Investment',
     general:    'General',
 };
-
-function ConfirmButton({ onConfirm, children, className, title }: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-    title?: string;
-}) {
-    const [pending, setPending] = useState(false);
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button type="button" onClick={() => { setPending(false); onConfirm(); }} className="text-red-600 font-medium hover:underline">Confirm</button>
-                <span className="text-ink-muted">/</span>
-                <button type="button" onClick={() => setPending(false)} className="text-ink-muted hover:underline">Cancel</button>
-            </span>
-        );
-    }
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className} title={title}>
-            {children}
-        </button>
-    );
-}
 
 export default function ContactsTrash() {
     const { submissions } = usePage<ContactTrashProps>().props;
@@ -96,6 +73,10 @@ export default function ContactsTrash() {
                                                 onConfirm={() => forceDestroy(s.id)}
                                                 className="text-ink-muted hover:text-red-500 transition-colors"
                                                 title="Delete permanently"
+                                                heading="Delete permanently?"
+                                                actionLabel="Delete permanently"
+                                                itemLabel={s.name}
+                                                description="This submission will be permanently deleted and cannot be restored."
                                             >
                                                 <Trash2 size={15} />
                                             </ConfirmButton>
