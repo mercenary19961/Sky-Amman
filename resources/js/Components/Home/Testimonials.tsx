@@ -46,11 +46,12 @@ export function Testimonials({ content, videos, testimonials }: TestimonialsProp
     const t = content.testimonials ?? {};
     const title = t.title?.content ?? '';
 
-    // Pick the active language per card (AR falls back to EN when blank).
+    // Pick the active language per card; if a field is filled in only one
+    // language, that one is used for both (bidirectional fallback).
     const clients: Client[] = testimonials
         .map((c) => ({
-            name: (ar ? c.name_ar : c.name_en) || c.name_en || '',
-            quote: (ar ? c.quote_ar : c.quote_en) || c.quote_en || '',
+            name: (ar ? c.name_ar || c.name_en : c.name_en || c.name_ar) || '',
+            quote: (ar ? c.quote_ar || c.quote_en : c.quote_en || c.quote_ar) || '',
             image: c.image_url,
         }))
         .filter((c) => c.name || c.quote);

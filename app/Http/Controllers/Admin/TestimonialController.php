@@ -40,18 +40,15 @@ class TestimonialController extends Controller
 
     public function store(Request $request, ChangeLogService $changeLog): RedirectResponse
     {
-        $data = $this->validateData($request);
+        $data = $this->validateData($request, imageRequired: true);
 
-        $mediaId = null;
-        if ($request->hasFile('image')) {
-            $mediaId = Media::storeFile($request->file('image'), 'testimonials', Auth::id())->id;
-        }
+        $mediaId = Media::storeFile($request->file('image'), 'testimonials', Auth::id())->id;
 
         $testimonial = Testimonial::create([
-            'name_en'    => $data['name_en'],
-            'name_ar'    => $data['name_ar'] ?? null,
-            'quote_en'   => $data['quote_en'],
-            'quote_ar'   => $data['quote_ar'] ?? null,
+            'name_en'    => ($data['name_en'] ?? '') ?: null,
+            'name_ar'    => ($data['name_ar'] ?? '') ?: null,
+            'quote_en'   => ($data['quote_en'] ?? '') ?: null,
+            'quote_ar'   => ($data['quote_ar'] ?? '') ?: null,
             'media_id'   => $mediaId,
             'is_active'  => true,
             'sort_order' => (int) Testimonial::query()->max('sort_order') + 1,
@@ -69,10 +66,10 @@ class TestimonialController extends Controller
         $old = $testimonial->attributesToArray();
 
         $attributes = [
-            'name_en'  => $data['name_en'],
-            'name_ar'  => $data['name_ar'] ?? null,
-            'quote_en' => $data['quote_en'],
-            'quote_ar' => $data['quote_ar'] ?? null,
+            'name_en'  => ($data['name_en'] ?? '') ?: null,
+            'name_ar'  => ($data['name_ar'] ?? '') ?: null,
+            'quote_en' => ($data['quote_en'] ?? '') ?: null,
+            'quote_ar' => ($data['quote_ar'] ?? '') ?: null,
         ];
 
         // A new upload replaces the avatar; the old media row is soft-deleted
@@ -126,16 +123,28 @@ class TestimonialController extends Controller
         return back()->with('success', 'Order updated.');
     }
 
-    private function validateData(Request $request): array
+    /**
+     * @param bool $imageRequired  true on create (a new testimonial needs a photo);
+     *                             false on update (the existing photo is kept).
+     *
+     * Name and quote each require AT LEAST ONE language — the public card falls
+     * back to the filled language for the empty one. Tight char limits keep cards
+     * uniform (mirror NAME_MAX / QUOTE_MAX in Testimonials/Index.tsx).
+     */
+    private function validateData(Request $request, bool $imageRequired = false): array
     {
-        // Tight limits keep cards uniform — a long quote breaks the carousel UI.
-        // Mirror these in the form (NAME_MAX / QUOTE_MAX in Testimonials/Index.tsx).
         return $request->validate([
-            'name_en'  => ['required', 'string', 'max:80'],
-            'name_ar'  => ['nullable', 'string', 'max:80'],
-            'quote_en' => ['required', 'string', 'max:200'],
-            'quote_ar' => ['nullable', 'string', 'max:200'],
-            'image'    => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
+            'name_en'  => ['nullable', 'required_without:name_ar', 'string', 'max:80'],
+            'name_ar'  => ['nullable', 'required_without:name_en', 'string', 'max:80'],
+            'quote_en' => ['nullable', 'required_without:quote_ar', 'string', 'max:200'],
+            'quote_ar' => ['nullable', 'required_without:quote_en', 'string', 'max:200'],
+            'image'    => [$imageRequired ? 'required' : 'nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
+        ], [
+            'name_en.required_without'  => 'Enter the name in at least one language.',
+            'name_ar.required_without'  => 'Enter the name in at least one language.',
+            'quote_en.required_without' => 'Enter the quote in at least one language.',
+            'quote_ar.required_without' => 'Enter the quote in at least one language.',
+            'image.required'            => 'Please upload a photo.',
         ]);
     }
 }

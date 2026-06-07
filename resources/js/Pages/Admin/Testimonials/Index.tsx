@@ -271,7 +271,18 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
         setPreview(f ? URL.createObjectURL(f) : item?.image_url ?? null);
     };
 
-    const canSubmit = nameEn.trim() !== '' && quoteEn.trim() !== '' && !processing;
+    // A testimonial needs a photo, a name, and a quote. Name/quote each only need
+    // ONE language — the public card falls back to the filled one for the other.
+    const hasPhoto = !!file || !!preview;
+    const hasName = nameEn.trim() !== '' || nameAr.trim() !== '';
+    const hasQuote = quoteEn.trim() !== '' || quoteAr.trim() !== '';
+    const canSubmit = hasPhoto && hasName && hasQuote && !processing;
+
+    const missing = [
+        !hasPhoto && 'a photo',
+        !hasName && 'a name',
+        !hasQuote && 'a quote',
+    ].filter(Boolean) as string[];
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -338,7 +349,9 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                         <form onSubmit={submit} className="flex-1 overflow-y-auto p-5 space-y-5">
                             {/* Photo */}
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Photo</label>
+                                <label className="block text-xs font-medium text-ink-muted mb-1.5">
+                                    Photo <span className="text-red-500">*</span>
+                                </label>
                                 <div className="flex items-center gap-4">
                                     <Avatar
                                         url={preview}
@@ -365,6 +378,10 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                 </div>
                             </div>
 
+                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                                Name <span className="text-red-500">*</span>
+                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
+                            </div>
                             <div>
                                 <LabelWithCount label="Name (EN)" value={nameEn} max={NAME_MAX} />
                                 <input
@@ -389,6 +406,10 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                     className={inputCls}
                                 />
                             </div>
+                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                                Quote <span className="text-red-500">*</span>
+                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
+                            </div>
                             <div>
                                 <LabelWithCount label="Quote (EN)" value={quoteEn} max={QUOTE_MAX} />
                                 <textarea
@@ -400,7 +421,8 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                     className={cn(inputCls, 'resize-y')}
                                 />
                                 <p className="mt-1 text-[11px] text-ink-muted">
-                                    Keep it short — one or two sentences read best on the card.
+                                    Keep it short — one or two sentences read best on the card. If you fill only one
+                                    language, it&rsquo;s shown for both on the site.
                                 </p>
                             </div>
                             <div>
@@ -420,6 +442,12 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                 New testimonials are shown on the homepage right away. Use the eye toggle on the card to
                                 hide one without deleting it.
                             </p>
+
+                            {missing.length > 0 && (
+                                <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                                    Add {missing.join(', ')} to continue.
+                                </p>
+                            )}
                         </form>
 
                         <div className="p-5 border-t border-ink/5 dark:border-white/10 flex items-center justify-end gap-2">
