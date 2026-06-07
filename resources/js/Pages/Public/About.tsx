@@ -94,7 +94,7 @@ export default function About() {
                                 className="pointer-events-none absolute z-0 hidden rounded-full bg-primary lg:block"
                                 style={{ top: '24%', insetInlineStart: '43%', width: '64%', height: '88%' }}
                             />
-                            <div className="relative z-10 min-h-44 overflow-hidden rounded-[40px] sm:min-h-52 sm:rounded-[80px] lg:min-h-0 lg:aspect-1241/422 lg:rounded-[150px]">
+                            <div className="relative z-10 min-h-56 overflow-hidden rounded-[40px] sm:min-h-72 sm:rounded-[80px] lg:min-h-0 lg:aspect-1241/422 lg:rounded-[150px]">
                                 <img
                                     src="/images/about/hero-banner.webp"
                                     alt=""
@@ -103,9 +103,18 @@ export default function About() {
                                 />
                                 <div aria-hidden="true" className="absolute inset-0" style={{ backgroundColor: `${NAVY}B3` }} />
                                 <div className="absolute inset-0 flex items-end justify-start p-6 sm:p-10 lg:p-14">
-                                    <h1 className="text-start text-6xl uppercase leading-none text-white drop-shadow-sm sm:text-8xl lg:text-[11rem] xl:text-[12rem]">
-                                        <span className="font-bold">{heroFirst}</span>
-                                        {heroRestStr && <span className="font-light"> {heroRestStr}</span>}
+                                    {/* First word on its own line (bold), the rest stacked below
+                                        (light) — e.g. "ABOUT" / "SKY AMMAN", "عن" / "سكاي عمّان". */}
+                                    <h1
+                                        className={cn(
+                                            'text-start uppercase leading-[0.95] text-white drop-shadow-sm',
+                                            ar
+                                                ? 'text-5xl sm:text-7xl lg:text-8xl xl:text-9xl'
+                                                : 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl',
+                                        )}
+                                    >
+                                        <span className="block -translate-y-1 font-bold sm:-translate-y-2 lg:-translate-y-3">{heroFirst}</span>
+                                        {heroRestStr && <span className="block font-light">{heroRestStr}</span>}
                                     </h1>
                                 </div>
                             </div>
@@ -199,7 +208,7 @@ function CloudBar({ title, body, side }: { title: string; body: string; side: 's
                         touching the top of the shape. */}
                     <h2
                         className={cn(
-                            'absolute -top-9 z-20 text-5xl font-bold uppercase text-primary sm:-top-14 sm:text-7xl lg:-top-20 lg:text-8xl',
+                            'absolute -top-12 z-20 text-5xl font-bold uppercase text-primary sm:-top-18 sm:text-7xl lg:-top-24 lg:text-8xl',
                             side === 'start' ? 'inset-s-4 text-start sm:inset-s-10' : 'inset-e-4 text-end sm:inset-e-10',
                         )}
                     >
@@ -214,7 +223,11 @@ function CloudBar({ title, body, side }: { title: string; body: string; side: 's
                             aria-hidden="true"
                             className={cn(
                                 'pointer-events-none absolute bottom-0 -z-10 h-[85%] w-[58%] object-contain opacity-80',
-                                side === 'start' ? 'inset-s-0 object-bottom-left' : 'inset-e-0 object-bottom-right',
+                                // object-position is physical, so flip it in RTL to keep the
+                                // cloud under the title (which moves via the logical inset-s/e).
+                                side === 'start'
+                                    ? 'inset-s-0 object-bottom-left rtl:object-bottom-right'
+                                    : 'inset-e-0 object-bottom-right rtl:object-bottom-left',
                             )}
                         />
                         <p className="mx-auto max-w-4xl px-8 py-12 text-center text-base leading-relaxed text-ink sm:px-14 sm:py-14 sm:text-lg lg:py-16 lg:text-xl">

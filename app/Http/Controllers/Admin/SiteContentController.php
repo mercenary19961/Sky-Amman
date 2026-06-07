@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Models\SiteContent;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,22 +19,26 @@ class SiteContentController extends Controller
         $pages = Page::ordered()->get()->keyBy('slug');
 
         $grouped = [];
-        SiteContent::query()
-            ->orderBy('page')
-            ->orderBy('sort_order')
-            ->orderBy('key')
-            ->get()
+        SiteContent::all()
+            ->sortBy([
+                ['page', 'asc'],
+                ['sort_order', 'asc'],
+                ['key', 'asc'],
+            ])
             ->each(function (SiteContent $row) use (&$grouped) {
                 $grouped[$row->page][$row->section][] = $row;
             });
 
         return Inertia::render('Admin/Content', [
-            'grouped' => $grouped,
-            'pages'   => $pages,
+            'grouped'  => $grouped,
+            'pages'    => $pages,
+            // Persistent "Undo last save" pointer for this section (set by
+            // ChangeLogService on the previous save; survives navigation).
+            'undoMeta' => session('undo:site_content'),
         ]);
     }
 
-    public function update(Request $request, string $page): RedirectResponse
+    public function update(Request $request, string $page, ChangeLogService $changeLog): RedirectResponse
     {
         $request->validate([
             'page_is_visible'    => 'boolean',
@@ -48,15 +53,26 @@ class SiteContentController extends Controller
             'rows.*.is_visible'  => 'boolean',
         ]);
 
-        // Update page-level SEO and visibility.
-        Page::query()->where('slug', $page)->firstOrFail()->update([
+        // Update page-level SEO and visibility (snapshotting before/after so the
+        // change log + revert cover SEO/visibility edits, not just content rows).
+        $pageModel = Page::query()->where('slug', $page)->firstOrFail();
+
+        $oldPage = [
+            'is_visible'         => (bool) $pageModel->is_visible,
+            'seo_title_en'       => $pageModel->seo_title_en,
+            'seo_title_ar'       => $pageModel->seo_title_ar,
+            'seo_description_en' => $pageModel->seo_description_en,
+            'seo_description_ar' => $pageModel->seo_description_ar,
+        ];
+        $newPage = [
             'is_visible'         => $request->boolean('page_is_visible', true),
             'seo_title_en'       => $request->input('seo_title_en'),
             'seo_title_ar'       => $request->input('seo_title_ar'),
             'seo_description_en' => $request->input('seo_description_en'),
             'seo_description_ar' => $request->input('seo_description_ar'),
-            'updated_by'         => Auth::id(),
-        ]);
+        ];
+
+        $pageModel->update([...$newPage, 'updated_by' => Auth::id()]);
 
         // Guard: only allow updating rows that belong to this page. Fetch the
         // current rows so we can skip no-op writes (don't bump updated_by /
@@ -66,6 +82,10 @@ class SiteContentController extends Controller
             ->whereIn('id', collect($request->rows)->pluck('id'))
             ->get()
             ->keyBy('id');
+
+        // Snapshots of changed rows (keyed by id) for the change log + revert.
+        $oldRows = [];
+        $newRows = [];
 
         foreach ($request->rows as $row) {
             $current = $existing->get($row['id']);
@@ -84,6 +104,20 @@ class SiteContentController extends Controller
                 continue;
             }
 
+            $label = ucfirst(str_replace('_', ' ', $current->section)) . ' · ' . $current->key;
+            $oldRows[$current->id] = [
+                'content_en' => $current->content_en,
+                'content_ar' => $current->content_ar,
+                'is_visible' => (bool) $current->is_visible,
+                'label'      => $label,
+            ];
+            $newRows[$current->id] = [
+                'content_en' => $contentEn,
+                'content_ar' => $contentAr,
+                'is_visible' => $isVisible,
+                'label'      => $label,
+            ];
+
             $current->update([
                 'content_en' => $contentEn,
                 'content_ar' => $contentAr,
@@ -91,6 +125,18 @@ class SiteContentController extends Controller
                 'updated_by' => Auth::id(),
             ]);
         }
+
+        // One entry covering both content rows + page SEO/visibility. log() skips
+        // it automatically if nothing actually changed.
+        $pageTitle = ucfirst(str_replace('_', ' ', $page));
+        $changeLog->log(
+            'site_content',
+            $page,
+            'update',
+            ['rows' => $oldRows, 'page' => $oldPage],
+            ['rows' => $newRows, 'page' => $newPage],
+            $pageTitle . ' content',
+        );
 
         return redirect()->back()->with('success', 'Content saved.');
     }

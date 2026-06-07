@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ChangeLogController;
 use App\Http\Controllers\Admin\ContactSubmissionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProjectController;
@@ -132,6 +133,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->where('id', '[0-9]+');
         Route::post('/users/{id}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->where('id', '[0-9]+');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->where('id', '[0-9]+');
+
+        // Change Log + Revert (audit history).
+        Route::get('/change-log', [ChangeLogController::class, 'index'])->name('change-log.index');
+        Route::delete('/change-log/undo/{modelType}', [ChangeLogController::class, 'dismissUndo'])->name('change-log.undo-dismiss')->where('modelType', '[a-z_]+');
+        Route::post('/change-log/{id}/revert', [ChangeLogController::class, 'revert'])->name('change-log.revert')->where('id', '[0-9]+');
+        Route::delete('/change-log/{id}', [ChangeLogController::class, 'destroy'])->name('change-log.destroy')->where('id', '[0-9]+');
     });
 
     // Projects — literal paths (trash, create) must come before the {id} wildcard.

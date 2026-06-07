@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -48,7 +49,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ChangeLogService $changeLog): RedirectResponse
     {
         $data = $request->validate([
             'name'            => ['required', 'string', 'max:255'],
@@ -64,7 +65,7 @@ class UserController extends Controller
             return back()->with('error', 'Granting admin access must be confirmed.');
         }
 
-        User::create([
+        $user = User::create([
             'name'      => $data['name'],
             'email'     => $data['email'],
             'role'      => $data['role'],
@@ -72,10 +73,12 @@ class UserController extends Controller
             'password'  => $data['password'], // hashed via the model's 'hashed' cast
         ]);
 
+        $changeLog->log('user', $user->id, 'create', null, $user->attributesToArray(), $user->name);
+
         return back()->with('success', 'User created.');
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $user = User::findOrFail($id);
         $isSelf = $user->id === $request->user()->id;
@@ -94,6 +97,7 @@ class UserController extends Controller
             'admin_confirmed' => ['boolean'],
         ]);
 
+        $old = $user->attributesToArray();
         $willBeActive = $request->boolean('is_active', true);
         $promoting    = $user->role !== 'admin' && $data['role'] === 'admin';
         $demoting     = $user->role === 'admin' && $data['role'] !== 'admin';
@@ -122,10 +126,12 @@ class UserController extends Controller
 
         $user->save();
 
+        $changeLog->log('user', $user->id, 'update', $old, $user->fresh()->attributesToArray(), $user->name);
+
         return back()->with('success', 'User updated.');
     }
 
-    public function toggleStatus(Request $request, int $id): RedirectResponse
+    public function toggleStatus(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $user = User::findOrFail($id);
 
@@ -138,13 +144,16 @@ class UserController extends Controller
             return back()->with('error', 'Admin accounts are self-managed. You can\'t change another admin\'s status.');
         }
 
+        $old = $user->attributesToArray();
         $user->is_active = ! $user->is_active;
         $user->save();
+
+        $changeLog->log('user', $user->id, 'update', $old, $user->fresh()->attributesToArray(), $user->name);
 
         return back()->with('success', $user->is_active ? 'User activated.' : 'User deactivated.');
     }
 
-    public function destroy(Request $request, int $id): RedirectResponse
+    public function destroy(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $user = User::findOrFail($id);
 
@@ -157,6 +166,7 @@ class UserController extends Controller
             return back()->with('error', 'Admin accounts are self-managed. Demote to editor before deleting.');
         }
 
+        $changeLog->log('user', $user->id, 'delete', $user->attributesToArray(), null, $user->name);
         $user->delete();
 
         return back()->with('success', 'User deleted.');

@@ -1,4 +1,5 @@
 import type { PageProps } from '@/types';
+import type { UndoMeta } from '@/types/admin/changelog';
 
 export interface SiteContentRow {
     id: number;
@@ -27,4 +28,5 @@ export interface PageRecord {
 export interface ContentPageProps extends PageProps {
     grouped: Record<string, Record<string, SiteContentRow[]>>;
     pages: Record<string, PageRecord>;
+    undoMeta: UndoMeta | null;
 }

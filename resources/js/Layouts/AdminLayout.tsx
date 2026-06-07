@@ -13,6 +13,7 @@ import {
     Menu,
 } from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
+import { UndoToast } from '@/Components/Admin/UndoToast';
 import type { PageProps } from '@/types';
 
 // Ordered longest-first so more-specific paths match before shorter prefixes.
@@ -101,6 +102,8 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
                 </header>
                 <main className="p-6">{children}</main>
             </div>
+
+            <UndoToast />
         </div>
     );
 }

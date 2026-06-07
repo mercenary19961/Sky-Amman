@@ -25,7 +25,7 @@ class SiteContentSeeder extends Seeder
             ['home', 'investment_banner', 'cta', 'Investment Opportunities', 'فرص الاستثمار'],
 
             ['home', 'managing_partner', 'label', 'Managing Partner', 'الشريك الإداري'],
-            ['home', 'managing_partner', 'name', 'MR. Jameel Abu Hajleh', 'السيد جميل أبو هجلة'],
+            ['home', 'managing_partner', 'name', 'MR. Jameel Abu Hajleh', 'السيد جميل أبو حجلة'],
             ['home', 'managing_partner', 'body_1', 'At SkyAmman, we believe that successful real estate investment begins with stability, vision, and trust. Jordan today stands as a strong example of security, urban growth, and promising investment opportunities, making it an ideal environment for modern real estate development.', 'في سكاي عمّان، نؤمن بأن الاستثمار العقاري الناجح يبدأ بالاستقرار والرؤية والثقة. الأردن اليوم نموذج للأمان والنمو الحضري وفرص الاستثمار الواعدة، مما يجعله بيئة مثالية للتطوير العقاري الحديث.'],
             ['home', 'managing_partner', 'body_2', 'From the beginning, our focus has been on delivering projects that combine quality, contemporary design, and long-term value while ensuring that every development reflects the needs and expectations of our clients.', 'منذ البداية، تمحور تركيزنا على تقديم مشاريع تجمع بين الجودة والتصميم العصري والقيمة بعيدة المدى، مع ضمان أن يعكس كل تطوير احتياجات عملائنا وتطلعاتهم.'],
             ['home', 'managing_partner', 'body_3', 'Our mission at SkyAmman goes beyond developing properties, we aim to contribute to a modern urban future that reflects the true potential of Jordan and creates lasting value for generations to come.', 'تتجاوز مهمتنا في سكاي عمّان مجرد تطوير العقارات، إذ نسعى للمساهمة في مستقبل حضري عصري يعكس الإمكانات الحقيقية للأردن ويخلق قيمة دائمة للأجيال القادمة.'],
@@ -35,7 +35,7 @@ class SiteContentSeeder extends Seeder
             ['home', 'departments', 'member_1_role', 'Chief Executive Officer', 'الرئيس التنفيذي'],
             ['home', 'departments', 'member_2_name', 'Eng. Hossam Salameh', 'م. حسام سلامة'],
             ['home', 'departments', 'member_2_role', 'Projects Director', 'مدير المشاريع'],
-            ['home', 'departments', 'member_3_name', 'Mr. Mohammad Makhl', 'السيد محمد مخل'],
+            ['home', 'departments', 'member_3_name', 'Mr. Mohammad Makhl', 'السيد محمد مكحل'],
             ['home', 'departments', 'member_3_role', 'Chief Financial Officer', 'المدير المالي'],
             ['home', 'departments', 'member_4_name', 'Mr. Sadad Al Rawashdeh', 'السيد سداد الرواشدة'],
             ['home', 'departments', 'member_4_role', 'Legal Director', 'المدير القانوني'],
@@ -155,7 +155,7 @@ class SiteContentSeeder extends Seeder
             ['security', 'construction', 'item_4', 'Use of trusted and verified suppliers', 'استخدام مواد من موردين موثوقين ومعتمدين'],
 
             // ---------------- ABOUT ----------------
-            ['about', 'hero', 'title', 'ABOUT US', 'من نحن'],
+            ['about', 'hero', 'title', 'ABOUT SKY AMMAN', 'عن سكاي عمّان'],
             ['about', 'intro', 'body', 'SkyAmman is a real estate development company based in Amman, specializing in the design and development of high quality residential, commercial, office, and medical spaces.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في تصميم وتطوير مساحات سكنية وتجارية ومكتبية وطبية عالية الجودة.'],
             ['about', 'crafted', 'title', 'Crafted Developments for Elevated Living', 'تطويرات مصمّمة لحياة راقية'],
             ['about', 'crafted', 'body', 'We deliver integrated real estate solutions tailored to meet diverse client needs, while maintaining high standards in quality and execution. In addition, we support property ownership through flexible financing solutions in collaboration with leading financial institutions in Jordan.', 'نقدّم حلولاً عقارية متكاملة مصمّمة لتلبية احتياجات العملاء المتنوعة، مع الحفاظ على معايير عالية في الجودة والتنفيذ. كما ندعم تملّك العقار من خلال حلول تمويل مرنة بالتعاون مع مؤسسات مالية رائدة في الأردن.'],

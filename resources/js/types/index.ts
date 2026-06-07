@@ -67,6 +67,8 @@ export interface PageProps {
     };
     locale: 'en' | 'ar';
     flash: Flash;
+    /** One-shot payload for the post-save Undo toast (set after a tracked change). */
+    undo?: { id: number; section: string; action: string; label: string | null } | null;
     siteSettings: SiteSettings;
     footerContentEn: SiteContentBundle;
     footerContentAr: SiteContentBundle;

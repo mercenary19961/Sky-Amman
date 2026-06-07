@@ -6,6 +6,7 @@ import {
     Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { UndoButton } from '@/Components/Admin/UndoButton';
 import { cn } from '@/lib/cn';
 import type { ContentPageProps, SiteContentRow } from '@/types/admin/content';
 
@@ -21,7 +22,11 @@ function toLabel(str: string): string {
 // 'footer' is a layout pseudo-page (no public URL of its own) — added here so
 // admins can edit shared footer copy from the Content editor. Its preview
 // iframe points at the homepage so changes show up at the bottom of the page.
-const PAGE_ORDER = ['home', 'properties', 'investment', 'self_build', 'security', 'about', 'contact', 'footer'];
+// NOTE: 'investment' is omitted because the Investment page is parked/disabled
+// (its route + nav item are commented out — see CLAUDE.md). Re-add it here to
+// surface its content in the editor when the page is un-parked. The icon/url/
+// label entries below are kept so re-adding is a one-line change.
+const PAGE_ORDER = ['home', 'properties', 'self_build', 'security', 'about', 'contact', 'footer'];
 
 const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     home:       Home,
@@ -115,7 +120,7 @@ function RowInput({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ContentEditor() {
-    const { grouped, pages } = usePage<ContentPageProps>().props;
+    const { grouped, pages, undoMeta } = usePage<ContentPageProps>().props;
     const orderedPages = PAGE_ORDER.filter(slug => pages[slug]);
 
     // Which page accordion is open — only one at a time
@@ -138,8 +143,18 @@ export default function ContentEditor() {
     const [previewExpanded, setPreviewExpanded] = useState(false);
     const [previewInteractive, setPreviewInteractive] = useState(false);
 
-    // Row values keyed by id
-    const [rowValues, setRowValues] = useState<Record<number, { content_en: string; content_ar: string }>>(() => {
+    type PageSeoState = Record<string, {
+        is_visible: boolean;
+        seo_title_en: string;
+        seo_title_ar: string;
+        seo_description_en: string;
+        seo_description_ar: string;
+    }>;
+
+    // Builders derive local form state from the current server props. Reused on
+    // mount AND whenever props change (save / undo-revert) so the inputs always
+    // reflect the persisted truth.
+    function buildRowValues(): Record<number, { content_en: string; content_ar: string }> {
         const v: Record<number, { content_en: string; content_ar: string }> = {};
         Object.values(grouped).forEach(sections =>
             Object.values(sections).forEach(rows =>
@@ -147,10 +162,9 @@ export default function ContentEditor() {
             ),
         );
         return v;
-    });
+    }
 
-    // Section visibility per page
-    const [sectionVisible, setSectionVisible] = useState<Record<string, Record<string, boolean>>>(() => {
+    function buildSectionVisible(): Record<string, Record<string, boolean>> {
         const v: Record<string, Record<string, boolean>> = {};
         Object.entries(grouped).forEach(([page, sections]) => {
             v[page] = {};
@@ -159,23 +173,10 @@ export default function ContentEditor() {
             });
         });
         return v;
-    });
+    }
 
-    // Page-level SEO + visibility
-    const [pageSeo, setPageSeo] = useState<Record<string, {
-        is_visible: boolean;
-        seo_title_en: string;
-        seo_title_ar: string;
-        seo_description_en: string;
-        seo_description_ar: string;
-    }>>(() => {
-        const v: Record<string, {
-            is_visible: boolean;
-            seo_title_en: string;
-            seo_title_ar: string;
-            seo_description_en: string;
-            seo_description_ar: string;
-        }> = {};
+    function buildPageSeo(): PageSeoState {
+        const v: PageSeoState = {};
         Object.values(pages).forEach(p => {
             v[p.slug] = {
                 is_visible: p.is_visible,
@@ -186,7 +187,21 @@ export default function ContentEditor() {
             };
         });
         return v;
-    });
+    }
+
+    const [rowValues, setRowValues] = useState(buildRowValues);
+    const [sectionVisible, setSectionVisible] = useState(buildSectionVisible);
+    const [pageSeo, setPageSeo] = useState<PageSeoState>(buildPageSeo);
+
+    // Resync from server props after a save or an undo/revert. Props only change
+    // on an Inertia round-trip (never on local typing), so this won't clobber
+    // in-progress edits — it reflects what was actually persisted.
+    useEffect(() => {
+        setRowValues(buildRowValues());
+        setSectionVisible(buildSectionVisible());
+        setPageSeo(buildPageSeo());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [grouped, pages]);
 
     function setRow(id: number, field: 'content_en' | 'content_ar', value: string) {
         setRowValues(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
@@ -287,22 +302,32 @@ export default function ContentEditor() {
                 (the token swaps via the .dark wrapper), so the sticky region
                 blends without a visible darker rectangle. z-10 keeps it above
                 the accordion but below the admin top bar (z-20). */}
-            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-1 mb-4 overflow-x-auto pt-2 pb-3">
-                {orderedPages.map(slug => (
-                    <button
-                        key={slug}
-                        type="button"
-                        onClick={() => openPage(slug)}
-                        className={cn(
-                            'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
-                            expandedPage === slug
-                                ? 'bg-primary text-zinc-900'
-                                : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
-                        )}
-                    >
-                        {pages[slug]?.title_en ?? toLabel(slug)}
-                    </button>
-                ))}
+            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-2 mb-4 pt-2 pb-3">
+                <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+                    {orderedPages.map(slug => (
+                        <button
+                            key={slug}
+                            type="button"
+                            onClick={() => openPage(slug)}
+                            className={cn(
+                                'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
+                                expandedPage === slug
+                                    ? 'bg-primary text-zinc-900'
+                                    : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
+                            )}
+                        >
+                            {pages[slug]?.title_en ?? toLabel(slug)}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Persistent "Undo last save" — pinned to the far right of the
+                    page-tab row so it doesn't push the preview/editor down. */}
+                {undoMeta && (
+                    <div className="shrink-0">
+                        <UndoButton modelType="site_content" undoMeta={undoMeta} />
+                    </div>
+                )}
             </div>
 
             {/* Split layout */}
@@ -350,6 +375,15 @@ export default function ContentEditor() {
                                     <span className="text-xs text-ink-muted">
                                         {sectionCount} section{sectionCount !== 1 ? 's' : ''} · {rowCount} fields
                                     </span>
+                                    {dirty && (
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
+                                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                            </span>
+                                            Unsaved changes
+                                        </span>
+                                    )}
                                     {!seo.is_visible && (
                                         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
                                             Hidden
@@ -384,7 +418,7 @@ export default function ContentEditor() {
                                                 isSaving
                                                     ? 'bg-primary/50 text-white cursor-not-allowed'
                                                     : canSave
-                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark animate-save-pulse'
                                                         : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
                                             )}
                                         >
@@ -528,7 +562,7 @@ export default function ContentEditor() {
                                                 className={cn(
                                                     'inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
                                                     canSave
-                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark animate-save-pulse'
                                                         : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
                                                 )}
                                             >

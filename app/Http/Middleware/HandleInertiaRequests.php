@@ -37,6 +37,9 @@ class HandleInertiaRequests extends Middleware
                 'info' => fn () => $request->session()->get('info'),
                 'warning' => fn () => $request->session()->get('warning'),
             ],
+            // One-shot payload set by ChangeLogService after a tracked save, so the
+            // admin can revert the change just made via the UndoToast.
+            'undo' => fn () => $request->session()->get('undo'),
             'siteSettings' => fn () => $this->getSiteSettings(),
             // Footer copy is admin-editable via the Site Content editor under the
             // "footer" pseudo-page. Both locales ship to the client so the language
