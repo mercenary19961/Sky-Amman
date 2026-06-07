@@ -11,7 +11,7 @@ class DefaultSettingsSeeder extends Seeder
     {
         $defaults = [
             // Contact info — placeholders, admin overrides via Settings page.
-            ['key' => 'company_phone', 'value' => '0770770123', 'type' => 'text', 'group' => 'contact'],
+            ['key' => 'company_phone', 'value' => '+962 770770123', 'type' => 'text', 'group' => 'contact'],
             ['key' => 'company_email', 'value' => 'info@skyamman.com', 'type' => 'email', 'group' => 'contact'],
             ['key' => 'company_address_en', 'value' => 'Amman, Jordan', 'type' => 'text', 'group' => 'contact'],
             ['key' => 'company_address_ar', 'value' => 'عمّان، الأردن', 'type' => 'text', 'group' => 'contact'],
