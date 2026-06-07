@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, Phone, Navigation } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 import { Select } from '@/Components/Public/Select';
@@ -147,6 +147,18 @@ export default function Contact() {
                                         referrerPolicy="no-referrer-when-downgrade"
                                     />
                                 </div>
+                            )}
+
+                            {settings?.google_maps_place_url && (
+                                <a
+                                    href={settings.google_maps_place_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-deep"
+                                >
+                                    <Navigation size={16} className="shrink-0" />
+                                    {t('contact.getDirections')}
+                                </a>
                             )}
                         </div>
 

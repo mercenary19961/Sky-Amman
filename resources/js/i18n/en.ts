@@ -254,6 +254,7 @@ const en = {
             subtitle: 'Tell us what you are looking for and we will reach out shortly.',
         },
         aboutProject: 'Inquiry about {{name}}',
+        getDirections: 'Get directions',
         form: {
             name: 'Name',
             email: 'Email',

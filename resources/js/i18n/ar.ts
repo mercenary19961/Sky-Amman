@@ -250,6 +250,7 @@ const ar = {
             subtitle: 'أخبرنا بما تبحث عنه وسنتواصل معك قريباً.',
         },
         aboutProject: 'استفسار عن {{name}}',
+        getDirections: 'الحصول على الاتجاهات',
         form: {
             name: 'الاسم',
             email: 'البريد الإلكتروني',

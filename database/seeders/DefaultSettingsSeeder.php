@@ -26,7 +26,7 @@ class DefaultSettingsSeeder extends Seeder
 
             // Map embed for the homepage "Our Location" section.
             ['key' => 'google_maps_embed_url', 'value' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2394.0592443058385!2d35.881698567642914!3d31.941601324289067!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151ca1858a48924d%3A0xe2a497e678b5e7e5!2s%E2%80%8FSKYAmman%20Real%20Estate%20Development!5e0!3m2!1sen!2sjo!4v1777274370623!5m2!1sen!2sjo', 'type' => 'url', 'group' => 'map'],
-            ['key' => 'google_maps_place_url', 'value' => '', 'type' => 'url', 'group' => 'map'],
+            ['key' => 'google_maps_place_url', 'value' => 'https://www.google.com/maps/place/SKYAmman+Real+Estate+Development/@31.939986,35.885444,17z', 'type' => 'url', 'group' => 'map'],
 
             // Media Room: LinkedIn uses a single-post iframe embed URL.
             // Instagram is fetched via the Graph API (see App\Services\InstagramService);
