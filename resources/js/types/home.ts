@@ -92,6 +92,7 @@ export interface RelatedProject {
 export interface AboutPageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
+    craftedImages: Record<'about_crafted_1' | 'about_crafted_2' | 'about_crafted_3', string>;
     seo: {
         title_en: string | null;
         title_ar: string | null;

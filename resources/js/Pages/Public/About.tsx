@@ -31,6 +31,7 @@ export default function About() {
     const ar = language === 'ar';
 
     const content = ar ? props.content_ar : props.content_en;
+    const craftedImages = props.craftedImages;
     const text = makeText(content, t);
 
     const heroTitle = text('hero', 'title', 'about.hero.title');
@@ -147,13 +148,13 @@ export default function About() {
                             big box filling the rest. */}
                         <div className="grid w-full grid-cols-3 grid-rows-2 gap-3 sm:gap-4">
                             <div className="overflow-hidden rounded-3xl aspect-square">
-                                <img src="/images/about/crafted-2.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
+                                <img src={craftedImages.about_crafted_2} alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
                             <div className="col-span-2 row-span-2 overflow-hidden rounded-[36px]">
-                                <img src="/images/about/crafted-1.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
+                                <img src={craftedImages.about_crafted_1} alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
                             <div className="overflow-hidden rounded-3xl aspect-square">
-                                <img src="/images/about/crafted-3.webp" alt="" loading="lazy" className="h-full w-full object-cover object-center" />
+                                <img src={craftedImages.about_crafted_3} alt="" loading="lazy" className="h-full w-full object-cover object-center" />
                             </div>
                         </div>
 

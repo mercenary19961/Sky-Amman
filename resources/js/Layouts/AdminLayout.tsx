@@ -12,6 +12,7 @@ import {
     Video,
     Quote,
     Contact,
+    Images,
     Menu,
 } from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
@@ -24,6 +25,7 @@ const PAGE_ICONS: Array<[path: string, icon: React.ComponentType<{ size?: number
     ['/admin/testimonial-videos', Video],
     ['/admin/testimonials', Quote],
     ['/admin/department-members', Contact],
+    ['/admin/page-images', Images],
     ['/admin/content',   FileText],
     ['/admin/projects',  Building2],
     ['/admin/contacts',  MessageSquare],

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DepartmentMemberController;
+use App\Http\Controllers\Admin\ManagedImageController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -113,6 +114,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
+
+    // Page images — replaceable decorative image slots (About "Crafted" cluster, …).
+    Route::get('/page-images', [ManagedImageController::class, 'index'])->name('page-images.index');
+    Route::post('/page-images/{key}', [ManagedImageController::class, 'update'])->name('page-images.update');
+    Route::delete('/page-images/{key}', [ManagedImageController::class, 'reset'])->name('page-images.reset');
 
     // Head of Departments team members (image + bilingual name/role).
     Route::get('/department-members', [DepartmentMemberController::class, 'index'])->name('department-members.index');
