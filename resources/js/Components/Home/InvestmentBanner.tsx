@@ -9,8 +9,9 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
     const banner = content.investment_banner ?? {};
 
     // Tagline arrives as a single string ("Buy Early, Save More, Gain More").
-    // Split on comma to render the inline strip image between segments.
-    const taglineParts = (banner.tagline?.content ?? '').split(',').map((s) => s.trim());
+    // Split on comma to render the inline strip image between segments. Accept
+    // both the Latin (,) and Arabic (،) comma so the AR string splits too.
+    const taglineParts = (banner.tagline?.content ?? '').split(/[,،]/).map((s) => s.trim());
 
     return (
         <section className="relative pt-20 sm:pt-28 pb-16 sm:pb-20 bg-surface">
