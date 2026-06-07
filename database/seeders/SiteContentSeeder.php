@@ -35,7 +35,7 @@ class SiteContentSeeder extends Seeder
             ['home', 'departments', 'member_1_role', 'Chief Executive Officer', 'الرئيس التنفيذي'],
             ['home', 'departments', 'member_2_name', 'Eng. Hossam Salameh', 'م. حسام سلامة'],
             ['home', 'departments', 'member_2_role', 'Projects Director', 'مدير المشاريع'],
-            ['home', 'departments', 'member_3_name', 'Mr. Mohammad Makhl', 'السيد محمد مخل'],
+            ['home', 'departments', 'member_3_name', 'Mr. Mohammad Makhl', 'السيد محمد مكحل'],
             ['home', 'departments', 'member_3_role', 'Chief Financial Officer', 'المدير المالي'],
             ['home', 'departments', 'member_4_name', 'Mr. Sadad Al Rawashdeh', 'السيد سداد الرواشدة'],
             ['home', 'departments', 'member_4_role', 'Legal Director', 'المدير القانوني'],
