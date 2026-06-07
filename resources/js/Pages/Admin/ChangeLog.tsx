@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Undo2, Trash2, ArrowRight, FileText, Building2, Users as UsersIcon, Settings as SettingsIcon, History } from 'lucide-react';
+import { Undo2, Trash2, ArrowRight, FileText, Building2, Users as UsersIcon, Settings as SettingsIcon, History, Quote, Video, MessageSquare } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
@@ -14,10 +14,13 @@ const ACTION_COLORS: Record<ChangeAction, string> = {
 };
 
 const SECTION_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-    settings:     SettingsIcon,
-    site_content: FileText,
-    project:      Building2,
-    user:         UsersIcon,
+    settings:          SettingsIcon,
+    site_content:      FileText,
+    project:           Building2,
+    user:              UsersIcon,
+    testimonial:       Quote,
+    testimonial_video: Video,
+    contact:           MessageSquare,
 };
 
 export default function ChangeLog() {

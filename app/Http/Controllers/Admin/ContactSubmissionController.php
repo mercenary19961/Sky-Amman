@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactSubmission;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -118,9 +119,11 @@ class ContactSubmissionController extends Controller
         return back()->with('success', $nowArchived ? 'Archived.' : 'Moved back to inbox.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(int $id, ChangeLogService $changeLog): RedirectResponse
     {
-        ContactSubmission::findOrFail($id)->delete();
+        $submission = ContactSubmission::findOrFail($id);
+        $changeLog->log('contact', $submission->id, 'delete', $submission->attributesToArray(), null, $submission->name);
+        $submission->delete();
 
         return redirect()
             ->route('admin.contacts.index')
@@ -140,9 +143,11 @@ class ContactSubmissionController extends Controller
         ]);
     }
 
-    public function restore(int $id): RedirectResponse
+    public function restore(int $id, ChangeLogService $changeLog): RedirectResponse
     {
-        ContactSubmission::onlyTrashed()->findOrFail($id)->restore();
+        $submission = ContactSubmission::onlyTrashed()->findOrFail($id);
+        $submission->restore();
+        $changeLog->log('contact', $submission->id, 'restore', null, $submission->fresh()->attributesToArray(), $submission->name);
 
         return redirect()
             ->route('admin.contacts.trash')

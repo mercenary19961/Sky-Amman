@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TestimonialVideo;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,26 +29,29 @@ class TestimonialVideoController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ChangeLogService $changeLog): RedirectResponse
     {
         $data = $this->validateData($request);
 
         // New videos enter the library hidden; the admin selects which 3 are
         // live via the draft selection + "Update homepage" (publish) action.
-        TestimonialVideo::create([
+        $video = TestimonialVideo::create([
             'title' => $data['title'] ?? null,
             'url' => $data['url'],
             'is_active' => false,
             'sort_order' => (int) TestimonialVideo::query()->max('sort_order') + 1,
         ]);
 
+        $changeLog->log('testimonial_video', $video->id, 'create', null, $video->attributesToArray(), $video->title ?: $video->url);
+
         return back()->with('success', 'Video added to the library.');
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $video = TestimonialVideo::findOrFail($id);
         $data = $this->validateData($request);
+        $old = $video->attributesToArray();
 
         // Editing only changes the URL/label — active state is managed solely
         // through publish() so the live set is always exactly MAX_ACTIVE.
@@ -55,6 +59,8 @@ class TestimonialVideoController extends Controller
             'title' => $data['title'] ?? null,
             'url' => $data['url'],
         ]);
+
+        $changeLog->log('testimonial_video', $video->id, 'update', $old, $video->fresh()->attributesToArray(), $video->title ?: $video->url);
 
         return back()->with('success', 'Video updated.');
     }
@@ -78,7 +84,7 @@ class TestimonialVideoController extends Controller
         return back()->with('success', 'Homepage videos updated.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $video = TestimonialVideo::findOrFail($id);
 
@@ -90,6 +96,7 @@ class TestimonialVideoController extends Controller
             return back()->with('error', 'This video is live. Swap it out via “Update homepage” before deleting.');
         }
 
+        $changeLog->log('testimonial_video', $video->id, 'delete', $video->attributesToArray(), null, $video->title ?: $video->url);
         $video->delete();
 
         return back()->with('success', 'Video removed.');

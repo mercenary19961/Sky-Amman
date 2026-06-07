@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Testimonial;
+use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +38,7 @@ class TestimonialController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ChangeLogService $changeLog): RedirectResponse
     {
         $data = $this->validateData($request);
 
@@ -46,7 +47,7 @@ class TestimonialController extends Controller
             $mediaId = Media::storeFile($request->file('image'), 'testimonials', Auth::id())->id;
         }
 
-        Testimonial::create([
+        $testimonial = Testimonial::create([
             'name_en'    => $data['name_en'],
             'name_ar'    => $data['name_ar'] ?? null,
             'quote_en'   => $data['quote_en'],
@@ -56,13 +57,16 @@ class TestimonialController extends Controller
             'sort_order' => (int) Testimonial::query()->max('sort_order') + 1,
         ]);
 
+        $changeLog->log('testimonial', $testimonial->id, 'create', null, $testimonial->attributesToArray(), $testimonial->name_en);
+
         return back()->with('success', 'Testimonial added.');
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $testimonial = Testimonial::findOrFail($id);
         $data = $this->validateData($request);
+        $old = $testimonial->attributesToArray();
 
         $attributes = [
             'name_en'  => $data['name_en'],
@@ -74,28 +78,35 @@ class TestimonialController extends Controller
         // A new upload replaces the avatar; the old media row is soft-deleted
         // (the physical file is preserved until force-delete — see Media model).
         if ($request->hasFile('image')) {
-            $old = $testimonial->media;
+            $oldMedia = $testimonial->media;
             $attributes['media_id'] = Media::storeFile($request->file('image'), 'testimonials', Auth::id())->id;
-            $old?->delete();
+            $oldMedia?->delete();
         }
 
         $testimonial->update($attributes);
+
+        $changeLog->log('testimonial', $testimonial->id, 'update', $old, $testimonial->fresh()->attributesToArray(), $testimonial->name_en);
 
         return back()->with('success', 'Testimonial updated.');
     }
 
     /** Show/hide a single testimonial on the homepage (immediate). */
-    public function toggleActive(int $id): RedirectResponse
+    public function toggleActive(int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $testimonial = Testimonial::findOrFail($id);
+        $old = $testimonial->attributesToArray();
         $testimonial->update(['is_active' => ! $testimonial->is_active]);
+
+        $changeLog->log('testimonial', $testimonial->id, 'update', $old, $testimonial->fresh()->attributesToArray(), $testimonial->name_en);
 
         return back()->with('success', $testimonial->is_active ? 'Testimonial shown.' : 'Testimonial hidden.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(int $id, ChangeLogService $changeLog): RedirectResponse
     {
-        Testimonial::findOrFail($id)->delete();
+        $testimonial = Testimonial::findOrFail($id);
+        $changeLog->log('testimonial', $testimonial->id, 'delete', $testimonial->attributesToArray(), null, $testimonial->name_en);
+        $testimonial->delete();
 
         return back()->with('success', 'Testimonial removed.');
     }
