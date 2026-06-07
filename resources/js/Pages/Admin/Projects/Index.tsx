@@ -346,6 +346,7 @@ export default function ProjectsIndex() {
                             <span>Per page</span>
                             <Select
                                 className="w-20"
+                                dropUp
                                 value={String(filters.per_page ?? 12)}
                                 onChange={(v) => applyFilter('per_page', v)}
                                 options={[8, 12, 16, 24, 32].map((n) => ({ value: String(n), label: String(n) }))}
