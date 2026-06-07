@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
@@ -185,6 +185,13 @@ export default function ProjectForm() {
         setData(prev => ({ ...prev, [key]: value }));
     }
 
+    // Dirty tracking: compare the working form against the persisted snapshot.
+    // `item` refreshes after each save (update redirects back), so the baseline
+    // resets and the button greys out again once changes are saved.
+    const baseline = useMemo(() => JSON.stringify(initialData(item)), [item]);
+    const dirty = JSON.stringify(data) !== baseline;
+    const canSave = dirty && !processing;
+
     const hiddenSpecs = data.hidden_specs ?? [];
     function toggleSpec(key: string) {
         setData(prev => {
@@ -195,6 +202,7 @@ export default function ProjectForm() {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
+        if (!canSave) return;
         setProcessing(true);
 
         const payload = {
@@ -239,11 +247,16 @@ export default function ProjectForm() {
                     type="button"
                     form="project-form"
                     onClick={submit}
-                    disabled={processing}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                    disabled={!canSave}
+                    className={cn(
+                        'inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+                        canSave
+                            ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                            : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
+                    )}
                 >
                     <Save size={15} />
-                    {processing ? 'Saving…' : 'Save Changes'}
+                    {processing ? 'Saving…' : dirty ? 'Save Changes' : 'Saved'}
                 </button>
             </div>
 
@@ -475,11 +488,16 @@ export default function ProjectForm() {
                 <button
                     type="button"
                     onClick={submit}
-                    disabled={processing}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors"
+                    disabled={!canSave}
+                    className={cn(
+                        'inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+                        canSave
+                            ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                            : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
+                    )}
                 >
                     <Save size={15} />
-                    {processing ? 'Saving…' : 'Save Changes'}
+                    {processing ? 'Saving…' : dirty ? 'Save Changes' : 'Saved'}
                 </button>
             </div>
         </AdminLayout>
