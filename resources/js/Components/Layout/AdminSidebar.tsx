@@ -9,6 +9,7 @@ import {
     History,
     Video,
     Quote,
+    Contact,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
@@ -48,6 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
             { label: 'Site Content', path: '/admin/content', icon: <FileText size={18} />, built: true },
             { label: 'Testimonial Videos', path: '/admin/testimonial-videos', icon: <Video size={18} />, built: true },
             { label: 'Testimonials', path: '/admin/testimonials', icon: <Quote size={18} />, built: true },
+            { label: 'Head of Departments', path: '/admin/department-members', icon: <Contact size={18} />, built: true },
         ],
     },
     {

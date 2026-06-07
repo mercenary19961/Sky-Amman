@@ -160,6 +160,14 @@ export interface TestimonialCard {
     image_url: string | null;
 }
 
+export interface DepartmentMemberCard {
+    name_en: string | null;
+    name_ar: string | null;
+    role_en: string | null;
+    role_ar: string | null;
+    image_url: string | null;
+}
+
 export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
@@ -167,6 +175,7 @@ export interface HomePageProps extends PageProps {
     featuredRentals: FeaturedProject[];
     testimonialVideos: string[];
     testimonials: TestimonialCard[];
+    departmentMembers: DepartmentMemberCard[];
     mediaEmbeds: {
         linkedin: string;
     };

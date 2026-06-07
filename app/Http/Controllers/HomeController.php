@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DepartmentMember;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
@@ -62,6 +63,15 @@ class HomeController extends Controller
             'featuredRentals' => $featuredRentals,
             // Testimonials carousel — the (max 3) active videos in admin order.
             'testimonialVideos' => TestimonialVideo::active()->ordered()->limit(3)->pluck('url')->all(),
+            // Head of Departments members (image + bilingual name/role), admin order.
+            'departmentMembers' => DepartmentMember::active()->ordered()->with('media:id,path,mime_type')->get()
+                ->map(fn (DepartmentMember $m) => [
+                    'name_en'   => $m->name_en,
+                    'name_ar'   => $m->name_ar,
+                    'role_en'   => $m->role_en,
+                    'role_ar'   => $m->role_ar,
+                    'image_url' => $m->media?->url,
+                ])->all(),
             // Client testimonial cards (image + bilingual name/quote), admin order.
             'testimonials' => Testimonial::active()->ordered()->with('media:id,path,mime_type')->get()
                 ->map(fn (Testimonial $t) => [

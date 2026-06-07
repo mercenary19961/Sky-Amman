@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ChangeLog;
 use App\Models\ContactSubmission;
+use App\Models\DepartmentMember;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
@@ -31,6 +32,7 @@ class ChangeLogService
         'user'              => 'Users',
         'testimonial'       => 'Testimonials',
         'testimonial_video' => 'Testimonial Videos',
+        'department_member' => 'Head of Departments',
         'contact'           => 'Contact Submissions',
     ];
 
@@ -86,7 +88,7 @@ class ChangeLogService
         return match ($log->model_type) {
             'settings', 'site_content' => $log->action === ChangeLog::ACTION_UPDATE,
             // Soft-deleted models: every action is reversible (delete ↔ restore).
-            'project', 'testimonial', 'testimonial_video' => in_array($log->action, [
+            'project', 'testimonial', 'testimonial_video', 'department_member' => in_array($log->action, [
                 ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE,
                 ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE,
             ], true),
@@ -116,6 +118,7 @@ class ChangeLogService
             'project'           => $this->revertProject($log),
             'testimonial'       => $this->revertTestimonial($log),
             'testimonial_video' => $this->revertTestimonialVideo($log),
+            'department_member' => $this->revertDepartmentMember($log),
             'contact'           => $this->revertContact($log),
             'user'              => $this->revertUser($log),
             default             => false,
@@ -203,6 +206,17 @@ class ChangeLogService
             ChangeLog::ACTION_RESTORE => (bool) TestimonialVideo::query()->whereKey($log->model_id)->first()?->delete(),
             ChangeLog::ACTION_DELETE => (bool) TestimonialVideo::withTrashed()->whereKey($log->model_id)->first()?->restore(),
             ChangeLog::ACTION_UPDATE => $this->restoreAttributes(TestimonialVideo::query()->whereKey($log->model_id)->first(), $log->old_data),
+            default => false,
+        };
+    }
+
+    private function revertDepartmentMember(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            ChangeLog::ACTION_CREATE => (bool) DepartmentMember::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) DepartmentMember::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) DepartmentMember::withTrashed()->whereKey($log->model_id)->first()?->restore(),
+            ChangeLog::ACTION_UPDATE => $this->restoreAttributes(DepartmentMember::query()->whereKey($log->model_id)->first(), $log->old_data),
             default => false,
         };
     }

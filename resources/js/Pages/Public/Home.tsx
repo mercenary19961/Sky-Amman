@@ -64,7 +64,7 @@ export default function Home() {
                 <AssurancePillars content={content} />
             )}
             {sectionVisible(content.managing_partner) && <ManagingPartner content={content} />}
-            {sectionVisible(content.departments) && <HeadOfDepartments content={content} />}
+            {sectionVisible(content.departments) && <HeadOfDepartments content={content} members={props.departmentMembers} />}
             {sectionVisible(content.showcase) && (
                 <ProjectShowcase
                     title={content.showcase?.title?.content ?? ''}

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\DepartmentMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -112,6 +113,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
+
+    // Head of Departments team members (image + bilingual name/role).
+    Route::get('/department-members', [DepartmentMemberController::class, 'index'])->name('department-members.index');
+    Route::post('/department-members', [DepartmentMemberController::class, 'store'])->name('department-members.store');
+    Route::post('/department-members/reorder', [DepartmentMemberController::class, 'reorder'])->name('department-members.reorder');
+    Route::post('/department-members/{id}/toggle', [DepartmentMemberController::class, 'toggleActive'])->name('department-members.toggle')->where('id', '[0-9]+');
+    Route::put('/department-members/{id}', [DepartmentMemberController::class, 'update'])->name('department-members.update')->where('id', '[0-9]+');
+    Route::delete('/department-members/{id}', [DepartmentMemberController::class, 'destroy'])->name('department-members.destroy')->where('id', '[0-9]+');
 
     // Client testimonials (image + bilingual name/quote) — content management.
     Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
