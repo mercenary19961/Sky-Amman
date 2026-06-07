@@ -94,9 +94,11 @@ class ChangeLogService
             // soft delete / restore are reversible (a permanent force-delete isn't
             // logged as revertable since the row is gone).
             'contact' => in_array($log->action, [ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE], true),
-            // Users are hard-deleted, so a delete can't be cleanly restored; only
-            // create (→ delete) and update (→ restore fields) are revertable.
-            'user' => in_array($log->action, [ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE], true),
+            // Users are soft-deleted now, so deletes are reversible too.
+            'user' => in_array($log->action, [
+                ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE,
+                ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE,
+            ], true),
             default => false,
         };
     }
@@ -218,6 +220,8 @@ class ChangeLogService
     {
         return match ($log->action) {
             ChangeLog::ACTION_CREATE => (bool) User::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) User::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) User::withTrashed()->whereKey($log->model_id)->first()?->restore(),
             ChangeLog::ACTION_UPDATE => $this->restoreAttributes(User::query()->whereKey($log->model_id)->first(), $log->old_data),
             default => false,
         };
