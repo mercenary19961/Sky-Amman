@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { AnimatePresence, motion, useAnimationControls, useInView } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Phone } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
@@ -152,7 +152,7 @@ function DriftingCloud({
  * POST form; the widget mounts only once the form is expanded. The "Contact Us"
  * CTA below is part of the original footer design and is left untouched.
  */
-function NewsletterSignup({ t, ft }: { t: TFunction; ft: FooterText }) {
+function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
     const [expanded, setExpanded] = useState(false);
     const [email, setEmail] = useState('');
     const [processing, setProcessing] = useState(false);
@@ -248,6 +248,17 @@ function NewsletterSignup({ t, ft }: { t: TFunction; ft: FooterText }) {
             >
                 {ft('subscribe', 'cta', 'footer.subscribe.cta')}
             </Link>
+
+            {siteSettings?.phone && (
+                <a
+                    href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`}
+                    dir="ltr"
+                    className="mt-5 flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors w-fit"
+                >
+                    <Phone size={15} className="shrink-0" />
+                    {siteSettings.phone}
+                </a>
+            )}
         </div>
     );
 }
@@ -257,7 +268,7 @@ function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; 
         <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
             {/* Column 1 — Newsletter sign-up. lg:flex-1 lets it absorb the slack so
                 the other 3 columns bunch on the right. */}
-            <NewsletterSignup t={t} ft={ft} />
+            <NewsletterSignup t={t} ft={ft} siteSettings={siteSettings} />
 
             {/* Column 2 — Main pages */}
             <div>
