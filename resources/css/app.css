@@ -75,6 +75,18 @@ html[dir="rtl"] body {
     animation: toast-slide-in 200ms ease-out;
 }
 
+/* Attention pulse for the Save button while a page has unsaved changes — an
+   expanding brand-blue ring that fades out, drawing the eye without the
+   loading-spinner feel of opacity pulsing. */
+@keyframes save-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(148, 196, 238, 0.55); }
+    70% { box-shadow: 0 0 0 7px rgba(148, 196, 238, 0); }
+}
+
+.animate-save-pulse {
+    animation: save-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Slow horizontal drift for the footer cloud layers. We render two copies of
    the cloud strip side-by-side inside an overflow-hidden window and translate
    the whole pair by -50% (= one image width) so the loop is seamless without

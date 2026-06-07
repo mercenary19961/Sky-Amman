@@ -71,7 +71,7 @@ export function UndoButton({ modelType, undoMeta }: UndoButtonProps) {
                 </button>
 
                 {/* Hover tooltip — the field diffs */}
-                <div className="absolute end-0 top-full z-30 mt-2 hidden w-80 group-hover/undo:block">
+                <div className="absolute inset-e-0 top-full z-30 mt-2 hidden w-80 group-hover/undo:block">
                     <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-3.5 text-xs text-white shadow-xl">
                         <div className="mb-2.5 flex items-center gap-2">
                             <History size={13} className="text-primary" />

@@ -302,22 +302,32 @@ export default function ContentEditor() {
                 (the token swaps via the .dark wrapper), so the sticky region
                 blends without a visible darker rectangle. z-10 keeps it above
                 the accordion but below the admin top bar (z-20). */}
-            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-1 mb-4 overflow-x-auto pt-2 pb-3">
-                {orderedPages.map(slug => (
-                    <button
-                        key={slug}
-                        type="button"
-                        onClick={() => openPage(slug)}
-                        className={cn(
-                            'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
-                            expandedPage === slug
-                                ? 'bg-primary text-zinc-900'
-                                : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
-                        )}
-                    >
-                        {pages[slug]?.title_en ?? toLabel(slug)}
-                    </button>
-                ))}
+            <div className="sticky top-16 z-10 bg-surface-muted flex items-center gap-2 mb-4 pt-2 pb-3">
+                <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+                    {orderedPages.map(slug => (
+                        <button
+                            key={slug}
+                            type="button"
+                            onClick={() => openPage(slug)}
+                            className={cn(
+                                'px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition-colors',
+                                expandedPage === slug
+                                    ? 'bg-primary text-zinc-900'
+                                    : 'bg-white dark:bg-zinc-800 border border-ink/10 dark:border-white/10 text-ink-muted hover:text-ink',
+                            )}
+                        >
+                            {pages[slug]?.title_en ?? toLabel(slug)}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Persistent "Undo last save" — pinned to the far right of the
+                    page-tab row so it doesn't push the preview/editor down. */}
+                {undoMeta && (
+                    <div className="shrink-0">
+                        <UndoButton modelType="site_content" undoMeta={undoMeta} />
+                    </div>
+                )}
             </div>
 
             {/* Split layout */}
@@ -365,6 +375,15 @@ export default function ContentEditor() {
                                     <span className="text-xs text-ink-muted">
                                         {sectionCount} section{sectionCount !== 1 ? 's' : ''} · {rowCount} fields
                                     </span>
+                                    {dirty && (
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
+                                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                            </span>
+                                            Unsaved changes
+                                        </span>
+                                    )}
                                     {!seo.is_visible && (
                                         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
                                             Hidden
@@ -399,7 +418,7 @@ export default function ContentEditor() {
                                                 isSaving
                                                     ? 'bg-primary/50 text-white cursor-not-allowed'
                                                     : canSave
-                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark animate-save-pulse'
                                                         : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
                                             )}
                                         >
@@ -543,7 +562,7 @@ export default function ContentEditor() {
                                                 className={cn(
                                                     'inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
                                                     canSave
-                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark'
+                                                        ? 'bg-primary text-zinc-900 hover:bg-primary-dark animate-save-pulse'
                                                         : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
                                                 )}
                                             >
@@ -567,13 +586,6 @@ export default function ContentEditor() {
                     'hidden xl:block xl:self-stretch shrink-0 transition-all duration-300',
                     previewExpanded ? 'xl:w-[70%]' : 'xl:w-[45%]',
                 )}>
-                    {/* Persistent "Undo last save" — top-right above the preview. */}
-                    {undoMeta && (
-                        <div className="mb-3 flex justify-end">
-                            <UndoButton modelType="site_content" undoMeta={undoMeta} />
-                        </div>
-                    )}
-
                     {/* top-32 (8rem) clears the AdminLayout's h-16 top bar AND
                         the now-sticky quick-nav (~3.5rem incl. its own padding)
                         with a small buffer so the preview chrome stays visible. */}
