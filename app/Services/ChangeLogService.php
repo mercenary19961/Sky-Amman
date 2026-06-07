@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ChangeLog;
+use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
@@ -129,12 +130,28 @@ class ChangeLogService
 
     private function revertSiteContent(ChangeLog $log): bool
     {
-        foreach (($log->old_data ?? []) as $id => $fields) {
+        $old = $log->old_data ?? [];
+        // Combined shape {rows, page}; fall back to the legacy flat rows map.
+        $rows = array_key_exists('rows', $old) ? ($old['rows'] ?? []) : $old;
+        $page = $old['page'] ?? [];
+
+        foreach ($rows as $id => $fields) {
             SiteContent::query()->where('id', $id)->update([
                 'content_en' => $fields['content_en'] ?? null,
                 'content_ar' => $fields['content_ar'] ?? null,
                 'is_visible' => $fields['is_visible'] ?? true,
                 'updated_by' => Auth::id(),
+            ]);
+        }
+
+        if (! empty($page)) {
+            Page::query()->where('slug', $log->model_id)->update([
+                'is_visible'         => $page['is_visible'] ?? true,
+                'seo_title_en'       => $page['seo_title_en'] ?? null,
+                'seo_title_ar'       => $page['seo_title_ar'] ?? null,
+                'seo_description_en' => $page['seo_description_en'] ?? null,
+                'seo_description_ar' => $page['seo_description_ar'] ?? null,
+                'updated_by'         => Auth::id(),
             ]);
         }
 
@@ -196,12 +213,21 @@ class ChangeLogService
         };
     }
 
-    /** Bilingual content rows keyed by id → {content_en, content_ar, is_visible, label}. */
+    /**
+     * Combined site-content diff: bilingual content rows (keyed by id) + the
+     * page-level SEO/visibility meta. Falls back to the legacy flat rows map.
+     */
     private function diffSiteContent(array $old, array $new): array
     {
+        $oldRows = array_key_exists('rows', $old) ? ($old['rows'] ?? []) : $old;
+        $newRows = array_key_exists('rows', $new) ? ($new['rows'] ?? []) : $new;
+        $oldPage = $old['page'] ?? [];
+        $newPage = $new['page'] ?? [];
+
         $changes = [];
-        foreach ($new as $id => $fields) {
-            $prev  = $old[$id] ?? [];
+
+        foreach ($newRows as $id => $fields) {
+            $prev  = $oldRows[$id] ?? [];
             $label = $fields['label'] ?? "Row #{$id}";
 
             foreach (['content_en' => ' (EN)', 'content_ar' => ' (AR)'] as $key => $suffix) {
@@ -219,6 +245,29 @@ class ChangeLogService
                     'new'   => $this->boolText($fields['is_visible'] ?? null),
                 ];
             }
+        }
+
+        // Page-level SEO + visibility.
+        $pageLabels = [
+            'seo_title_en'       => 'SEO Title (EN)',
+            'seo_title_ar'       => 'SEO Title (AR)',
+            'seo_description_en' => 'SEO Description (EN)',
+            'seo_description_ar' => 'SEO Description (AR)',
+        ];
+        foreach ($pageLabels as $key => $label) {
+            $a = (string) ($oldPage[$key] ?? '');
+            $b = (string) ($newPage[$key] ?? '');
+            if ($a !== $b) {
+                $changes[] = ['label' => $label, 'old' => $this->truncate($a), 'new' => $this->truncate($b)];
+            }
+        }
+
+        if (array_key_exists('is_visible', $newPage) && (bool) ($oldPage['is_visible'] ?? true) !== (bool) $newPage['is_visible']) {
+            $changes[] = [
+                'label' => 'Page visibility',
+                'old'   => ($oldPage['is_visible'] ?? true) ? 'Visible' : 'Hidden',
+                'new'   => $newPage['is_visible'] ? 'Visible' : 'Hidden',
+            ];
         }
 
         return $changes;

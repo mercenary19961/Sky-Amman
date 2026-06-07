@@ -19,11 +19,12 @@ class SiteContentController extends Controller
         $pages = Page::ordered()->get()->keyBy('slug');
 
         $grouped = [];
-        SiteContent::query()
-            ->orderBy('page')
-            ->orderBy('sort_order')
-            ->orderBy('key')
-            ->get()
+        SiteContent::all()
+            ->sortBy([
+                ['page', 'asc'],
+                ['sort_order', 'asc'],
+                ['key', 'asc'],
+            ])
             ->each(function (SiteContent $row) use (&$grouped) {
                 $grouped[$row->page][$row->section][] = $row;
             });
@@ -52,15 +53,26 @@ class SiteContentController extends Controller
             'rows.*.is_visible'  => 'boolean',
         ]);
 
-        // Update page-level SEO and visibility.
-        Page::query()->where('slug', $page)->firstOrFail()->update([
+        // Update page-level SEO and visibility (snapshotting before/after so the
+        // change log + revert cover SEO/visibility edits, not just content rows).
+        $pageModel = Page::query()->where('slug', $page)->firstOrFail();
+
+        $oldPage = [
+            'is_visible'         => (bool) $pageModel->is_visible,
+            'seo_title_en'       => $pageModel->seo_title_en,
+            'seo_title_ar'       => $pageModel->seo_title_ar,
+            'seo_description_en' => $pageModel->seo_description_en,
+            'seo_description_ar' => $pageModel->seo_description_ar,
+        ];
+        $newPage = [
             'is_visible'         => $request->boolean('page_is_visible', true),
             'seo_title_en'       => $request->input('seo_title_en'),
             'seo_title_ar'       => $request->input('seo_title_ar'),
             'seo_description_en' => $request->input('seo_description_en'),
             'seo_description_ar' => $request->input('seo_description_ar'),
-            'updated_by'         => Auth::id(),
-        ]);
+        ];
+
+        $pageModel->update([...$newPage, 'updated_by' => Auth::id()]);
 
         // Guard: only allow updating rows that belong to this page. Fetch the
         // current rows so we can skip no-op writes (don't bump updated_by /
@@ -72,8 +84,8 @@ class SiteContentController extends Controller
             ->keyBy('id');
 
         // Snapshots of changed rows (keyed by id) for the change log + revert.
-        $oldData = [];
-        $newData = [];
+        $oldRows = [];
+        $newRows = [];
 
         foreach ($request->rows as $row) {
             $current = $existing->get($row['id']);
@@ -93,13 +105,13 @@ class SiteContentController extends Controller
             }
 
             $label = ucfirst(str_replace('_', ' ', $current->section)) . ' · ' . $current->key;
-            $oldData[$current->id] = [
+            $oldRows[$current->id] = [
                 'content_en' => $current->content_en,
                 'content_ar' => $current->content_ar,
                 'is_visible' => (bool) $current->is_visible,
                 'label'      => $label,
             ];
-            $newData[$current->id] = [
+            $newRows[$current->id] = [
                 'content_en' => $contentEn,
                 'content_ar' => $contentAr,
                 'is_visible' => $isVisible,
@@ -114,10 +126,17 @@ class SiteContentController extends Controller
             ]);
         }
 
-        if (! empty($newData)) {
-            $pageTitle = ucfirst(str_replace('_', ' ', $page));
-            $changeLog->log('site_content', $page, 'update', $oldData, $newData, $pageTitle . ' content');
-        }
+        // One entry covering both content rows + page SEO/visibility. log() skips
+        // it automatically if nothing actually changed.
+        $pageTitle = ucfirst(str_replace('_', ' ', $page));
+        $changeLog->log(
+            'site_content',
+            $page,
+            'update',
+            ['rows' => $oldRows, 'page' => $oldPage],
+            ['rows' => $newRows, 'page' => $newPage],
+            $pageTitle . ' content',
+        );
 
         return redirect()->back()->with('success', 'Content saved.');
     }
