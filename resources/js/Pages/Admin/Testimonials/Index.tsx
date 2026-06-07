@@ -38,6 +38,16 @@ type EditingState = TestimonialItem | 'new' | null;
 const NAME_MAX = 80;
 const QUOTE_MAX = 200;
 
+/** Group heading above a pair of EN/AR fields (e.g. "Name", "Quote"). */
+function GroupLabel({ label }: { label: string }) {
+    return (
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink dark:text-zinc-100">
+            {label} <span className="text-red-500">*</span>
+            <span className="font-normal text-[11px] text-ink-muted">— at least one language</span>
+        </div>
+    );
+}
+
 /** Field label with a live "used / max" counter that warns as it fills up. */
 function LabelWithCount({ label, value, max }: { label: string; value: string; max: number }) {
     const len = value.length;
@@ -378,64 +388,67 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                 </div>
                             </div>
 
-                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-                                Name <span className="text-red-500">*</span>
-                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
-                            </div>
                             <div>
-                                <LabelWithCount label="Name (EN)" value={nameEn} max={NAME_MAX} />
-                                <input
-                                    type="text"
-                                    value={nameEn}
-                                    onChange={(e) => setNameEn(e.target.value)}
-                                    maxLength={NAME_MAX}
-                                    autoFocus
-                                    placeholder="e.g. Ahmad Al-Masri"
-                                    className={inputCls}
-                                />
+                                <GroupLabel label="Name" />
+                                <div className="space-y-3">
+                                    <div>
+                                        <LabelWithCount label="English" value={nameEn} max={NAME_MAX} />
+                                        <input
+                                            type="text"
+                                            value={nameEn}
+                                            onChange={(e) => setNameEn(e.target.value)}
+                                            maxLength={NAME_MAX}
+                                            autoFocus
+                                            placeholder="e.g. Ahmad Al-Masri"
+                                            className={inputCls}
+                                        />
+                                    </div>
+                                    <div>
+                                        <LabelWithCount label="Arabic" value={nameAr} max={NAME_MAX} />
+                                        <input
+                                            type="text"
+                                            value={nameAr}
+                                            onChange={(e) => setNameAr(e.target.value)}
+                                            maxLength={NAME_MAX}
+                                            dir="rtl"
+                                            placeholder="اسم العميل"
+                                            className={inputCls}
+                                        />
+                                    </div>
+                                </div>
                             </div>
+
                             <div>
-                                <LabelWithCount label="Name (AR)" value={nameAr} max={NAME_MAX} />
-                                <input
-                                    type="text"
-                                    value={nameAr}
-                                    onChange={(e) => setNameAr(e.target.value)}
-                                    maxLength={NAME_MAX}
-                                    dir="rtl"
-                                    placeholder="اسم العميل"
-                                    className={inputCls}
-                                />
-                            </div>
-                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-                                Quote <span className="text-red-500">*</span>
-                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
-                            </div>
-                            <div>
-                                <LabelWithCount label="Quote (EN)" value={quoteEn} max={QUOTE_MAX} />
-                                <textarea
-                                    value={quoteEn}
-                                    onChange={(e) => setQuoteEn(e.target.value)}
-                                    maxLength={QUOTE_MAX}
-                                    rows={3}
-                                    placeholder="What the client said…"
-                                    className={cn(inputCls, 'resize-y')}
-                                />
-                                <p className="mt-1 text-[11px] text-ink-muted">
+                                <GroupLabel label="Quote" />
+                                <div className="space-y-3">
+                                    <div>
+                                        <LabelWithCount label="English" value={quoteEn} max={QUOTE_MAX} />
+                                        <textarea
+                                            value={quoteEn}
+                                            onChange={(e) => setQuoteEn(e.target.value)}
+                                            maxLength={QUOTE_MAX}
+                                            rows={3}
+                                            placeholder="What the client said…"
+                                            className={cn(inputCls, 'resize-y')}
+                                        />
+                                    </div>
+                                    <div>
+                                        <LabelWithCount label="Arabic" value={quoteAr} max={QUOTE_MAX} />
+                                        <textarea
+                                            value={quoteAr}
+                                            onChange={(e) => setQuoteAr(e.target.value)}
+                                            maxLength={QUOTE_MAX}
+                                            rows={3}
+                                            dir="rtl"
+                                            placeholder="ما قاله العميل…"
+                                            className={cn(inputCls, 'resize-y')}
+                                        />
+                                    </div>
+                                </div>
+                                <p className="mt-2 text-[11px] text-ink-muted">
                                     Keep it short — one or two sentences read best on the card. If you fill only one
                                     language, it&rsquo;s shown for both on the site.
                                 </p>
-                            </div>
-                            <div>
-                                <LabelWithCount label="Quote (AR)" value={quoteAr} max={QUOTE_MAX} />
-                                <textarea
-                                    value={quoteAr}
-                                    onChange={(e) => setQuoteAr(e.target.value)}
-                                    maxLength={QUOTE_MAX}
-                                    rows={3}
-                                    dir="rtl"
-                                    placeholder="ما قاله العميل…"
-                                    className={cn(inputCls, 'resize-y')}
-                                />
                             </div>
 
                             <p className="text-xs text-ink-muted">

@@ -38,6 +38,16 @@ type EditingState = MemberItem | 'new' | null;
 const NAME_MAX = 120;
 const ROLE_MAX = 120;
 
+/** Group heading above a pair of EN/AR fields (e.g. "Name", "Role"). */
+function GroupLabel({ label }: { label: string }) {
+    return (
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink dark:text-zinc-100">
+            {label} <span className="text-red-500">*</span>
+            <span className="font-normal text-[11px] text-ink-muted">— at least one language</span>
+        </div>
+    );
+}
+
 /** Field label with a live "used / max" counter that warns as it fills up. */
 function LabelWithCount({ label, value, max }: { label: string; value: string; max: number }) {
     const len = value.length;
@@ -373,30 +383,32 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                                 </div>
                             </div>
 
-                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-                                Name <span className="text-red-500">*</span>
-                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
-                            </div>
                             <div>
-                                <LabelWithCount label="Name (EN)" value={nameEn} max={NAME_MAX} />
-                                <input type="text" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={NAME_MAX} autoFocus placeholder="e.g. Eng. Mahmoud Abu Sarhan" className={inputCls} />
-                            </div>
-                            <div>
-                                <LabelWithCount label="Name (AR)" value={nameAr} max={NAME_MAX} />
-                                <input type="text" value={nameAr} onChange={(e) => setNameAr(e.target.value)} maxLength={NAME_MAX} dir="rtl" placeholder="م. محمود أبو سرحان" className={inputCls} />
+                                <GroupLabel label="Name" />
+                                <div className="space-y-3">
+                                    <div>
+                                        <LabelWithCount label="English" value={nameEn} max={NAME_MAX} />
+                                        <input type="text" value={nameEn} onChange={(e) => setNameEn(e.target.value)} maxLength={NAME_MAX} autoFocus placeholder="e.g. Eng. Mahmoud Abu Sarhan" className={inputCls} />
+                                    </div>
+                                    <div>
+                                        <LabelWithCount label="Arabic" value={nameAr} max={NAME_MAX} />
+                                        <input type="text" value={nameAr} onChange={(e) => setNameAr(e.target.value)} maxLength={NAME_MAX} dir="rtl" placeholder="م. محمود أبو سرحان" className={inputCls} />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="-mb-2 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-                                Role <span className="text-red-500">*</span>
-                                <span className="font-normal text-[11px] text-ink-muted/80">— at least one language</span>
-                            </div>
                             <div>
-                                <LabelWithCount label="Role (EN)" value={roleEn} max={ROLE_MAX} />
-                                <input type="text" value={roleEn} onChange={(e) => setRoleEn(e.target.value)} maxLength={ROLE_MAX} placeholder="e.g. Chief Executive Officer" className={inputCls} />
-                            </div>
-                            <div>
-                                <LabelWithCount label="Role (AR)" value={roleAr} max={ROLE_MAX} />
-                                <input type="text" value={roleAr} onChange={(e) => setRoleAr(e.target.value)} maxLength={ROLE_MAX} dir="rtl" placeholder="الرئيس التنفيذي" className={inputCls} />
+                                <GroupLabel label="Role" />
+                                <div className="space-y-3">
+                                    <div>
+                                        <LabelWithCount label="English" value={roleEn} max={ROLE_MAX} />
+                                        <input type="text" value={roleEn} onChange={(e) => setRoleEn(e.target.value)} maxLength={ROLE_MAX} placeholder="e.g. Chief Executive Officer" className={inputCls} />
+                                    </div>
+                                    <div>
+                                        <LabelWithCount label="Arabic" value={roleAr} max={ROLE_MAX} />
+                                        <input type="text" value={roleAr} onChange={(e) => setRoleAr(e.target.value)} maxLength={ROLE_MAX} dir="rtl" placeholder="الرئيس التنفيذي" className={inputCls} />
+                                    </div>
+                                </div>
                             </div>
 
                             <p className="text-xs text-ink-muted">
