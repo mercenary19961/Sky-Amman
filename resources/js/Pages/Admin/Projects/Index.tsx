@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare, LayoutGrid, List } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
@@ -41,11 +41,39 @@ function Badge({ label, color }: { label: string; color: string }) {
     );
 }
 
+/** Empty-image placeholder icon, sized by the wrapper. */
+function ImgPlaceholder({ className }: { className?: string }) {
+    return (
+        <div className={cn('flex items-center justify-center text-ink-muted', className)}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-5-5L5 21" />
+            </svg>
+        </div>
+    );
+}
+
+type ViewMode = 'card' | 'list';
+const VIEW_KEY = 'admin:projects:view';
 
 export default function ProjectsIndex() {
     const { projects, filters, trashedCount } = usePage<ProjectIndexProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
+
+    // Card grid is the default; the choice persists across visits. Initial render
+    // is 'card' on both server and client, then we sync to the saved preference.
+    const [view, setView] = useState<ViewMode>('card');
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const saved = localStorage.getItem(VIEW_KEY);
+        if (saved === 'card' || saved === 'list') setView(saved);
+    }, []);
+    function changeView(v: ViewMode) {
+        setView(v);
+        if (typeof window !== 'undefined') localStorage.setItem(VIEW_KEY, v);
+    }
 
     function applyFilter(key: string, value: string) {
         router.get('/admin/projects', { ...filters, [key]: value || undefined, page: undefined }, {
@@ -133,10 +161,38 @@ export default function ProjectsIndex() {
                     ]}
                 />
 
+                {/* View toggle — card (default) vs. table. */}
+                <div className="ms-auto inline-flex items-center rounded-md border border-ink/10 dark:border-white/10 bg-white dark:bg-zinc-800 p-0.5">
+                    <button
+                        type="button"
+                        onClick={() => changeView('card')}
+                        title="Card view"
+                        aria-pressed={view === 'card'}
+                        className={cn(
+                            'inline-flex items-center justify-center rounded p-1.5 transition-colors',
+                            view === 'card' ? 'bg-primary text-zinc-900' : 'text-ink-muted hover:text-ink',
+                        )}
+                    >
+                        <LayoutGrid size={16} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => changeView('list')}
+                        title="List view"
+                        aria-pressed={view === 'list'}
+                        className={cn(
+                            'inline-flex items-center justify-center rounded p-1.5 transition-colors',
+                            view === 'list' ? 'bg-primary text-zinc-900' : 'text-ink-muted hover:text-ink',
+                        )}
+                    >
+                        <List size={16} />
+                    </button>
+                </div>
+
                 {trashedCount > 0 && (
                     <Link
                         href="/admin/projects/trash"
-                        className="ms-auto inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
+                        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
                     >
                         <Archive size={15} />
                         Trash ({trashedCount})
@@ -144,16 +200,23 @@ export default function ProjectsIndex() {
                 )}
             </div>
 
-            {/* Table */}
-            <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden">
-                {projects.data.length === 0 ? (
-                    <div className="py-16 text-center text-ink-muted text-sm">
-                        No projects found.{' '}
-                        <Link href="/admin/projects/create" className="text-primary hover:underline">
-                            Add the first one.
-                        </Link>
-                    </div>
-                ) : (
+            {projects.data.length === 0 ? (
+                <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg py-16 text-center text-ink-muted text-sm">
+                    No projects found.{' '}
+                    <Link href="/admin/projects/create" className="text-primary hover:underline">
+                        Add the first one.
+                    </Link>
+                </div>
+            ) : view === 'card' ? (
+                /* Card grid (default) */
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {projects.data.map((project: ProjectListItem) => (
+                        <ProjectCard key={project.id} project={project} onDelete={() => deleteProject(project.id)} />
+                    ))}
+                </div>
+            ) : (
+                /* Table view */
+                <div className="bg-white dark:bg-zinc-800 border border-ink/5 dark:border-white/10 rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
                         <thead className="bg-surface-muted border-b border-ink/5">
                             <tr>
@@ -272,8 +335,8 @@ export default function ProjectsIndex() {
                             ))}
                         </tbody>
                     </table>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Pagination */}
             {projects.last_page > 1 && (
@@ -307,5 +370,75 @@ export default function ProjectsIndex() {
                 </div>
             )}
         </AdminLayout>
+    );
+}
+
+function ProjectCard({ project, onDelete }: { project: ProjectListItem; onDelete: () => void }) {
+    return (
+        <div className="group relative flex flex-col overflow-hidden rounded-lg border border-ink/5 dark:border-white/10 bg-white dark:bg-zinc-800 transition-all hover:shadow-md">
+            {/* Cover */}
+            <div className="relative aspect-video bg-surface-muted">
+                {project.featured_image ? (
+                    <img src={project.featured_image.url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                    <ImgPlaceholder className="h-full w-full" />
+                )}
+
+                {/* Listing status — top start */}
+                {project.listing_status && (
+                    <span className="absolute top-2 inset-s-2">
+                        <Badge label={STATUS_LABELS[project.listing_status]} color={cn(STATUS_COLORS[project.listing_status], 'shadow-sm')} />
+                    </span>
+                )}
+
+                {/* Active state — top end */}
+                <span className="absolute top-2 inset-e-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-medium text-ink shadow-sm">
+                    <span className={cn('w-1.5 h-1.5 rounded-full', project.is_active ? 'bg-emerald-500' : 'bg-ink/30')} />
+                    {project.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+
+            {/* Body */}
+            <div className="flex flex-1 flex-col p-3">
+                <div className="font-semibold text-ink truncate">{project.title_en}</div>
+                <div className="mt-0.5 truncate text-xs text-ink-muted" dir="rtl">{project.title_ar}</div>
+
+                <div className="mt-2">
+                    <Badge label={CATEGORY_LABELS[project.category]} color={CATEGORY_COLORS[project.category]} />
+                </div>
+
+                {/* Footer: counts + actions */}
+                <div className="mt-3 flex items-center justify-between border-t border-ink/5 dark:border-white/10 pt-2.5 text-xs text-ink-muted">
+                    <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1" title="Images">
+                            <ImageIcon size={13} />{project.images_count}
+                        </span>
+                        <span className="inline-flex items-center gap-1" title="Inquiries">
+                            <MessageSquare size={13} />{project.inquiries_count}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={`/admin/projects/${project.id}/edit`}
+                            className="text-ink-muted hover:text-primary transition-colors"
+                            title="Edit"
+                        >
+                            <Pencil size={15} />
+                        </Link>
+                        <ConfirmButton
+                            onConfirm={onDelete}
+                            className="text-ink-muted hover:text-red-500 transition-colors"
+                            title="Delete"
+                            heading="Move project to trash?"
+                            actionLabel="Delete"
+                            itemLabel={project.title_en}
+                            description="The project will be moved to Trash. You can restore it from there."
+                        >
+                            <Trash2 size={15} />
+                        </ConfirmButton>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
