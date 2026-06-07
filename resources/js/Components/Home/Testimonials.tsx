@@ -115,8 +115,6 @@ function ClientCardsCarousel({ clients }: { clients: Client[] }) {
         ? Array.from({ length: visible }, (_, k) => ({ client: clients[wrap(activeIndex + k)], pos: wrap(activeIndex + k) }))
         : clients.map((client, pos) => ({ client, pos }));
 
-    const cols = showControls ? visible : Math.min(N, 4);
-
     return (
         <div className="relative mt-14 sm:mt-20">
             {/* Arrows sit outside the grid on lg, overlay on smaller screens. */}
@@ -141,10 +139,10 @@ function ClientCardsCarousel({ clients }: { clients: Client[] }) {
                 </>
             )}
 
-            <div
-                className="grid gap-6 lg:gap-8"
-                style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-            >
+            {/* Cards are capped at a fixed max width and centred, so the layout
+                looks the same whether there are 1 or many testimonials — the card
+                (and its width-relative dome/avatar) never balloons to fill the row. */}
+            <div className="flex flex-wrap justify-center gap-6 lg:gap-8">
                 <AnimatePresence mode="popLayout" initial={false}>
                     {shown.map(({ client, pos }) => (
                         <motion.div
@@ -154,6 +152,7 @@ function ClientCardsCarousel({ clients }: { clients: Client[] }) {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.96 }}
                             transition={{ duration: 0.3 }}
+                            className="max-w-65 basis-full sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(25%-1.5rem)]"
                         >
                             <ClientCard client={client} />
                         </motion.div>
