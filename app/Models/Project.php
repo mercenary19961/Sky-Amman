@@ -42,6 +42,7 @@ class Project extends Model
         'floors',
         'bedrooms',
         'bathrooms',
+        'hidden_specs',
         'featured_image_id',
         'seo_title_en',
         'seo_title_ar',
@@ -65,6 +66,7 @@ class Project extends Model
             'floors' => 'integer',
             'bedrooms' => 'integer',
             'bathrooms' => 'integer',
+            'hidden_specs' => 'array',
         ];
     }
 

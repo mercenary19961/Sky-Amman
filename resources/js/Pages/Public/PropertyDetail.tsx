@@ -37,13 +37,15 @@ export default function PropertyDetail() {
 
     const areaLabel = p.area_sqm != null ? (ar ? `${p.area_sqm} م²` : `${p.area_sqm} SQM`) : null;
 
-    // Detail rows — only the specs that are actually set.
+    // Detail rows — only the specs that are set AND not hidden by the editor.
+    const hidden = p.hidden_specs ?? [];
+    const show = (key: string) => !hidden.includes(key);
     const specs: { label: string; value: string }[] = [];
-    if (areaLabel) specs.push({ label: t('properties.detail.livingSpace'), value: areaLabel });
-    if (p.completion_year != null) specs.push({ label: t('properties.detail.completionYear'), value: String(p.completion_year) });
-    if (p.floors != null) specs.push({ label: t('properties.detail.floors'), value: String(p.floors) });
-    if (p.bedrooms != null) specs.push({ label: t('properties.detail.bedrooms'), value: String(p.bedrooms) });
-    if (p.bathrooms != null) specs.push({ label: t('properties.detail.bathrooms'), value: String(p.bathrooms) });
+    if (areaLabel && show('area_sqm')) specs.push({ label: t('properties.detail.livingSpace'), value: areaLabel });
+    if (p.completion_year != null && show('completion_year')) specs.push({ label: t('properties.detail.completionYear'), value: String(p.completion_year) });
+    if (p.floors != null && show('floors')) specs.push({ label: t('properties.detail.floors'), value: String(p.floors) });
+    if (p.bedrooms != null && show('bedrooms')) specs.push({ label: t('properties.detail.bedrooms'), value: String(p.bedrooms) });
+    if (p.bathrooms != null && show('bathrooms')) specs.push({ label: t('properties.detail.bathrooms'), value: String(p.bathrooms) });
 
     // Per-listing SEO with sensible fallbacks to the project's own content.
     const seoTitle = (ar ? p.seo_title_ar : p.seo_title_en) || `${title} · SkyAmman`;
@@ -67,7 +69,7 @@ export default function PropertyDetail() {
             addressCountry: 'JO',
         };
     }
-    if (p.area_sqm != null) {
+    if (p.area_sqm != null && show('area_sqm')) {
         jsonLd.floorSize = { '@type': 'QuantitativeValue', value: p.area_sqm, unitCode: 'MTK' };
     }
     const jsonLdHtml = JSON.stringify(jsonLd).replace(/</g, '\\u003c');

@@ -31,6 +31,8 @@ class UpdateProjectRequest extends FormRequest
             'floors'                => 'nullable|integer|min:1|max:200',
             'bedrooms'              => 'nullable|integer|min:0|max:50',
             'bathrooms'             => 'nullable|integer|min:0|max:50',
+            'hidden_specs'          => 'nullable|array',
+            'hidden_specs.*'        => 'in:area_sqm,completion_year,floors,bedrooms,bathrooms',
             'featured_image_id'     => 'nullable|exists:media,id',
             'seo_title_en'          => 'nullable|string|max:255',
             'seo_title_ar'          => 'nullable|string|max:255',

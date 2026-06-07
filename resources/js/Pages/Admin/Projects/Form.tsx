@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
 import { Select } from '@/Components/Admin/Select';
@@ -98,6 +98,38 @@ function BilingualRow({ children }: { children: React.ReactNode }) {
     return <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{children}</div>;
 }
 
+/**
+ * A spec input with a per-field show/hide toggle. When hidden, the value is kept
+ * but the row is omitted from the public property detail page (see hidden_specs).
+ */
+function SpecField({
+    label, error, hidden, onToggle, children,
+}: {
+    label: string;
+    error?: string;
+    hidden: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+}) {
+    return (
+        <div>
+            <div className="mb-1 flex items-center justify-between gap-1">
+                <label className="block text-xs font-medium text-ink-muted">{label}</label>
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    title={hidden ? 'Hidden on the property page — click to show' : 'Shown on the property page — click to hide'}
+                    className={cn('inline-flex items-center transition-colors', hidden ? 'text-amber-500 hover:text-amber-600' : 'text-ink-muted hover:text-ink')}
+                >
+                    {hidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                </button>
+            </div>
+            <div className={cn(hidden && 'opacity-50')}>{children}</div>
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        </div>
+    );
+}
+
 function initialData(item: ProjectFormItem | null): FormData {
     return {
         title_en:             item?.title_en             ?? '',
@@ -117,6 +149,7 @@ function initialData(item: ProjectFormItem | null): FormData {
         floors:               item?.floors               ?? null,
         bedrooms:             item?.bedrooms             ?? null,
         bathrooms:            item?.bathrooms            ?? null,
+        hidden_specs:         item?.hidden_specs         ?? [],
         featured_image_id:    item?.featured_image_id    ?? null,
         seo_title_en:         item?.seo_title_en         ?? '',
         seo_title_ar:         item?.seo_title_ar         ?? '',
@@ -150,6 +183,14 @@ export default function ProjectForm() {
 
     function set<K extends keyof FormData>(key: K, value: FormData[K]) {
         setData(prev => ({ ...prev, [key]: value }));
+    }
+
+    const hiddenSpecs = data.hidden_specs ?? [];
+    function toggleSpec(key: string) {
+        setData(prev => {
+            const cur = prev.hidden_specs ?? [];
+            return { ...prev, hidden_specs: cur.includes(key) ? cur.filter(k => k !== key) : [...cur, key] };
+        });
     }
 
     function submit(e: React.FormEvent) {
@@ -327,23 +368,23 @@ export default function ProjectForm() {
 
                 {/* ── Property Specs ── */}
                 <Section>
-                    <SectionHeader title="Property Specs" icon={SlidersHorizontal} description="Leave blank for investment opportunities or land plots." />
+                    <SectionHeader title="Property Specs" icon={SlidersHorizontal} description="Leave blank for investment opportunities or land plots. Use the eye on each spec to hide it on the property page while keeping the value." />
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                        <Field label="Area (m²)" error={errors.area_sqm}>
+                        <SpecField label="Area (m²)" error={errors.area_sqm} hidden={hiddenSpecs.includes('area_sqm')} onToggle={() => toggleSpec('area_sqm')}>
                             <Input type="number" value={data.area_sqm} onChange={v => set('area_sqm', v ? parseInt(v, 10) : null)} placeholder="850" />
-                        </Field>
-                        <Field label="Floors" error={errors.floors}>
+                        </SpecField>
+                        <SpecField label="Floors" error={errors.floors} hidden={hiddenSpecs.includes('floors')} onToggle={() => toggleSpec('floors')}>
                             <Input type="number" value={data.floors} onChange={v => set('floors', v ? parseInt(v, 10) : null)} placeholder="3" />
-                        </Field>
-                        <Field label="Bedrooms" error={errors.bedrooms}>
+                        </SpecField>
+                        <SpecField label="Bedrooms" error={errors.bedrooms} hidden={hiddenSpecs.includes('bedrooms')} onToggle={() => toggleSpec('bedrooms')}>
                             <Input type="number" value={data.bedrooms} onChange={v => set('bedrooms', v ? parseInt(v, 10) : null)} placeholder="4" />
-                        </Field>
-                        <Field label="Bathrooms" error={errors.bathrooms}>
+                        </SpecField>
+                        <SpecField label="Bathrooms" error={errors.bathrooms} hidden={hiddenSpecs.includes('bathrooms')} onToggle={() => toggleSpec('bathrooms')}>
                             <Input type="number" value={data.bathrooms} onChange={v => set('bathrooms', v ? parseInt(v, 10) : null)} placeholder="5" />
-                        </Field>
-                        <Field label="Completion Year" error={errors.completion_year}>
+                        </SpecField>
+                        <SpecField label="Completion Year" error={errors.completion_year} hidden={hiddenSpecs.includes('completion_year')} onToggle={() => toggleSpec('completion_year')}>
                             <Input type="number" value={data.completion_year} onChange={v => set('completion_year', v ? parseInt(v, 10) : null)} placeholder="2026" />
-                        </Field>
+                        </SpecField>
                     </div>
                 </Section>
 

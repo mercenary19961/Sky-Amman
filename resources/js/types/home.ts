@@ -71,6 +71,7 @@ export interface PropertyDetail {
     floors: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
+    hidden_specs: string[] | null;
     seo_title_en: string | null;
     seo_title_ar: string | null;
     seo_description_en: string | null;

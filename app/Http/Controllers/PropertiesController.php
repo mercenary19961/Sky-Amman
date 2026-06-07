@@ -134,6 +134,8 @@ class PropertiesController extends Controller
                 'floors' => $project->floors,
                 'bedrooms' => $project->bedrooms,
                 'bathrooms' => $project->bathrooms,
+                // Spec keys the editor chose to hide on the detail page.
+                'hidden_specs' => $project->hidden_specs ?? [],
                 // Per-listing SEO (falls back to title/description on the client).
                 'seo_title_en' => $project->seo_title_en,
                 'seo_title_ar' => $project->seo_title_ar,

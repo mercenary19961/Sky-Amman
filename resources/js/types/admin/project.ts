@@ -52,6 +52,7 @@ export interface ProjectFormItem {
     floors: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
+    hidden_specs: string[] | null;
     featured_image_id: number | null;
     seo_title_en: string | null;
     seo_title_ar: string | null;
