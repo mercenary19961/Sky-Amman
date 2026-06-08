@@ -17,6 +17,8 @@ interface SelectProps {
     /** Override the trigger button styles entirely. */
     buttonClassName?: string;
     disabled?: boolean;
+    /** Open the option list upward (e.g. when the trigger sits near the page bottom). */
+    dropUp?: boolean;
 }
 
 /**
@@ -25,7 +27,7 @@ interface SelectProps {
  * Closes on outside click / Escape. Use this for ALL dropdowns in the admin
  * panel; the public-site equivalent lives in Components/Public/Select.tsx.
  */
-export function Select({ value, onChange, options, placeholder, className, buttonClassName, disabled }: SelectProps) {
+export function Select({ value, onChange, options, placeholder, className, buttonClassName, disabled, dropUp }: SelectProps) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const selected = options.find((o) => o.value === value);
@@ -72,7 +74,10 @@ export function Select({ value, onChange, options, placeholder, className, butto
             {open && (
                 <ul
                     role="listbox"
-                    className="absolute z-30 mt-1.5 max-h-64 w-full overflow-auto rounded-lg border border-ink/10 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800"
+                    className={cn(
+                        'absolute z-30 max-h-64 w-full overflow-auto rounded-lg border border-ink/10 bg-white py-1 shadow-lg dark:border-white/10 dark:bg-zinc-800',
+                        dropUp ? 'bottom-full mb-1.5' : 'mt-1.5',
+                    )}
                 >
                     {options.map((o) => {
                         const active = o.value === value;

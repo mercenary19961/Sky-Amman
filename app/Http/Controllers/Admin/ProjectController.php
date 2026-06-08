@@ -41,11 +41,17 @@ class ProjectController extends Controller
             });
         }
 
-        $projects = $query->ordered()->paginate(15)->withQueryString();
+        // Per-page is admin-selectable (card grid reads nicer at multiples of 4).
+        $perPage = (int) $request->input('per_page', 12);
+        if (! in_array($perPage, [8, 12, 16, 24, 32], true)) {
+            $perPage = 12;
+        }
+
+        $projects = $query->ordered()->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Projects/Index', [
             'projects'     => $projects,
-            'filters'      => $request->only(['category', 'listing_status', 'active', 'search']),
+            'filters'      => $request->only(['category', 'listing_status', 'active', 'search']) + ['per_page' => $perPage],
             'trashedCount' => Project::onlyTrashed()->count(),
         ]);
     }

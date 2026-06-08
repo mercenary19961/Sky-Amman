@@ -50,6 +50,7 @@ export interface PropertiesPageProps extends PageProps {
     content_ar: SiteContentBundle;
     projects: FeaturedProject[];
     galleryImages: GalleryImage[];
+    galleryPerView: number;
     seo: PageSeo;
     url: string;
 }
@@ -71,6 +72,7 @@ export interface PropertyDetail {
     floors: number | null;
     bedrooms: number | null;
     bathrooms: number | null;
+    hidden_specs: string[] | null;
     seo_title_en: string | null;
     seo_title_ar: string | null;
     seo_description_en: string | null;
@@ -91,6 +93,7 @@ export interface RelatedProject {
 export interface AboutPageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
+    craftedImages: Record<'about_crafted_1' | 'about_crafted_2' | 'about_crafted_3', string>;
     seo: {
         title_en: string | null;
         title_ar: string | null;
@@ -152,12 +155,30 @@ export interface PropertyDetailPageProps extends PageProps {
     mapEmbedUrl: string;
 }
 
+export interface TestimonialCard {
+    name_en: string;
+    name_ar: string | null;
+    quote_en: string;
+    quote_ar: string | null;
+    image_url: string | null;
+}
+
+export interface DepartmentMemberCard {
+    name_en: string | null;
+    name_ar: string | null;
+    role_en: string | null;
+    role_ar: string | null;
+    image_url: string | null;
+}
+
 export interface HomePageProps extends PageProps {
     content_en: SiteContentBundle;
     content_ar: SiteContentBundle;
     featuredProjects: FeaturedProject[];
     featuredRentals: FeaturedProject[];
     testimonialVideos: string[];
+    testimonials: TestimonialCard[];
+    departmentMembers: DepartmentMemberCard[];
     mediaEmbeds: {
         linkedin: string;
     };

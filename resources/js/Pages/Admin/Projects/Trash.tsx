@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { ArrowLeft, RotateCcw, Trash2, AlignLeft, Tag, Clock } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 import type { ProjectTrashProps, ProjectListItem, ProjectCategory } from '@/types/admin/project';
 
@@ -11,45 +11,6 @@ const CATEGORY_LABELS: Record<ProjectCategory, string> = {
     investment_opportunity: 'Investment Opportunity',
 };
 
-function ConfirmButton({
-    onConfirm,
-    children,
-    className,
-}: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-}) {
-    const [pending, setPending] = useState(false);
-
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button
-                    type="button"
-                    onClick={() => { setPending(false); onConfirm(); }}
-                    className="text-red-600 font-medium hover:underline"
-                >
-                    Confirm
-                </button>
-                <span className="text-ink-muted">/</span>
-                <button
-                    type="button"
-                    onClick={() => setPending(false)}
-                    className="text-ink-muted hover:underline"
-                >
-                    Cancel
-                </button>
-            </span>
-        );
-    }
-
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className}>
-            {children}
-        </button>
-    );
-}
 
 export default function ProjectsTrash() {
     const { projects } = usePage<ProjectTrashProps>().props;
@@ -133,6 +94,10 @@ export default function ProjectsTrash() {
                                                 className={cn(
                                                     'inline-flex items-center gap-1.5 text-xs text-ink-muted hover:text-red-500 transition-colors',
                                                 )}
+                                                heading="Delete forever?"
+                                                actionLabel="Delete forever"
+                                                itemLabel={project.title_en}
+                                                description="This project and its images will be permanently deleted and cannot be restored."
                                             >
                                                 <Trash2 size={14} />
                                                 Delete forever

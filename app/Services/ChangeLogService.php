@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\Models\ChangeLog;
+use App\Models\ContactSubmission;
+use App\Models\DepartmentMember;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Models\Testimonial;
+use App\Models\TestimonialVideo;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -22,10 +26,14 @@ use Illuminate\Support\Facades\Auth;
 class ChangeLogService
 {
     public const SECTION_LABELS = [
-        'settings'     => 'Settings',
-        'site_content' => 'Site Content',
-        'project'      => 'Projects',
-        'user'         => 'Users',
+        'settings'          => 'Settings',
+        'site_content'      => 'Site Content',
+        'project'           => 'Projects',
+        'user'              => 'Users',
+        'testimonial'       => 'Testimonials',
+        'testimonial_video' => 'Testimonial Videos',
+        'department_member' => 'Head of Departments',
+        'contact'           => 'Contact Submissions',
     ];
 
     /** Metadata columns never shown as a diff or written back on revert. */
@@ -79,13 +87,20 @@ class ChangeLogService
 
         return match ($log->model_type) {
             'settings', 'site_content' => $log->action === ChangeLog::ACTION_UPDATE,
-            'project' => in_array($log->action, [
+            // Soft-deleted models: every action is reversible (delete ↔ restore).
+            'project', 'testimonial', 'testimonial_video', 'department_member' => in_array($log->action, [
                 ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE,
                 ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE,
             ], true),
-            // Users are hard-deleted, so a delete can't be cleanly restored; only
-            // create (→ delete) and update (→ restore fields) are revertable.
-            'user' => in_array($log->action, [ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE], true),
+            // Contacts are created by the public form, never in admin — only the
+            // soft delete / restore are reversible (a permanent force-delete isn't
+            // logged as revertable since the row is gone).
+            'contact' => in_array($log->action, [ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE], true),
+            // Users are soft-deleted now, so deletes are reversible too.
+            'user' => in_array($log->action, [
+                ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE,
+                ChangeLog::ACTION_DELETE, ChangeLog::ACTION_RESTORE,
+            ], true),
             default => false,
         };
     }
@@ -98,11 +113,15 @@ class ChangeLogService
         }
 
         $ok = match ($log->model_type) {
-            'settings'     => $this->revertSettings($log),
-            'site_content' => $this->revertSiteContent($log),
-            'project'      => $this->revertProject($log),
-            'user'         => $this->revertUser($log),
-            default        => false,
+            'settings'          => $this->revertSettings($log),
+            'site_content'      => $this->revertSiteContent($log),
+            'project'           => $this->revertProject($log),
+            'testimonial'       => $this->revertTestimonial($log),
+            'testimonial_video' => $this->revertTestimonialVideo($log),
+            'department_member' => $this->revertDepartmentMember($log),
+            'contact'           => $this->revertContact($log),
+            'user'              => $this->revertUser($log),
+            default             => false,
         };
 
         if ($ok) {
@@ -169,10 +188,54 @@ class ChangeLogService
         };
     }
 
+    private function revertTestimonial(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            ChangeLog::ACTION_CREATE => (bool) Testimonial::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) Testimonial::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) Testimonial::withTrashed()->whereKey($log->model_id)->first()?->restore(),
+            ChangeLog::ACTION_UPDATE => $this->restoreAttributes(Testimonial::query()->whereKey($log->model_id)->first(), $log->old_data),
+            default => false,
+        };
+    }
+
+    private function revertTestimonialVideo(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            ChangeLog::ACTION_CREATE => (bool) TestimonialVideo::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) TestimonialVideo::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) TestimonialVideo::withTrashed()->whereKey($log->model_id)->first()?->restore(),
+            ChangeLog::ACTION_UPDATE => $this->restoreAttributes(TestimonialVideo::query()->whereKey($log->model_id)->first(), $log->old_data),
+            default => false,
+        };
+    }
+
+    private function revertDepartmentMember(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            ChangeLog::ACTION_CREATE => (bool) DepartmentMember::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) DepartmentMember::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) DepartmentMember::withTrashed()->whereKey($log->model_id)->first()?->restore(),
+            ChangeLog::ACTION_UPDATE => $this->restoreAttributes(DepartmentMember::query()->whereKey($log->model_id)->first(), $log->old_data),
+            default => false,
+        };
+    }
+
+    private function revertContact(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            ChangeLog::ACTION_DELETE => (bool) ContactSubmission::withTrashed()->whereKey($log->model_id)->first()?->restore(),
+            ChangeLog::ACTION_RESTORE => (bool) ContactSubmission::query()->whereKey($log->model_id)->first()?->delete(),
+            default => false,
+        };
+    }
+
     private function revertUser(ChangeLog $log): bool
     {
         return match ($log->action) {
             ChangeLog::ACTION_CREATE => (bool) User::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_RESTORE => (bool) User::query()->whereKey($log->model_id)->first()?->delete(),
+            ChangeLog::ACTION_DELETE => (bool) User::withTrashed()->whereKey($log->model_id)->first()?->restore(),
             ChangeLog::ACTION_UPDATE => $this->restoreAttributes(User::query()->whereKey($log->model_id)->first(), $log->old_data),
             default => false,
         };

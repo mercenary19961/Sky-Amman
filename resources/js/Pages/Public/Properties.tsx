@@ -357,25 +357,108 @@ export default function Properties() {
                             {t('properties.gallery.title')}
                         </h2>
 
-                        <div className="mt-10 sm:mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:h-115 lg:gap-3">
-                            {props.galleryImages.map((img) => (
-                                <div
-                                    key={img.id}
-                                    className="group relative aspect-3/4 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full lg:flex-1 lg:transition-[flex-grow] lg:duration-500 lg:ease-out lg:hover:grow-3"
-                                >
-                                    <img
-                                        src={img.url}
-                                        alt={img.alt}
-                                        loading="lazy"
-                                        className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                        <ProjectsGallery images={props.galleryImages} perView={props.galleryPerView} />
                     </div>
                 </section>
             )}
         </PublicLayout>
+    );
+}
+
+/** Per-view tile count: `perView` on desktop, 3 on tablet, 2 on mobile. */
+function useGalleryVisible(perView: number): number {
+    const [count, setCount] = useState(perView);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const update = () => {
+            const w = window.innerWidth;
+            setCount(w >= 1024 ? perView : w >= 640 ? 3 : 2);
+        };
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, [perView]);
+    return count;
+}
+
+/**
+ * Projects Gallery carousel — a hover-expand row (desktop) / grid (mobile) that
+ * shows a window of `visible` tiles and pages through the full shuffled pool with
+ * prev/next arrows + dots. When the pool fits in one view, it renders statically
+ * with no controls.
+ */
+function ProjectsGallery({ images, perView }: { images: { id: string; url: string; alt: string }[]; perView: number }) {
+    const visible = useGalleryVisible(perView);
+    const [active, setActive] = useState(0);
+    const N = images.length;
+    const showControls = N > visible;
+
+    useEffect(() => { setActive((i) => (N === 0 ? 0 : i % N)); }, [N]);
+
+    const wrap = (i: number) => ((i % N) + N) % N;
+    const next = () => setActive((i) => wrap(i + 1));
+    const prev = () => setActive((i) => wrap(i - 1));
+
+    const shown = showControls
+        ? Array.from({ length: visible }, (_, k) => ({ img: images[wrap(active + k)], pos: wrap(active + k) }))
+        : images.map((img, pos) => ({ img, pos }));
+
+    return (
+        <div className="relative mt-10 sm:mt-12">
+            {showControls && (
+                <>
+                    <button
+                        type="button"
+                        onClick={prev}
+                        aria-label="Previous images"
+                        className="absolute z-20 -inset-s-1 sm:-inset-s-3 lg:-inset-s-5 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-white/90 text-primary shadow-sm transition-colors hover:bg-primary hover:text-white cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronLeft size={22} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={next}
+                        aria-label="Next images"
+                        className="absolute z-20 -inset-e-1 sm:-inset-e-3 lg:-inset-e-5 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-white/90 text-primary shadow-sm transition-colors hover:bg-primary hover:text-white cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronRight size={22} />
+                    </button>
+                </>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:flex lg:h-115 lg:gap-3">
+                {shown.map(({ img, pos }) => (
+                    <div
+                        key={pos}
+                        className="group relative aspect-3/4 overflow-hidden rounded-3xl lg:aspect-auto lg:h-full lg:flex-1 lg:transition-[flex-grow] lg:duration-500 lg:ease-out lg:hover:grow-3"
+                    >
+                        <img
+                            src={img.url}
+                            alt={img.alt}
+                            loading="lazy"
+                            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {showControls && (
+                <div className="mt-6 flex justify-center items-center gap-2.5">
+                    {images.map((_, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => setActive(i)}
+                            aria-label={`Go to image ${i + 1}`}
+                            className={cn(
+                                'rounded-full transition-all cursor-pointer',
+                                i === active ? 'w-3 h-3 bg-primary' : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 

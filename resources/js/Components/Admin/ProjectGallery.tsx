@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Star, ImageIcon, Trash2, Upload } from 'lucide-react';
+import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 import type { ProjectImageItem } from '@/types/admin/project';
 
@@ -59,8 +60,6 @@ function SortableImage({
         transform: CSS.Transform.toString(transform),
         transition,
     };
-
-    const [confirmDelete, setConfirmDelete] = useState(false);
 
     return (
         <div
@@ -132,34 +131,16 @@ function SortableImage({
                     <ImageIcon size={13} />
                 </button>
 
-                {confirmDelete ? (
-                    <span className="flex items-center gap-1 text-[10px]">
-                        <button
-                            type="button"
-                            onClick={onDelete}
-                            className="text-red-400 font-medium hover:text-red-300"
-                        >
-                            Delete
-                        </button>
-                        <span className="text-white/50">/</span>
-                        <button
-                            type="button"
-                            onClick={() => setConfirmDelete(false)}
-                            className="text-white/70 hover:text-white"
-                        >
-                            Keep
-                        </button>
-                    </span>
-                ) : (
-                    <button
-                        type="button"
-                        onClick={() => setConfirmDelete(true)}
-                        className="p-1.5 rounded text-white hover:text-red-400 transition-colors"
-                        title="Delete image"
-                    >
-                        <Trash2 size={13} />
-                    </button>
-                )}
+                <ConfirmDeleteButton
+                    onConfirm={onDelete}
+                    className="p-1.5 rounded text-white hover:text-red-400 transition-colors"
+                    title="Delete image"
+                    heading="Delete this image?"
+                    itemLabel={image.media.original_filename}
+                    description="This image will be removed from the project gallery."
+                >
+                    <Trash2 size={13} />
+                </ConfirmDeleteButton>
             </div>
         </div>
     );

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ManagedImage;
 use App\Models\Page;
 use App\Models\SiteContent;
 use Inertia\Inertia;
@@ -24,6 +25,8 @@ class AboutController extends Controller
         return Inertia::render('Public/About', [
             'content_en' => SiteContent::getPage('about', 'en'),
             'content_ar' => SiteContent::getPage('about', 'ar'),
+            // Admin-replaceable "Crafted" cluster images (fall back to defaults).
+            'craftedImages' => ManagedImage::urls(['about_crafted_1', 'about_crafted_2', 'about_crafted_3']),
             // Per-page SEO (admin-editable; client falls back to page copy).
             'seo' => [
                 'title_en' => $page->seo_title_en,

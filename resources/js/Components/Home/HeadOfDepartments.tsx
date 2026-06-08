@@ -1,24 +1,37 @@
-import type { SiteContentBundle } from '@/types/home';
+import { User as UserIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { SiteContentBundle, DepartmentMemberCard } from '@/types/home';
 
 interface HeadOfDepartmentsProps {
     content: SiteContentBundle;
+    // Active, ordered team members (image + bilingual name/role) from the admin
+    // Head of Departments section.
+    members: DepartmentMemberCard[];
 }
 
 interface Member {
     name: string;
     role: string;
+    image: string | null;
 }
 
-export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
+export function HeadOfDepartments({ content, members }: HeadOfDepartmentsProps) {
+    const { language } = useLanguage();
+    const ar = language === 'ar';
     const dept = content.departments ?? {};
     const title = dept.title?.content ?? '';
 
-    const members: Member[] = [1, 2, 3, 4].map((i) => ({
-        name: dept[`member_${i}_name`]?.content ?? '',
-        role: dept[`member_${i}_role`]?.content ?? '',
-    }));
+    // Pick the active language per field; a field filled in only one language is
+    // used for both (bidirectional fallback).
+    const cards: Member[] = members
+        .map((m) => ({
+            name: (ar ? m.name_ar || m.name_en : m.name_en || m.name_ar) || '',
+            role: (ar ? m.role_ar || m.role_en : m.role_en || m.role_ar) || '',
+            image: m.image_url,
+        }))
+        .filter((m) => m.name || m.role);
 
-    if (!title && members.every((m) => !m.name)) return null;
+    if (!title && cards.length === 0) return null;
 
     return (
         <section className="bg-surface py-16 sm:py-24">
@@ -29,12 +42,13 @@ export function HeadOfDepartments({ content }: HeadOfDepartmentsProps) {
                     </h2>
                 )}
 
-                <div className="mt-10 sm:mt-12 lg:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 lg:gap-x-8 3xl:gap-x-12">
-                    {members.map(
-                        (member, idx) =>
-                            member.name && <DeptCard key={idx} member={member} />,
-                    )}
-                </div>
+                {cards.length > 0 && (
+                    <div className="mt-10 sm:mt-12 lg:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 lg:gap-x-8 3xl:gap-x-12">
+                        {cards.map((member, idx) => (
+                            <DeptCard key={idx} member={member} />
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     );
@@ -46,16 +60,20 @@ function DeptCard({ member }: { member: Member }) {
         // padding) so the geometry is IDENTICAL at every viewport — the circle
         // always overhangs the card top by exactly half and the text always
         // clears it. The card width itself is capped per breakpoint so it can't
-        // balloon on the wide 2-col tablet layout (which is what made the circle
-        // grow huge and swallow the names). pt-[37%] = half the 74%-wide circle.
+        // balloon on the wide 2-col tablet layout. pt-[37%] = half the 74%-wide circle.
         <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[37%]">
             {/* Avatar circle — 74% of the card width, overhanging the card top by
-                half (pt-[37%]). Solid primary fill for now; swap to <img> when
-                portraits land. */}
-            <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square rounded-full bg-primary shadow-md z-10"
-                aria-hidden="true"
-            />
+                half (pt-[37%]). Shows the uploaded photo, or a primary-fill
+                placeholder with a person icon when none is set. */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square overflow-hidden rounded-full bg-primary shadow-md z-10">
+                {member.image ? (
+                    <img src={member.image} alt={member.name} loading="lazy" className="h-full w-full object-cover" />
+                ) : (
+                    <div className="grid h-full w-full place-items-center text-white/70">
+                        <UserIcon className="h-1/3 w-1/3" />
+                    </div>
+                )}
+            </div>
 
             {/* Asymmetric rounded card from Rectangle 54.svg */}
             <div

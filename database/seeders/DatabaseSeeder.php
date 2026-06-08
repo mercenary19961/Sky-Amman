@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             SiteContentSeeder::class,
             ProjectsSeeder::class,
             TestimonialVideosSeeder::class,
+            DepartmentMemberSeeder::class,
         ]);
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DepartmentMember;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\SiteContent;
+use App\Models\Testimonial;
 use App\Models\TestimonialVideo;
 use App\Services\InstagramService;
 use Inertia\Inertia;
@@ -59,8 +61,27 @@ class HomeController extends Controller
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
             'featuredRentals' => $featuredRentals,
-            // Testimonials carousel — the (max 3) active videos in admin order.
-            'testimonialVideos' => TestimonialVideo::active()->ordered()->limit(3)->pluck('url')->all(),
+            // Testimonials carousel — all active videos (min 3) in admin order.
+            // Three show at once; extras page in via the carousel arrows.
+            'testimonialVideos' => TestimonialVideo::active()->ordered()->pluck('url')->all(),
+            // Head of Departments members (image + bilingual name/role), admin order.
+            'departmentMembers' => DepartmentMember::active()->ordered()->with('media:id,path,mime_type')->get()
+                ->map(fn (DepartmentMember $m) => [
+                    'name_en'   => $m->name_en,
+                    'name_ar'   => $m->name_ar,
+                    'role_en'   => $m->role_en,
+                    'role_ar'   => $m->role_ar,
+                    'image_url' => $m->media?->url,
+                ])->all(),
+            // Client testimonial cards (image + bilingual name/quote), admin order.
+            'testimonials' => Testimonial::active()->ordered()->with('media:id,path,mime_type')->get()
+                ->map(fn (Testimonial $t) => [
+                    'name_en'   => $t->name_en,
+                    'name_ar'   => $t->name_ar,
+                    'quote_en'  => $t->quote_en,
+                    'quote_ar'  => $t->quote_ar,
+                    'image_url' => $t->media?->url,
+                ])->all(),
             'mediaEmbeds' => [
                 'linkedin' => Setting::get('linkedin_embed_url', ''),
             ],

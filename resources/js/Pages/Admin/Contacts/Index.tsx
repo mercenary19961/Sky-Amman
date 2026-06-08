@@ -4,6 +4,7 @@ import {
     Search, Archive, Trash2, ArchiveRestore, Inbox, Mail, MailOpen, Building2, ChevronRight,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ContactIndexProps, ContactListItem, RequestType } from '@/types/admin/contact';
@@ -29,29 +30,6 @@ function Badge({ label, color }: { label: string; color: string }) {
         <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs font-medium', color)}>
             {label}
         </span>
-    );
-}
-
-function ConfirmButton({ onConfirm, children, className, title }: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-    title?: string;
-}) {
-    const [pending, setPending] = useState(false);
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button type="button" onClick={() => { setPending(false); onConfirm(); }} className="text-red-600 font-medium hover:underline">Confirm</button>
-                <span className="text-ink-muted">/</span>
-                <button type="button" onClick={() => setPending(false)} className="text-ink-muted hover:underline">Cancel</button>
-            </span>
-        );
-    }
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className} title={title}>
-            {children}
-        </button>
     );
 }
 

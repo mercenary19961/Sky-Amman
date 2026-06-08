@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GalleryImage;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\ProjectImage;
@@ -48,6 +49,9 @@ class PropertiesController extends Controller
             'content_ar' => SiteContent::getPage('properties', 'ar'),
             'projects' => $projects,
             'galleryImages' => $this->galleryImages(),
+            // How many gallery tiles to show per view (desktop); the carousel
+            // pages through the rest. Admin-editable in Projects Gallery.
+            'galleryPerView' => max(1, (int) Setting::get('gallery_count', 6)),
             // Per-page SEO (admin-editable; client falls back to site-wide defaults).
             'seo' => [
                 'title_en' => $page->seo_title_en,
@@ -134,6 +138,8 @@ class PropertiesController extends Controller
                 'floors' => $project->floors,
                 'bedrooms' => $project->bedrooms,
                 'bathrooms' => $project->bathrooms,
+                // Spec keys the editor chose to hide on the detail page.
+                'hidden_specs' => $project->hidden_specs ?? [],
                 // Per-listing SEO (falls back to title/description on the client).
                 'seo_title_en' => $project->seo_title_en,
                 'seo_title_ar' => $project->seo_title_ar,
@@ -150,10 +156,11 @@ class PropertiesController extends Controller
     }
 
     /**
-     * Builds the "Projects Gallery" image set. The pool is every active
-     * project's gallery images, falling back to each project's placeholder
-     * render when it has no uploaded gallery yet. `gallery_mode` decides between
-     * a random subset per visit (`shuffle`) or an admin-ordered manual list.
+     * The public "Projects Gallery" image set: the full pool (sold-project images
+     * + editor uploads, see GalleryImage::pool) minus any images the editor hid
+     * (the `gallery_hidden` setting), shuffled on every visit (so the order
+     * changes each refresh) and capped. The client shows a window of
+     * `gallery_count` tiles and pages through the rest with the arrows.
      */
     private function galleryImages(): array
     {
@@ -161,46 +168,14 @@ class PropertiesController extends Controller
             return [];
         }
 
-        $count = max(1, (int) Setting::get('gallery_count', 6));
-        $mode = Setting::get('gallery_mode', 'shuffle');
+        $hidden = json_decode((string) Setting::get('gallery_hidden', '[]'), true) ?: [];
 
-        $pool = Project::active()
-            ->ordered()
-            ->with(['images.media'])
-            ->get()
-            ->flatMap(function (Project $p) {
-                if ($p->images->isNotEmpty()) {
-                    return $p->images
-                        ->filter(fn (ProjectImage $img) => $img->media !== null)
-                        ->map(fn (ProjectImage $img) => [
-                            'id' => "img-{$img->id}",
-                            'url' => route('media.serve', $img->media_id, false),
-                            'alt' => $p->title_en,
-                        ]);
-                }
-
-                // No uploaded gallery → use the project's placeholder render.
-                return [[
-                    'id' => "slug-{$p->slug}",
-                    'url' => "/images/projects/{$p->slug}.svg",
-                    'alt' => $p->title_en,
-                ]];
-            })
-            ->values();
-
-        if ($mode === 'manual') {
-            $manual = json_decode((string) Setting::get('gallery_manual', '[]'), true) ?: [];
-            $byId = $pool->keyBy('id');
-
-            return collect($manual)
-                ->map(fn ($id) => $byId->get($id))
-                ->filter()
-                ->take($count)
-                ->values()
-                ->all();
-        }
-
-        // Shuffle: a fresh random subset on every page load.
-        return $pool->shuffle()->take($count)->values()->all();
+        return GalleryImage::pool()
+            ->reject(fn (array $img) => in_array($img['id'], $hidden, true))
+            ->map(fn (array $img) => ['id' => $img['id'], 'url' => $img['url'], 'alt' => $img['alt']])
+            ->shuffle()
+            ->take(60) // bound the payload; surplus rotates in on the next refresh
+            ->values()
+            ->all();
     }
 }

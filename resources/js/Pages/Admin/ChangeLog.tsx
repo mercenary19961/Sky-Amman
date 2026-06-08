@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { Undo2, Trash2, ArrowRight, FileText, Building2, Users as UsersIcon, Settings as SettingsIcon, History } from 'lucide-react';
+import { Undo2, Trash2, ArrowRight, FileText, Building2, Users as UsersIcon, Settings as SettingsIcon, History, Quote, Video, MessageSquare, Contact } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ChangeLogPageProps, ChangeLogItem, ChangeAction } from '@/types/admin/changelog';
@@ -14,34 +14,15 @@ const ACTION_COLORS: Record<ChangeAction, string> = {
 };
 
 const SECTION_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-    settings:     SettingsIcon,
-    site_content: FileText,
-    project:      Building2,
-    user:         UsersIcon,
+    settings:          SettingsIcon,
+    site_content:      FileText,
+    project:           Building2,
+    user:              UsersIcon,
+    testimonial:       Quote,
+    testimonial_video: Video,
+    department_member: Contact,
+    contact:           MessageSquare,
 };
-
-function ConfirmButton({ onConfirm, children, className, title }: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-    title?: string;
-}) {
-    const [pending, setPending] = useState(false);
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button type="button" onClick={() => { setPending(false); onConfirm(); }} className="text-red-600 font-medium hover:underline">Confirm</button>
-                <span className="text-ink-muted">/</span>
-                <button type="button" onClick={() => setPending(false)} className="text-ink-muted hover:underline">Cancel</button>
-            </span>
-        );
-    }
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className} title={title}>
-            {children}
-        </button>
-    );
-}
 
 export default function ChangeLog() {
     const { logs, users, sectionLabels, filters } = usePage<ChangeLogPageProps>().props;

@@ -30,27 +30,13 @@ class SiteContentSeeder extends Seeder
             ['home', 'managing_partner', 'body_2', 'From the beginning, our focus has been on delivering projects that combine quality, contemporary design, and long-term value while ensuring that every development reflects the needs and expectations of our clients.', 'منذ البداية، تمحور تركيزنا على تقديم مشاريع تجمع بين الجودة والتصميم العصري والقيمة بعيدة المدى، مع ضمان أن يعكس كل تطوير احتياجات عملائنا وتطلعاتهم.'],
             ['home', 'managing_partner', 'body_3', 'Our mission at SkyAmman goes beyond developing properties, we aim to contribute to a modern urban future that reflects the true potential of Jordan and creates lasting value for generations to come.', 'تتجاوز مهمتنا في سكاي عمّان مجرد تطوير العقارات، إذ نسعى للمساهمة في مستقبل حضري عصري يعكس الإمكانات الحقيقية للأردن ويخلق قيمة دائمة للأجيال القادمة.'],
 
+            // Only the section title is site_content; the members (with photos)
+            // live in the department_members table — Admin → Head of Departments
+            // (DepartmentMemberSeeder).
             ['home', 'departments', 'title', 'Head of Departments', 'رؤساء الأقسام'],
-            ['home', 'departments', 'member_1_name', 'Eng. Mahmoud Abu Sarhan', 'م. محمود أبو سرحان'],
-            ['home', 'departments', 'member_1_role', 'Chief Executive Officer', 'الرئيس التنفيذي'],
-            ['home', 'departments', 'member_2_name', 'Eng. Hossam Salameh', 'م. حسام سلامة'],
-            ['home', 'departments', 'member_2_role', 'Projects Director', 'مدير المشاريع'],
-            ['home', 'departments', 'member_3_name', 'Mr. Mohammad Makhl', 'السيد محمد مكحل'],
-            ['home', 'departments', 'member_3_role', 'Chief Financial Officer', 'المدير المالي'],
-            ['home', 'departments', 'member_4_name', 'Mr. Sadad Al Rawashdeh', 'السيد سداد الرواشدة'],
-            ['home', 'departments', 'member_4_role', 'Legal Director', 'المدير القانوني'],
 
             ['home', 'about', 'title', 'Who We Are?', 'من نحن؟'],
             ['home', 'about', 'body', 'SkyAmman is a real estate development company based in Amman, specializing in residential, commercial, office, and medical projects. We deliver quality driven developments and integrated real estate solutions, while offering flexible property ownership options built on trust, value, and long term vision.', 'سكاي عمّان شركة تطوير عقاري مقرّها عمّان، متخصصة في المشاريع السكنية والتجارية والمكتبية والطبية. نُقدّم تطويرات عالية الجودة وحلولاً عقارية متكاملة، مع خيارات تملّك مرنة قائمة على الثقة والقيمة والرؤية بعيدة المدى.'],
-
-            ['home', 'stats', 'clients_value', '+1500', '+1500'],
-            ['home', 'stats', 'clients_label', 'Clients', 'عميل'],
-            ['home', 'stats', 'projects_value', '180', '180'],
-            ['home', 'stats', 'projects_label', 'Projects Delivered', 'مشروع منجز'],
-            ['home', 'stats', 'years_value', '+30', '+30'],
-            ['home', 'stats', 'years_label', 'Years Experience', 'عام من الخبرة'],
-            ['home', 'stats', 'sqm_value', '+500K', '+500 ألف'],
-            ['home', 'stats', 'sqm_label', 'm² Developed', 'م² تم تطويرها'],
 
             ['home', 'assurance_financial', 'number', '001', '001'],
             ['home', 'assurance_financial', 'title', 'Financial Assurance', 'الأمان المالي'],
@@ -83,16 +69,9 @@ class SiteContentSeeder extends Seeder
             ['home', 'rentals', 'card_cta', 'Explore More', 'استكشف المزيد'],
 
             ['home', 'testimonials', 'title', 'Testimonials', 'آراء العملاء'],
-            // Carousel videos live in their own table now (TestimonialVideosSeeder),
-            // managed via Admin → Testimonial Videos — not as site_content rows.
-            ['home', 'testimonials', 'client_1_name', 'Client Name', 'اسم العميل'],
-            ['home', 'testimonials', 'client_1_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
-            ['home', 'testimonials', 'client_2_name', 'Client Name', 'اسم العميل'],
-            ['home', 'testimonials', 'client_2_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
-            ['home', 'testimonials', 'client_3_name', 'Client Name', 'اسم العميل'],
-            ['home', 'testimonials', 'client_3_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
-            ['home', 'testimonials', 'client_4_name', 'Client Name', 'اسم العميل'],
-            ['home', 'testimonials', 'client_4_quote', 'Our approach is centered around redefining the property ownership experience through three core pillars: legal security, financial security, and structural integrity.', 'نهجنا يتمحور حول إعادة تعريف تجربة تملك العقار من خلال ثلاث ركائز أساسية: الأمان القانوني، والأمان المالي، والسلامة الإنشائية.'],
+            // Carousel videos live in their own table (TestimonialVideosSeeder,
+            // Admin → Testimonial Videos) and the client cards in the testimonials
+            // table (Admin → Testimonials) — only the section title is site_content.
 
             ['home', 'value_prop', 'title', 'Value Proposition', 'القيمة المضافة'],
             ['home', 'value_prop', 'item_1', 'Over 30 Years Of Experience In Real Estate', 'أكثر من 30 عاماً من الخبرة في العقارات'],

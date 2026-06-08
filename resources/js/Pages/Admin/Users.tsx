@@ -4,6 +4,7 @@ import {
     Plus, Pencil, Trash2, ShieldCheck, ShieldAlert, X, Power, Lock,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
 import { PasswordField, PASSWORD_RULES } from '@/Components/Admin/PasswordField';
 import { cn } from '@/lib/cn';
@@ -189,7 +190,14 @@ export default function Users() {
                                                             >
                                                                 <Power size={15} />
                                                             </button>
-                                                            <ConfirmButton onConfirm={() => destroy(u)} className="text-ink-muted hover:text-red-500 transition-colors" title="Delete">
+                                                            <ConfirmButton
+                                                                onConfirm={() => destroy(u)}
+                                                                className="text-ink-muted hover:text-red-500 transition-colors"
+                                                                title="Delete"
+                                                                heading="Delete this user?"
+                                                                itemLabel={u.name}
+                                                                description="This user account will be permanently deleted and cannot be restored."
+                                                            >
                                                                 <Trash2 size={15} />
                                                             </ConfirmButton>
                                                         </>
@@ -367,25 +375,3 @@ function Field({ label, error, hint, children }: {
     );
 }
 
-function ConfirmButton({ onConfirm, children, className, title }: {
-    onConfirm: () => void;
-    children: React.ReactNode;
-    className?: string;
-    title?: string;
-}) {
-    const [pending, setPending] = useState(false);
-    if (pending) {
-        return (
-            <span className="flex items-center gap-1 text-xs">
-                <button type="button" onClick={() => { setPending(false); onConfirm(); }} className="text-red-600 font-medium hover:underline">Confirm</button>
-                <span className="text-ink-muted">/</span>
-                <button type="button" onClick={() => setPending(false)} className="text-ink-muted hover:underline">Cancel</button>
-            </span>
-        );
-    }
-    return (
-        <button type="button" onClick={() => setPending(true)} className={className} title={title}>
-            {children}
-        </button>
-    );
-}

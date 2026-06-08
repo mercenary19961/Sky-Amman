@@ -8,6 +8,10 @@ use App\Http\Controllers\Admin\ProjectImageController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\DepartmentMemberController;
+use App\Http\Controllers\Admin\GalleryImageController;
+use App\Http\Controllers\Admin\ManagedImageController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -111,6 +115,35 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/testimonial-videos/publish', [TestimonialVideoController::class, 'publish'])->name('testimonial-videos.publish');
     Route::put('/testimonial-videos/{id}', [TestimonialVideoController::class, 'update'])->name('testimonial-videos.update')->where('id', '[0-9]+');
     Route::delete('/testimonial-videos/{id}', [TestimonialVideoController::class, 'destroy'])->name('testimonial-videos.destroy')->where('id', '[0-9]+');
+
+    // Projects Gallery — editor-curated images (pooled with sold-project images).
+    Route::get('/gallery', [GalleryImageController::class, 'index'])->name('gallery.index');
+    Route::post('/gallery/settings', [GalleryImageController::class, 'updateSettings'])->name('gallery.settings');
+    Route::post('/gallery/toggle', [GalleryImageController::class, 'toggleHidden'])->name('gallery.toggle');
+    Route::post('/gallery', [GalleryImageController::class, 'store'])->name('gallery.store');
+    Route::delete('/gallery/{id}', [GalleryImageController::class, 'destroy'])->name('gallery.destroy')->where('id', '[0-9]+');
+
+    // Page images — replaceable decorative image slots (About "Crafted" cluster, …).
+    Route::get('/page-images', [ManagedImageController::class, 'index'])->name('page-images.index');
+    Route::post('/page-images/{key}', [ManagedImageController::class, 'update'])->name('page-images.update');
+    Route::delete('/page-images/{key}', [ManagedImageController::class, 'reset'])->name('page-images.reset');
+
+    // Head of Departments team members (image + bilingual name/role).
+    Route::get('/department-members', [DepartmentMemberController::class, 'index'])->name('department-members.index');
+    Route::post('/department-members', [DepartmentMemberController::class, 'store'])->name('department-members.store');
+    Route::post('/department-members/reorder', [DepartmentMemberController::class, 'reorder'])->name('department-members.reorder');
+    Route::post('/department-members/{id}/toggle', [DepartmentMemberController::class, 'toggleActive'])->name('department-members.toggle')->where('id', '[0-9]+');
+    Route::put('/department-members/{id}', [DepartmentMemberController::class, 'update'])->name('department-members.update')->where('id', '[0-9]+');
+    Route::delete('/department-members/{id}', [DepartmentMemberController::class, 'destroy'])->name('department-members.destroy')->where('id', '[0-9]+');
+
+    // Client testimonials (image + bilingual name/quote) — content management.
+    Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+    Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
+    Route::post('/testimonials/reorder', [TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+    Route::post('/testimonials/{id}/toggle', [TestimonialController::class, 'toggleActive'])->name('testimonials.toggle')->where('id', '[0-9]+');
+    // Image upload needs multipart, so update is POST + _method spoofing from the client.
+    Route::put('/testimonials/{id}', [TestimonialController::class, 'update'])->name('testimonials.update')->where('id', '[0-9]+');
+    Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy')->where('id', '[0-9]+');
 
     // Contact Submissions — single inbox for all public forms (editors + admins).
     // Literal `trash` must precede the {id} wildcard.

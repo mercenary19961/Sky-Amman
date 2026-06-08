@@ -59,7 +59,7 @@ function ContactBody({ values, setValue }: { values: Record<string, string>; set
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <FL>Phone</FL>
-                    <input type="tel" value={values['company_phone'] ?? ''} onChange={e => setValue('company_phone', e.target.value)} placeholder="+962 6 000 0000" className={inputClass()} />
+                    <input type="tel" value={values['company_phone'] ?? ''} onChange={e => setValue('company_phone', e.target.value)} placeholder="+962 7xxxxxxxx" dir="ltr" className={inputClass()} />
                 </div>
                 <div>
                     <FL>Email</FL>
