@@ -5,6 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $email
+ * @property bool $is_active
+ * @property string|null $ip_address
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|NewsletterSubscriber withoutTrashed()
+ * @mixin \Eloquent
+ */
 class NewsletterSubscriber extends Model
 {
     use SoftDeletes;

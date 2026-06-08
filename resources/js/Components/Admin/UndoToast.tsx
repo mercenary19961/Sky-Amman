@@ -11,7 +11,11 @@ import type { UndoPayload } from '@/types/admin/changelog';
  * Rendered once in AdminLayout.
  */
 export function UndoToast() {
-    const undo = (usePage<PageProps>().props.undo as UndoPayload | null | undefined) ?? null;
+    const page = usePage<PageProps>().props;
+    // Revert is admin-only (the route is admin-gated), so only admins get the toast.
+    const undo = page.auth.user?.role === 'admin'
+        ? ((page.undo as UndoPayload | null | undefined) ?? null)
+        : null;
     const [visible, setVisible] = useState(false);
     const [shownId, setShownId] = useState<number | null>(null);
 

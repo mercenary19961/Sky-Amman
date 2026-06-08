@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -52,7 +53,7 @@ class ProjectController extends Controller
         return Inertia::render('Admin/Projects/Index', [
             'projects'     => $projects,
             'filters'      => $request->only(['category', 'listing_status', 'active', 'search']) + ['per_page' => $perPage],
-            'trashedCount' => Project::onlyTrashed()->count(),
+            'trashedCount' => Project::onlyTrashed()->count('*'), // '*' is count's default — explicit to silence intelephense P1005
         ]);
     }
 
@@ -82,16 +83,22 @@ class ProjectController extends Controller
         $slug = Str::slug($data['title_en']);
         $base = $slug;
         $i = 1;
-        while (Project::where('slug', $slug)->exists()) {
+        // '=', 'and' are where()'s defaults — explicit only to silence intelephense P1005.
+        while (Project::where('slug', '=', $slug, 'and')->exists()) {
             $slug = $base . '-' . $i++;
         }
         $data['slug'] = $slug;
 
-        foreach (['short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
+        foreach (['title_en', 'title_ar', 'short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = strip_tags($data[$field]);
             }
         }
+
+        // A brand-new project has no gallery yet, so it can't reference a
+        // featured/OG image — those are picked from its own uploaded gallery later.
+        $data['featured_image_id'] = null;
+        $data['og_image_id'] = null;
 
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
@@ -133,9 +140,20 @@ class ProjectController extends Controller
         $old = $project->attributesToArray();
         $data = $request->validated();
 
-        foreach (['short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
+        foreach (['title_en', 'title_ar', 'short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = strip_tags($data[$field]);
+            }
+        }
+
+        // The featured/OG image must be one of THIS project's own gallery images
+        // (the UI only offers those). Reject a tampered id pointing elsewhere.
+        $ownMediaIds = $project->images()->pluck('media_id')->all();
+        foreach (['featured_image_id', 'og_image_id'] as $field) {
+            if (! empty($data[$field]) && ! in_array($data[$field], $ownMediaIds)) {
+                throw ValidationException::withMessages([
+                    $field => 'The selected image must belong to this project\'s gallery.',
+                ]);
             }
         }
 

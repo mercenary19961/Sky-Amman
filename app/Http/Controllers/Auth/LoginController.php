@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Services\TurnstileVerifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,23 +52,15 @@ class LoginController extends Controller
             ]);
         }
 
-        $existingUser = User::where('email', $request->input('email'))->first();
-
-        if (! $existingUser) {
-            RateLimiter::hit($key, self::DECAY_SECONDS);
-            usleep(750_000);
-
-            throw ValidationException::withMessages([
-                'email' => ['No account found with this email address.'],
-            ]);
-        }
-
+        // Single generic failure for BOTH an unknown email and a wrong password —
+        // no user enumeration. The 750ms delay also masks the bcrypt timing
+        // difference between "no such user" and "user exists, bad password".
         if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             RateLimiter::hit($key, self::DECAY_SECONDS);
             usleep(750_000);
 
             throw ValidationException::withMessages([
-                'password' => ['Incorrect password. Please try again.'],
+                'email' => ['These credentials don\'t match our records.'],
             ]);
         }
 

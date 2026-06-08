@@ -35,7 +35,9 @@ class SiteContentController extends Controller
             'pages'    => $pages,
             // Persistent "Undo last save" pointer for this section (set by
             // ChangeLogService on the previous save; survives navigation).
-            'undoMeta' => session('undo:site_content'),
+            // Admin-only — the revert route is admin-gated (editors would get a
+            // button that 403s).
+            'undoMeta' => Auth::user()?->isAdmin() ? session('undo:site_content') : null,
         ]);
     }
 
