@@ -437,6 +437,7 @@ In Laravel 12 / Symfony 7, the `HEADER_X_FORWARDED_FOR` etc. constants are on `S
 ### Remaining
 - [ ] Code splitting (verify `manualChunks` chunks under 500kB — already configured, currently vendor-react @ 213kB largest)
 - [ ] Replace seeded placeholder content (phone "+962 6 000 0000", empty social URLs) with real values
+- [ ] **Seed page SEO defaults + extend "Reset to Default" to cover SEO.** The admin Site Content **"Reset to Default"** safeguard ([SiteContentController::reset](app/Http/Controllers/Admin/SiteContentController.php), admin-only, type-to-confirm "Reset to Default") restores every `site_content` row to [`SiteContentSeeder::rows()`](database/seeders/SiteContentSeeder.php) — **text + visibility only**. Per-page SEO (`seo_title_*`/`seo_description_*` on the `pages` table) is **intentionally NOT reset** because there are no real SEO defaults seeded yet (PagesSeeder seeds empty SEO). **When the real SEO copy is decided:** (1) seed it in `PagesSeeder`, (2) extend `reset()` to also restore each page's SEO fields from those defaults (snapshot old/new into the same change-log entry so it stays revertable). The reset is logged as a single revertable `site_content` change (`model_id = "all"`).
 - [ ] Final testing & go-live
 
 > **Last updated:** 2026-06-06 — **Admin panel complete: Change Log + Undo shipped (last admin section). Plus per-page SEO consistency, expanded SEO health checks, save-button polish, Users section, forgot/reset-password.**

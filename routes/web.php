@@ -158,6 +158,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Settings + Users — admin only.
     Route::middleware('admin')->group(function () {
+        // Reset all Site Content text back to the shipped defaults (safeguard).
+        Route::post('/content/reset', [SiteContentController::class, 'reset'])->name('content.reset');
+
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
 

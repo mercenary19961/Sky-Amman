@@ -12,9 +12,19 @@ use Illuminate\Database\Seeder;
  */
 class SiteContentSeeder extends Seeder
 {
-    public function run(): void
+    /**
+     * The canonical default copy for every public section: [page, section, key,
+     * en, ar]. Single source of truth shared by initial seeding AND the admin
+     * "Reset to Default" safeguard (SiteContentController::reset), so a reset
+     * always restores exactly what we ship.
+     *
+     * NOTE: page-level SEO (the seo_title / seo_description columns on the
+     * `pages` table) has NO defaults here yet — when real SEO copy is decided,
+     * seed it on PagesSeeder and extend the reset to cover it (see CLAUDE.md).
+     */
+    public static function rows(): array
     {
-        $rows = [
+        return [
             // ---------------- HOME ----------------
             ['home', 'hero', 'title', 'Real Estate Development', 'التطوير العقاري'],
             ['home', 'hero', 'location', 'In Amman', 'في عمّان'],
@@ -162,8 +172,11 @@ class SiteContentSeeder extends Seeder
             ['footer', 'copyright', 'text',           'All rights reserved', 'جميع الحقوق محفوظة'],
             ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],
         ];
+    }
 
-        foreach ($rows as [$page, $section, $key, $en, $ar]) {
+    public function run(): void
+    {
+        foreach (self::rows() as [$page, $section, $key, $en, $ar]) {
             SiteContent::updateOrCreate(
                 ['page' => $page, 'section' => $section, 'key' => $key],
                 [
