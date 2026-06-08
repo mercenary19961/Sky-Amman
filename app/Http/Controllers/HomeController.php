@@ -61,8 +61,9 @@ class HomeController extends Controller
             'content_ar' => SiteContent::getPage('home', 'ar'),
             'featuredProjects' => $featuredProjects,
             'featuredRentals' => $featuredRentals,
-            // Testimonials carousel — the (max 3) active videos in admin order.
-            'testimonialVideos' => TestimonialVideo::active()->ordered()->limit(3)->pluck('url')->all(),
+            // Testimonials carousel — all active videos (min 3) in admin order.
+            // Three show at once; extras page in via the carousel arrows.
+            'testimonialVideos' => TestimonialVideo::active()->ordered()->pluck('url')->all(),
             // Head of Departments members (image + bilingual name/role), admin order.
             'departmentMembers' => DepartmentMember::active()->ordered()->with('media:id,path,mime_type')->get()
                 ->map(fn (DepartmentMember $m) => [

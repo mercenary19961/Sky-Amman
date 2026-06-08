@@ -235,7 +235,9 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     const centerIndex = activeIndex;
     const leftIndex = wrap(activeIndex - 1);
     const rightIndex = wrap(activeIndex + 1);
-    const multi = N > 1;
+    // Exactly three → static 3-up layout. More than three → carousel: arrows +
+    // dots appear and the side previews rotate the active video.
+    const multi = N > 3;
 
     return (
         <>

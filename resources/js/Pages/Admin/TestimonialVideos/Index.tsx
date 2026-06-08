@@ -26,7 +26,7 @@ interface VideoItem {
 
 interface TestimonialVideosProps {
     videos: VideoItem[];
-    maxActive: number;
+    minActive: number;
     [key: string]: unknown;
 }
 
@@ -39,7 +39,7 @@ type EditingState = VideoItem | 'new' | null;
 const sortedKey = (ids: Iterable<number>) => [...ids].sort((a, b) => a - b).join(',');
 
 export default function TestimonialVideosIndex() {
-    const { videos, maxActive } = usePage<TestimonialVideosProps>().props;
+    const { videos, minActive } = usePage<TestimonialVideosProps>().props;
 
     // Order/list mirror for optimistic drag reordering.
     const [items, setItems] = useState<VideoItem[]>(videos);
@@ -68,16 +68,16 @@ export default function TestimonialVideosIndex() {
     const selectedCount = draft.size;
     const draftKey = sortedKey(draft);
     const dirty = draftKey !== liveKey;
-    // A live video can't be deleted while the homepage is fully stocked.
+    // A live video can't be removed if it would drop the live set below the min.
     const liveActiveCount = videos.filter((v) => v.is_active).length;
-    const exactly = selectedCount === maxActive;
-    const canPublish = dirty && exactly;
+    const atLeast = selectedCount >= minActive;
+    const canPublish = dirty && atLeast;
 
     const toggleDraft = (id: number) =>
         setDraft((prev) => {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id);
-            else if (next.size < maxActive) next.add(id);
+            else next.add(id);
             return next;
         });
 
@@ -104,8 +104,8 @@ export default function TestimonialVideosIndex() {
 
     const statusNote = !dirty
         ? 'live'
-        : selectedCount < maxActive
-          ? `select ${maxActive - selectedCount} more, then update`
+        : selectedCount < minActive
+          ? `select ${minActive - selectedCount} more (at least ${minActive}), then update`
           : 'unsaved — click Update homepage';
 
     return (
@@ -115,9 +115,10 @@ export default function TestimonialVideosIndex() {
             <div className="max-w-5xl">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <p className="text-sm text-ink-muted max-w-xl">
-                        Build a library of videos, then choose exactly{' '}
-                        <strong className="text-ink dark:text-zinc-200">{maxActive}</strong> to show on the homepage.
-                        Toggle the eye on each card to stage your pick, then{' '}
+                        Build a library of videos, then choose at least{' '}
+                        <strong className="text-ink dark:text-zinc-200">{minActive}</strong> to show on the homepage.
+                        Three appear at once; pick <strong className="text-ink dark:text-zinc-200">more than {minActive}</strong>{' '}
+                        and visitors page through them with arrows. Toggle the eye on each card to stage your pick, then{' '}
                         <strong className="text-ink dark:text-zinc-200">Update homepage</strong> to apply it. Add a
                         video by pasting its <strong className="text-ink dark:text-zinc-200">YouTube link</strong>.
                     </p>
@@ -129,8 +130,8 @@ export default function TestimonialVideosIndex() {
                             title={
                                 !dirty
                                     ? 'No changes to apply'
-                                    : !exactly
-                                      ? `Select exactly ${maxActive} videos first`
+                                    : !atLeast
+                                      ? `Select at least ${minActive} videos first`
                                       : 'Apply to the homepage'
                             }
                             className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -151,17 +152,15 @@ export default function TestimonialVideosIndex() {
                 <div
                     className={cn(
                         'mb-6 inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium',
-                        exactly && !dirty
+                        atLeast && !dirty
                             ? 'bg-emerald-500/15 text-emerald-400'
-                            : dirty
-                              ? 'bg-amber-500/15 text-amber-400'
-                              : 'bg-emerald-500/15 text-emerald-400',
+                            : 'bg-amber-500/15 text-amber-400',
                     )}
                 >
                     <span
-                        className={cn('w-2 h-2 rounded-full', exactly && !dirty ? 'bg-emerald-400' : 'bg-amber-400')}
+                        className={cn('w-2 h-2 rounded-full', atLeast && !dirty ? 'bg-emerald-400' : 'bg-amber-400')}
                     />
-                    {selectedCount} of {maxActive} selected — {statusNote}
+                    {selectedCount} selected (min {minActive}) — {statusNote}
                 </div>
 
                 {items.length === 0 ? (
@@ -182,8 +181,8 @@ export default function TestimonialVideosIndex() {
                                         key={video.id}
                                         video={video}
                                         selected={draft.has(video.id)}
-                                        selectDisabled={!draft.has(video.id) && draft.size >= maxActive}
-                                        deleteLocked={video.is_active && liveActiveCount >= maxActive}
+                                        selectDisabled={false}
+                                        deleteLocked={video.is_active && liveActiveCount <= minActive}
                                         onToggle={() => toggleDraft(video.id)}
                                         onEdit={() => setEditing(video)}
                                         onPreview={() => setPreview(video.url)}
@@ -305,11 +304,9 @@ function SortableVideoCard({
                         onClick={onToggle}
                         disabled={selectDisabled}
                         title={
-                            selectDisabled
-                                ? 'Already 3 selected — deselect one first'
-                                : selected
-                                  ? 'Showing — click to remove from selection'
-                                  : 'Hidden — click to select'
+                            selected
+                                ? 'Showing — click to remove from selection'
+                                : 'Hidden — click to select'
                         }
                         className="p-1.5 rounded text-ink-muted hover:bg-white/5 hover:text-ink dark:hover:text-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                     >

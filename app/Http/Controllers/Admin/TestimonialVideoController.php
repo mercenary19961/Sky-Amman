@@ -15,17 +15,17 @@ use Inertia\Response;
 class TestimonialVideoController extends Controller
 {
     /**
-     * The Testimonials section always shows exactly three videos (a 3-up
-     * layout). publish() enforces this exact count for the live set; the admin
-     * stages a selection in the UI and applies it here.
+     * The Testimonials section shows at least three videos (a 3-up layout).
+     * publish() enforces this minimum for the live set; the admin may select
+     * more — extra videos become a carousel the visitor pages through.
      */
-    private const MAX_ACTIVE = 3;
+    private const MIN_ACTIVE = 3;
 
     public function index(): Response
     {
         return Inertia::render('Admin/TestimonialVideos/Index', [
             'videos' => TestimonialVideo::ordered()->get(['id', 'title', 'url', 'sort_order', 'is_active']),
-            'maxActive' => self::MAX_ACTIVE,
+            'minActive' => self::MIN_ACTIVE,
         ]);
     }
 
@@ -66,13 +66,14 @@ class TestimonialVideoController extends Controller
     }
 
     /**
-     * Apply the admin's chosen live set. Requires EXACTLY MAX_ACTIVE ids — this
-     * is what guarantees the homepage always shows three (no more, no less).
+     * Apply the admin's chosen live set. Requires AT LEAST MIN_ACTIVE ids — this
+     * guarantees the homepage always shows the 3-up layout; any extras become a
+     * carousel the visitor pages through.
      */
     public function publish(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'ids' => ['required', 'array', 'size:' . self::MAX_ACTIVE],
+            'ids' => ['required', 'array', 'min:' . self::MIN_ACTIVE],
             'ids.*' => ['integer', 'distinct', 'exists:testimonial_videos,id'],
         ]);
 
@@ -88,11 +89,10 @@ class TestimonialVideoController extends Controller
     {
         $video = TestimonialVideo::findOrFail($id);
 
-        // Don't let a live video be deleted while the homepage is fully stocked —
-        // that would drop the live set below MAX_ACTIVE. Swap it out via publish
-        // first. (If fewer than MAX_ACTIVE are live, deleting is allowed.)
+        // Don't let a live video be deleted if doing so would drop the live set
+        // below MIN_ACTIVE. Swap it out (or add another) via publish first.
         $activeCount = TestimonialVideo::active()->count();
-        if ($video->is_active && $activeCount >= self::MAX_ACTIVE) {
+        if ($video->is_active && $activeCount <= self::MIN_ACTIVE) {
             return back()->with('error', 'This video is live. Swap it out via “Update homepage” before deleting.');
         }
 
