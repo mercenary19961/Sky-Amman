@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GalleryImage;
 use App\Models\Page;
 use App\Models\Project;
 use App\Models\ProjectImage;
@@ -152,10 +153,11 @@ class PropertiesController extends Controller
     }
 
     /**
-     * Builds the "Projects Gallery" image set. The pool is every active
-     * project's gallery images, falling back to each project's placeholder
-     * render when it has no uploaded gallery yet. `gallery_mode` decides between
-     * a random subset per visit (`shuffle`) or an admin-ordered manual list.
+     * Builds the "Projects Gallery" image set: images from SOLD projects
+     * (showcasing completed work) PLUS any images the editor has curated in
+     * Admin → Projects Gallery. A sold project with no uploaded gallery falls
+     * back to its placeholder render. The combined pool is shuffled on every
+     * visit, so the displayed selection changes on each refresh.
      */
     private function galleryImages(): array
     {
@@ -164,10 +166,10 @@ class PropertiesController extends Controller
         }
 
         $count = max(1, (int) Setting::get('gallery_count', 6));
-        $mode = Setting::get('gallery_mode', 'shuffle');
 
-        $pool = Project::active()
-            ->ordered()
+        // Images from sold projects.
+        $soldPool = Project::active()
+            ->where('listing_status', 'sold')
             ->with(['images.media'])
             ->get()
             ->flatMap(function (Project $p) {
@@ -187,22 +189,20 @@ class PropertiesController extends Controller
                     'url' => "/images/projects/{$p->slug}.svg",
                     'alt' => $p->title_en,
                 ]];
-            })
-            ->values();
+            });
 
-        if ($mode === 'manual') {
-            $manual = json_decode((string) Setting::get('gallery_manual', '[]'), true) ?: [];
-            $byId = $pool->keyBy('id');
+        // Editor-curated gallery images.
+        $editorPool = GalleryImage::ordered()
+            ->with('media')
+            ->get()
+            ->filter(fn (GalleryImage $g) => $g->media !== null)
+            ->map(fn (GalleryImage $g) => [
+                'id' => "gal-{$g->id}",
+                'url' => route('media.serve', $g->media_id, false),
+                'alt' => '',
+            ]);
 
-            return collect($manual)
-                ->map(fn ($id) => $byId->get($id))
-                ->filter()
-                ->take($count)
-                ->values()
-                ->all();
-        }
-
-        // Shuffle: a fresh random subset on every page load.
-        return $pool->shuffle()->take($count)->values()->all();
+        // Fresh random selection on every page load.
+        return $soldPool->concat($editorPool)->shuffle()->take($count)->values()->all();
     }
 }

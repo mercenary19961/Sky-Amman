@@ -29,7 +29,7 @@ function Field({ icon, label, children }: { icon: React.ReactNode; label: string
             <span className="mt-0.5 text-ink-muted shrink-0">{icon}</span>
             <div className="min-w-0">
                 <div className="text-xs text-ink-muted">{label}</div>
-                <div className="text-sm text-ink break-words">{children}</div>
+                <div className="text-sm text-ink wrap-break-word">{children}</div>
             </div>
         </div>
     );

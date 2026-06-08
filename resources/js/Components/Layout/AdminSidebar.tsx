@@ -11,6 +11,7 @@ import {
     Quote,
     Contact,
     Images,
+    GalleryThumbnails,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
@@ -52,6 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
             { label: 'Testimonials', path: '/admin/testimonials', icon: <Quote size={18} />, built: true },
             { label: 'Head of Departments', path: '/admin/department-members', icon: <Contact size={18} />, built: true },
             { label: 'Page Images', path: '/admin/page-images', icon: <Images size={18} />, built: true },
+            { label: 'Projects Gallery', path: '/admin/gallery', icon: <GalleryThumbnails size={18} />, built: true },
         ],
     },
     {
