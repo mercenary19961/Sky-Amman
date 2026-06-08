@@ -50,6 +50,7 @@ export interface PropertiesPageProps extends PageProps {
     content_ar: SiteContentBundle;
     projects: FeaturedProject[];
     galleryImages: GalleryImage[];
+    galleryPerView: number;
     seo: PageSeo;
     url: string;
 }

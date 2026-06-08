@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryImage;
 use App\Models\Media;
+use App\Models\Project;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +30,26 @@ class GalleryImageController extends Controller
                 ])->all(),
             // Sold projects whose images feed the gallery automatically (for the
             // informational note in the admin UI).
-            'soldCount' => \App\Models\Project::active()->where('listing_status', 'sold')->count(),
+            'soldCount' => Project::active()->where('listing_status', 'sold')->count(),
+            'settings'  => [
+                'enabled' => (bool) Setting::get('gallery_enabled', true),
+                'count'   => max(1, (int) Setting::get('gallery_count', 6)),
+            ],
         ]);
+    }
+
+    /** Display settings for the public gallery section (per-view count + show/hide). */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'count'   => ['required', 'integer', 'min:1', 'max:24'],
+            'enabled' => ['boolean'],
+        ]);
+
+        Setting::set('gallery_count', (string) $data['count']);
+        Setting::set('gallery_enabled', $request->boolean('enabled') ? '1' : '0');
+
+        return back()->with('success', 'Gallery settings saved.');
     }
 
     public function store(Request $request): RedirectResponse

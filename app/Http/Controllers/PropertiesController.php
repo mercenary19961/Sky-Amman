@@ -49,6 +49,9 @@ class PropertiesController extends Controller
             'content_ar' => SiteContent::getPage('properties', 'ar'),
             'projects' => $projects,
             'galleryImages' => $this->galleryImages(),
+            // How many gallery tiles to show per view (desktop); the carousel
+            // pages through the rest. Admin-editable in Projects Gallery.
+            'galleryPerView' => max(1, (int) Setting::get('gallery_count', 6)),
             // Per-page SEO (admin-editable; client falls back to site-wide defaults).
             'seo' => [
                 'title_en' => $page->seo_title_en,
@@ -156,8 +159,9 @@ class PropertiesController extends Controller
      * Builds the "Projects Gallery" image set: images from SOLD projects
      * (showcasing completed work) PLUS any images the editor has curated in
      * Admin → Projects Gallery. A sold project with no uploaded gallery falls
-     * back to its placeholder render. The combined pool is shuffled on every
-     * visit, so the displayed selection changes on each refresh.
+     * back to its placeholder render. The whole pool is shuffled on every visit
+     * (so the order changes each refresh) and capped; the client shows a window
+     * of `gallery_count` tiles and pages through the rest with the arrows.
      */
     private function galleryImages(): array
     {
@@ -165,7 +169,9 @@ class PropertiesController extends Controller
             return [];
         }
 
-        $count = max(1, (int) Setting::get('gallery_count', 6));
+        // Bound the payload — the carousel pages through this; anything beyond
+        // rotates in on the next refresh (the pool is re-shuffled each visit).
+        $cap = 60;
 
         // Images from sold projects.
         $soldPool = Project::active()
@@ -202,7 +208,7 @@ class PropertiesController extends Controller
                 'alt' => '',
             ]);
 
-        // Fresh random selection on every page load.
-        return $soldPool->concat($editorPool)->shuffle()->take($count)->values()->all();
+        // Fresh random order on every page load.
+        return $soldPool->concat($editorPool)->shuffle()->take($cap)->values()->all();
     }
 }

@@ -24,15 +24,32 @@ interface GalleryItem {
 interface GalleryProps {
     images: GalleryItem[];
     soldCount: number;
+    settings: { enabled: boolean; count: number };
     [key: string]: unknown;
 }
 
 export default function GalleryIndex() {
-    const { images, soldCount } = usePage<GalleryProps>().props;
+    const { images, soldCount, settings } = usePage<GalleryProps>().props;
 
     const [items, setItems] = useState<GalleryItem[]>(images);
     useEffect(() => setItems(images), [images]);
     const [uploading, setUploading] = useState(false);
+
+    // Display settings (per-view count + show/hide the whole section).
+    const [count, setCount] = useState(settings.count);
+    const [enabled, setEnabled] = useState(settings.enabled);
+    const [savingSettings, setSavingSettings] = useState(false);
+    useEffect(() => { setCount(settings.count); setEnabled(settings.enabled); }, [settings.count, settings.enabled]);
+    const settingsDirty = count !== settings.count || enabled !== settings.enabled;
+
+    const saveSettings = () => {
+        if (!settingsDirty || savingSettings) return;
+        setSavingSettings(true);
+        router.post('/admin/gallery/settings', { count, enabled }, {
+            preserveScroll: true,
+            onFinish: () => setSavingSettings(false),
+        });
+    };
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -72,8 +89,45 @@ export default function GalleryIndex() {
                 <p className="mb-4 max-w-2xl text-sm text-ink-muted">
                     The public “Projects Gallery” on the Properties page automatically shows images from your{' '}
                     <strong className="text-ink dark:text-zinc-200">{soldCount} sold project{soldCount === 1 ? '' : 's'}</strong>,
-                    plus any images you add below. The displayed set is shuffled on every visit, so it changes on each refresh.
+                    plus any images you add below. The order is shuffled on every visit, and visitors can page through
+                    them with the arrows.
                 </p>
+
+                {/* Display settings */}
+                <div className="mb-6 flex flex-wrap items-end gap-4 rounded-lg border border-ink/5 dark:border-white/10 bg-white dark:bg-zinc-800 p-4">
+                    <label className="flex items-center gap-2 text-sm text-ink dark:text-zinc-100">
+                        <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="h-4 w-4 accent-primary" />
+                        Show gallery section
+                    </label>
+                    <div>
+                        <label className="block text-xs font-medium text-ink-muted mb-1">Tiles shown per view</label>
+                        <input
+                            type="number"
+                            min={1}
+                            max={24}
+                            value={count}
+                            onChange={(e) => setCount(Math.min(24, Math.max(1, parseInt(e.target.value || '1', 10))))}
+                            className="w-24 rounded-md border border-ink/15 dark:border-white/15 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={saveSettings}
+                        disabled={!settingsDirty || savingSettings}
+                        className={cn(
+                            'rounded-md px-4 py-2 text-sm font-medium transition-colors',
+                            settingsDirty && !savingSettings
+                                ? 'bg-primary-strong text-white hover:bg-primary-strong-hover'
+                                : 'bg-ink/5 dark:bg-white/10 text-ink-muted cursor-not-allowed',
+                        )}
+                    >
+                        {savingSettings ? 'Saving…' : 'Save settings'}
+                    </button>
+                    <p className="w-full text-[11px] text-ink-muted">
+                        On desktop up to this many tiles show at once; on smaller screens it auto-reduces. Extra images
+                        page in with the arrows.
+                    </p>
+                </div>
 
                 {/* Dropzone */}
                 <div
@@ -90,6 +144,7 @@ export default function GalleryIndex() {
                         {uploading ? 'Uploading…' : isDragActive ? 'Drop the images here' : 'Drag & drop images, or click to browse'}
                     </div>
                     <div className="mt-1 text-xs text-ink-muted">JPEG, PNG, WebP — max 10 MB each</div>
+                    <div className="mt-0.5 text-[11px] text-ink-muted">Square or portrait images (e.g. ~1200×1200) look best — tiles are cropped to fit.</div>
                 </div>
 
                 {items.length === 0 ? (
