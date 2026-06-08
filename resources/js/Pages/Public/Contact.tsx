@@ -190,17 +190,19 @@ export default function Contact() {
                                     {form.errors.email && <p className="mt-1 text-sm text-red-600">{form.errors.email}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-ink">
-                                        {t('contact.form.phone')} <span className="text-ink-muted">{t('common.optional')}</span>
-                                    </label>
+                                    <label className="block text-sm font-medium text-ink">{t('contact.form.phone')}</label>
                                     <input
                                         type="tel"
                                         value={form.data.phone}
                                         onChange={(e) => form.setData('phone', e.target.value)}
+                                        required
+                                        placeholder="+962 7XXXXXXXX"
                                         className={inputClass}
                                         dir="ltr"
                                     />
-                                    {form.errors.phone && <p className="mt-1 text-sm text-red-600">{form.errors.phone}</p>}
+                                    {form.errors.phone
+                                        ? <p className="mt-1 text-sm text-red-600">{form.errors.phone}</p>
+                                        : <p className="mt-1 text-xs text-ink-muted">{t('contact.form.phoneHint')}</p>}
                                 </div>
                             </div>
 

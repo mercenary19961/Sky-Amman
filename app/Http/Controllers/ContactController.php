@@ -65,13 +65,20 @@ class ContactController extends Controller
      */
     public function store(Request $request, TurnstileVerifier $turnstile): RedirectResponse
     {
+        // Strip spaces/dashes/parens before validating so "+962 7…" and "07…"
+        // both pass the same rule (and normalize cleanly afterwards).
+        $request->merge(['phone' => preg_replace('/[\s()\-]/', '', (string) $request->input('phone'))]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            // Jordan mobile: "+962 7XXXXXXXX" or "07XXXXXXXX" (962/no-+ also ok).
+            'phone' => ['required', 'string', 'regex:/^(?:\+962|962|0)7\d{8}$/'],
             'request_type' => ['required', Rule::in(ContactSubmission::REQUEST_TYPES)],
             'message' => ['required', 'string', 'max:5000'],
             'property' => ['nullable', 'string', 'max:255'],
+        ], [
+            'phone.regex' => 'Enter a valid Jordan mobile, e.g. +962 7XXXXXXXX or 07XXXXXXXX.',
         ]);
 
         if (! $turnstile->verify($request->input('cf-turnstile-response'), $request->ip())) {
@@ -85,7 +92,8 @@ class ContactController extends Controller
         $submission = ContactSubmission::create([
             'name' => strip_tags($validated['name']),
             'email' => $validated['email'],
-            'phone' => ! empty($validated['phone']) ? strip_tags($validated['phone']) : null,
+            // Stored canonically as "+9627XXXXXXXX" regardless of entered form.
+            'phone' => $this->normalizeJordanPhone($validated['phone']),
             'request_type' => $validated['request_type'],
             'message' => strip_tags($validated['message']),
             'project_id' => $projectId,
@@ -95,6 +103,23 @@ class ContactController extends Controller
         $this->notifyRecipients($submission);
 
         return back()->with('success', __('contact.form.success'));
+    }
+
+    /**
+     * Canonicalize a validated Jordan phone to "+9627XXXXXXXX". Input has already
+     * been stripped of spaces/dashes and matched against the format rule, so it's
+     * one of: +9627…, 9627…, or 07….
+     */
+    private function normalizeJordanPhone(string $phone): string
+    {
+        if (str_starts_with($phone, '+962')) {
+            return $phone;
+        }
+        if (str_starts_with($phone, '962')) {
+            return '+' . $phone;
+        }
+
+        return '+962' . substr($phone, 1); // "07XXXXXXXX" → "+9627XXXXXXXX"
     }
 
     /**
