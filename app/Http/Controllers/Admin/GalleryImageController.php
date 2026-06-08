@@ -22,20 +22,42 @@ class GalleryImageController extends Controller
 {
     public function index(): Response
     {
+        $hidden = json_decode((string) Setting::get('gallery_hidden', '[]'), true) ?: [];
+
+        // The full pool (sold-project images + editor uploads), each flagged with
+        // its current hidden state so any single image can be shown/hidden.
+        $images = GalleryImage::pool()->map(fn (array $img) => [
+            'id'         => $img['id'],
+            'url'        => $img['url'],
+            'source'     => $img['source'],
+            'label'      => $img['label'],
+            'gallery_id' => $img['gallery_id'] ?? null,
+            'hidden'     => in_array($img['id'], $hidden, true),
+        ])->all();
+
         return Inertia::render('Admin/Gallery/Index', [
-            'images' => GalleryImage::ordered()->with('media:id,path,mime_type')->get()
-                ->map(fn (GalleryImage $g) => [
-                    'id'        => $g->id,
-                    'image_url' => $g->media?->url,
-                ])->all(),
-            // Sold projects whose images feed the gallery automatically (for the
-            // informational note in the admin UI).
+            'images'    => $images,
             'soldCount' => Project::active()->where('listing_status', 'sold')->count(),
             'settings'  => [
                 'enabled' => (bool) Setting::get('gallery_enabled', true),
                 'count'   => max(1, (int) Setting::get('gallery_count', 6)),
             ],
         ]);
+    }
+
+    /** Show/hide a single image (any pool image, including sold-project ones). */
+    public function toggleHidden(Request $request): RedirectResponse
+    {
+        $id = $request->validate(['id' => ['required', 'string']])['id'];
+
+        $hidden = json_decode((string) Setting::get('gallery_hidden', '[]'), true) ?: [];
+        $hidden = in_array($id, $hidden, true)
+            ? array_values(array_diff($hidden, [$id]))
+            : [...$hidden, $id];
+
+        Setting::set('gallery_hidden', json_encode(array_values($hidden)));
+
+        return back()->with('success', 'Gallery updated.');
     }
 
     /** Display settings for the public gallery section (per-view count + show/hide). */
@@ -77,17 +99,4 @@ class GalleryImageController extends Controller
         return back()->with('success', 'Image removed.');
     }
 
-    public function reorder(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'ids'   => ['required', 'array'],
-            'ids.*' => ['integer', 'exists:gallery_images,id'],
-        ]);
-
-        foreach ($validated['ids'] as $position => $id) {
-            GalleryImage::query()->where('id', $id)->update(['sort_order' => $position + 1]);
-        }
-
-        return back()->with('success', 'Order updated.');
-    }
 }

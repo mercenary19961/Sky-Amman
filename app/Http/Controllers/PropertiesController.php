@@ -156,12 +156,11 @@ class PropertiesController extends Controller
     }
 
     /**
-     * Builds the "Projects Gallery" image set: images from SOLD projects
-     * (showcasing completed work) PLUS any images the editor has curated in
-     * Admin → Projects Gallery. A sold project with no uploaded gallery falls
-     * back to its placeholder render. The whole pool is shuffled on every visit
-     * (so the order changes each refresh) and capped; the client shows a window
-     * of `gallery_count` tiles and pages through the rest with the arrows.
+     * The public "Projects Gallery" image set: the full pool (sold-project images
+     * + editor uploads, see GalleryImage::pool) minus any images the editor hid
+     * (the `gallery_hidden` setting), shuffled on every visit (so the order
+     * changes each refresh) and capped. The client shows a window of
+     * `gallery_count` tiles and pages through the rest with the arrows.
      */
     private function galleryImages(): array
     {
@@ -169,46 +168,14 @@ class PropertiesController extends Controller
             return [];
         }
 
-        // Bound the payload — the carousel pages through this; anything beyond
-        // rotates in on the next refresh (the pool is re-shuffled each visit).
-        $cap = 60;
+        $hidden = json_decode((string) Setting::get('gallery_hidden', '[]'), true) ?: [];
 
-        // Images from sold projects.
-        $soldPool = Project::active()
-            ->where('listing_status', 'sold')
-            ->with(['images.media'])
-            ->get()
-            ->flatMap(function (Project $p) {
-                if ($p->images->isNotEmpty()) {
-                    return $p->images
-                        ->filter(fn (ProjectImage $img) => $img->media !== null)
-                        ->map(fn (ProjectImage $img) => [
-                            'id' => "img-{$img->id}",
-                            'url' => route('media.serve', $img->media_id, false),
-                            'alt' => $p->title_en,
-                        ]);
-                }
-
-                // No uploaded gallery → use the project's placeholder render.
-                return [[
-                    'id' => "slug-{$p->slug}",
-                    'url' => "/images/projects/{$p->slug}.svg",
-                    'alt' => $p->title_en,
-                ]];
-            });
-
-        // Editor-curated gallery images.
-        $editorPool = GalleryImage::ordered()
-            ->with('media')
-            ->get()
-            ->filter(fn (GalleryImage $g) => $g->media !== null)
-            ->map(fn (GalleryImage $g) => [
-                'id' => "gal-{$g->id}",
-                'url' => route('media.serve', $g->media_id, false),
-                'alt' => '',
-            ]);
-
-        // Fresh random order on every page load.
-        return $soldPool->concat($editorPool)->shuffle()->take($cap)->values()->all();
+        return GalleryImage::pool()
+            ->reject(fn (array $img) => in_array($img['id'], $hidden, true))
+            ->map(fn (array $img) => ['id' => $img['id'], 'url' => $img['url'], 'alt' => $img['alt']])
+            ->shuffle()
+            ->take(60) // bound the payload; surplus rotates in on the next refresh
+            ->values()
+            ->all();
     }
 }

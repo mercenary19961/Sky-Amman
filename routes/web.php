@@ -119,8 +119,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Projects Gallery — editor-curated images (pooled with sold-project images).
     Route::get('/gallery', [GalleryImageController::class, 'index'])->name('gallery.index');
     Route::post('/gallery/settings', [GalleryImageController::class, 'updateSettings'])->name('gallery.settings');
+    Route::post('/gallery/toggle', [GalleryImageController::class, 'toggleHidden'])->name('gallery.toggle');
     Route::post('/gallery', [GalleryImageController::class, 'store'])->name('gallery.store');
-    Route::post('/gallery/reorder', [GalleryImageController::class, 'reorder'])->name('gallery.reorder');
     Route::delete('/gallery/{id}', [GalleryImageController::class, 'destroy'])->name('gallery.destroy')->where('id', '[0-9]+');
 
     // Page images — replaceable decorative image slots (About "Crafted" cluster, …).

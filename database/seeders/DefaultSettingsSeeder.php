@@ -52,6 +52,8 @@ class DefaultSettingsSeeder extends Seeder
             ['key' => 'gallery_count', 'value' => '6', 'type' => 'number', 'group' => 'gallery'],
             ['key' => 'gallery_mode', 'value' => 'shuffle', 'type' => 'text', 'group' => 'gallery'],
             ['key' => 'gallery_manual', 'value' => '[]', 'type' => 'json', 'group' => 'gallery'],
+            //  • gallery_hidden — JSON array of pool image ids the editor hid
+            ['key' => 'gallery_hidden', 'value' => '[]', 'type' => 'json', 'group' => 'gallery'],
 
             // Lead routing map — request_type -> recipient email(s). JSON-encoded.
             // Empty entries fall back to company_email.
