@@ -85,6 +85,54 @@ export interface ProjectTrashProps extends PageProps {
     projects: Paginator<ProjectTrashItem>;
 }
 
+export interface ProjectShowImage {
+    id: number;
+    url: string;
+    filename: string;
+    is_featured: boolean;
+    is_og: boolean;
+}
+
+export interface ProjectShowItem {
+    id: number;
+    slug: string;
+    title_en: string;
+    title_ar: string;
+    category: ProjectCategory;
+    listing_status: ProjectListingStatus | null;
+    group: string | null;
+    is_active: boolean;
+    short_description_en: string | null;
+    short_description_ar: string | null;
+    description_en: string | null;
+    description_ar: string | null;
+    location_en: string | null;
+    location_ar: string | null;
+    address_en: string | null;
+    address_ar: string | null;
+    area_sqm: number | null;
+    completion_year: number | null;
+    floors: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    hidden_specs: string[];
+    seo_title_en: string | null;
+    seo_title_ar: string | null;
+    seo_description_en: string | null;
+    seo_description_ar: string | null;
+    images: ProjectShowImage[];
+    inquiries_count: number;
+    created_by: string | null;
+    updated_by: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+    public_url: string;
+}
+
+export interface ProjectShowProps extends PageProps {
+    project: ProjectShowItem;
+}
+
 export interface ProjectFormProps extends PageProps {
     item: ProjectFormItem | null;
 }

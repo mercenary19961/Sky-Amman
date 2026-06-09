@@ -183,6 +183,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit')->where('id', '[0-9]+');
+    Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show')->where('id', '[0-9]+');
     Route::put('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update')->where('id', '[0-9]+');
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy'])->name('projects.destroy')->where('id', '[0-9]+');
     Route::post('/projects/{id}/restore', [ProjectController::class, 'restore'])->name('projects.restore')->where('id', '[0-9]+');

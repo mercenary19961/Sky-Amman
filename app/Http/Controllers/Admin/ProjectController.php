@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProjectRequest;
 use App\Http\Requests\Admin\UpdateProjectRequest;
 use App\Models\Project;
+use App\Models\ProjectImage;
 use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -144,6 +145,68 @@ class ProjectController extends Controller
                     ],
                 ])->values(),
             ]),
+        ]);
+    }
+
+    /** Read-only project detail view (the card/row links here). */
+    public function show(int $id): Response
+    {
+        $project = Project::withCount('inquiries')
+            ->with([
+                'images.media:id,path,mime_type,original_filename',
+                'createdBy:id,name',
+                'updatedBy:id,name',
+            ])
+            ->findOrFail($id);
+
+        $images = $project->images
+            ->filter(fn (ProjectImage $img) => $img->media !== null)
+            ->map(fn (ProjectImage $img) => [
+                'id'          => $img->id,
+                'url'         => route('media.serve', $img->media_id, false),
+                'filename'    => $img->media->original_filename,
+                'is_featured' => $img->media_id === $project->featured_image_id,
+                'is_og'       => $img->media_id === $project->og_image_id,
+            ])
+            ->values()
+            ->all();
+
+        return Inertia::render('Admin/Projects/Show', [
+            'project' => [
+                'id'                   => $project->id,
+                'slug'                 => $project->slug,
+                'title_en'             => $project->title_en,
+                'title_ar'             => $project->title_ar,
+                'category'             => $project->category,
+                'listing_status'       => $project->listing_status,
+                'group'                => $project->group,
+                'is_active'            => $project->is_active,
+                'short_description_en' => $project->short_description_en,
+                'short_description_ar' => $project->short_description_ar,
+                'description_en'       => $project->description_en,
+                'description_ar'       => $project->description_ar,
+                'location_en'          => $project->location_en,
+                'location_ar'          => $project->location_ar,
+                'address_en'           => $project->address_en,
+                'address_ar'           => $project->address_ar,
+                'area_sqm'             => $project->area_sqm,
+                'completion_year'      => $project->completion_year,
+                'floors'               => $project->floors,
+                'bedrooms'             => $project->bedrooms,
+                'bathrooms'            => $project->bathrooms,
+                'hidden_specs'         => $project->hidden_specs ?? [],
+                'seo_title_en'         => $project->seo_title_en,
+                'seo_title_ar'         => $project->seo_title_ar,
+                'seo_description_en'   => $project->seo_description_en,
+                'seo_description_ar'   => $project->seo_description_ar,
+                'images'               => $images,
+                'inquiries_count'      => $project->inquiries_count,
+                'created_by'           => $project->createdBy?->name,
+                'updated_by'           => $project->updatedBy?->name,
+                'created_at'           => $project->created_at?->toDayDateTimeString(),
+                'updated_at'           => $project->updated_at?->toDayDateTimeString(),
+                'public_url'           => route('properties.show', $project->slug),
+            ],
         ]);
     }
 

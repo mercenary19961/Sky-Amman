@@ -266,7 +266,9 @@ export default function ProjectsIndex() {
 
                                     {/* Title */}
                                     <td className="px-4 py-3">
-                                        <div className="font-medium text-ink">{project.title_en}</div>
+                                        <Link href={`/admin/projects/${project.id}`} className="font-medium text-ink hover:text-primary transition-colors">
+                                            {project.title_en}
+                                        </Link>
                                         <div className="text-ink-muted text-xs mt-0.5">{project.title_ar}</div>
                                     </td>
 
@@ -395,6 +397,13 @@ function ProjectCard({ project, onDelete }: { project: ProjectListItem; onDelete
         <div className="group relative flex flex-col overflow-hidden rounded-lg border border-ink/5 dark:border-white/10 bg-white dark:bg-zinc-800 transition-all hover:shadow-md">
             {/* Cover */}
             <div className="relative aspect-video bg-surface-muted">
+                {/* Click anywhere on the cover opens the project (sits below the
+                    carousel buttons, which are z-10). */}
+                <Link
+                    href={`/admin/projects/${project.id}`}
+                    className="absolute inset-0 z-1"
+                    aria-label={`View ${project.title_en}`}
+                />
                 {images.length > 0 ? (
                     <img src={images[idx]} alt="" className="h-full w-full object-cover" />
                 ) : (
@@ -450,7 +459,9 @@ function ProjectCard({ project, onDelete }: { project: ProjectListItem; onDelete
 
             {/* Body */}
             <div className="flex flex-1 flex-col p-3">
-                <div className="font-semibold text-ink truncate">{project.title_en}</div>
+                <Link href={`/admin/projects/${project.id}`} className="block font-semibold text-ink truncate hover:text-primary transition-colors">
+                    {project.title_en}
+                </Link>
                 <div className="mt-0.5 truncate text-xs text-ink-muted" dir="rtl">{project.title_ar}</div>
 
                 <div className="mt-2">
