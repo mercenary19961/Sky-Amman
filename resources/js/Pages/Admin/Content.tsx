@@ -2,11 +2,12 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
-    ExternalLink, MousePointerClick, ChevronRight,
+    ExternalLink, MousePointerClick, ChevronRight, RotateCcw,
     Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { UndoButton } from '@/Components/Admin/UndoButton';
+import { ConfirmActionButton } from '@/Components/Admin/ConfirmActionButton';
 import { cn } from '@/lib/cn';
 import type { ContentPageProps, SiteContentRow } from '@/types/admin/content';
 
@@ -120,8 +121,12 @@ function RowInput({
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ContentEditor() {
-    const { grouped, pages, undoMeta } = usePage<ContentPageProps>().props;
+    const { grouped, pages, undoMeta, auth } = usePage<ContentPageProps>().props;
     const orderedPages = PAGE_ORDER.filter(slug => pages[slug]);
+    const isAdmin = auth.user?.role === 'admin';
+
+    // Admin-only safeguard: restore all section copy to the shipped defaults.
+    const resetToDefaults = () => router.post('/admin/content/reset', {}, { preserveScroll: true });
 
     // Which page accordion is open — only one at a time
     const [expandedPage, setExpandedPage] = useState<string | null>(orderedPages[0] ?? null);
@@ -320,6 +325,33 @@ export default function ContentEditor() {
                         </button>
                     ))}
                 </div>
+
+                {/* Admin-only "Reset to Default" safeguard — restores every
+                    section's text to the shipped copy (type-to-confirm). */}
+                {isAdmin && (
+                    <div className="shrink-0">
+                        <ConfirmActionButton
+                            onConfirm={resetToDefaults}
+                            tone="warning"
+                            confirmWord="Reset to Default"
+                            heading="Reset all Site Content?"
+                            actionLabel="Reset to Default"
+                            actionIcon={<RotateCcw size={15} />}
+                            title="Restore all section text to the shipped defaults"
+                            description={
+                                <>
+                                    This restores the <strong className="text-ink">text and visibility of every section on every page</strong> to
+                                    the defaults we ship — discarding all editor changes. Per-page SEO is not affected.
+                                    You can undo this afterwards from the Change Log.
+                                </>
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+                        >
+                            <RotateCcw size={15} />
+                            Reset to Default
+                        </ConfirmActionButton>
+                    </div>
+                )}
 
                 {/* Persistent "Undo last save" — pinned to the far right of the
                     page-tab row so it doesn't push the preview/editor down. */}

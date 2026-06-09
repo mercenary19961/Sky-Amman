@@ -12,6 +12,41 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Innovation #1: optional `media_id` lets a single content row carry text + an
  * image (hero bg, illustration). Innovation #5: `is_visible` lets admin hide an
  * entire section without a code deploy.
+ *
+ * @property int $id
+ * @property string $page
+ * @property string $section
+ * @property string $key
+ * @property string|null $content_en
+ * @property string|null $content_ar
+ * @property string $type
+ * @property int|null $media_id
+ * @property bool $is_visible
+ * @property int $sort_order
+ * @property int|null $updated_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $content
+ * @property-read \App\Models\Media|null $media
+ * @property-read \App\Models\User|null $updatedByUser
+ * @method static Builder<static>|SiteContent newModelQuery()
+ * @method static Builder<static>|SiteContent newQuery()
+ * @method static Builder<static>|SiteContent query()
+ * @method static Builder<static>|SiteContent visible()
+ * @method static Builder<static>|SiteContent whereContentAr($value)
+ * @method static Builder<static>|SiteContent whereContentEn($value)
+ * @method static Builder<static>|SiteContent whereCreatedAt($value)
+ * @method static Builder<static>|SiteContent whereId($value)
+ * @method static Builder<static>|SiteContent whereIsVisible($value)
+ * @method static Builder<static>|SiteContent whereKey($value)
+ * @method static Builder<static>|SiteContent whereMediaId($value)
+ * @method static Builder<static>|SiteContent wherePage($value)
+ * @method static Builder<static>|SiteContent whereSection($value)
+ * @method static Builder<static>|SiteContent whereSortOrder($value)
+ * @method static Builder<static>|SiteContent whereType($value)
+ * @method static Builder<static>|SiteContent whereUpdatedAt($value)
+ * @method static Builder<static>|SiteContent whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
 class SiteContent extends Model
 {

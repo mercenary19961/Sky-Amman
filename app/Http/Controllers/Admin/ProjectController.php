@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProjectRequest;
 use App\Http\Requests\Admin\UpdateProjectRequest;
 use App\Models\Project;
+use App\Models\ProjectImage;
 use App\Services\ChangeLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +22,7 @@ class ProjectController extends Controller
     public function index(Request $request): Response
     {
         $query = Project::withCount(['images', 'inquiries'])
-            ->with('featuredImage:id');
+            ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id']);
 
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -47,12 +50,25 @@ class ProjectController extends Controller
             $perPage = 12;
         }
 
-        $projects = $query->ordered()->paginate($perPage)->withQueryString();
+        $projects = $query->ordered()->paginate($perPage)->withQueryString()
+            ->through(fn (Project $p) => [
+                'id'              => $p->id,
+                'title_en'        => $p->title_en,
+                'title_ar'        => $p->title_ar,
+                'category'        => $p->category,
+                'listing_status'  => $p->listing_status,
+                'is_active'       => $p->is_active,
+                'images_count'    => $p->images_count,
+                'inquiries_count' => $p->inquiries_count,
+                // Ordered image URLs (featured/OG first) for the card carousel +
+                // list thumbnail; empty when the project has no uploads yet.
+                'images'          => $p->cardImageUrls(),
+            ]);
 
         return Inertia::render('Admin/Projects/Index', [
             'projects'     => $projects,
             'filters'      => $request->only(['category', 'listing_status', 'active', 'search']) + ['per_page' => $perPage],
-            'trashedCount' => Project::onlyTrashed()->count(),
+            'trashedCount' => Project::onlyTrashed()->count('*'), // '*' is count's default — explicit to silence intelephense P1005
         ]);
     }
 
@@ -82,16 +98,22 @@ class ProjectController extends Controller
         $slug = Str::slug($data['title_en']);
         $base = $slug;
         $i = 1;
-        while (Project::where('slug', $slug)->exists()) {
+        // '=', 'and' are where()'s defaults — explicit only to silence intelephense P1005.
+        while (Project::where('slug', '=', $slug, 'and')->exists()) {
             $slug = $base . '-' . $i++;
         }
         $data['slug'] = $slug;
 
-        foreach (['short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
+        foreach (['title_en', 'title_ar', 'short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = strip_tags($data[$field]);
             }
         }
+
+        // A brand-new project has no gallery yet, so it can't reference a
+        // featured/OG image — those are picked from its own uploaded gallery later.
+        $data['featured_image_id'] = null;
+        $data['og_image_id'] = null;
 
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
@@ -127,21 +149,123 @@ class ProjectController extends Controller
         ]);
     }
 
+    /** Read-only project detail view (the card/row links here). */
+    public function show(int $id): Response
+    {
+        $project = Project::withCount('inquiries')
+            ->with([
+                'images.media:id,path,mime_type,original_filename',
+                'createdBy:id,name',
+                'updatedBy:id,name',
+            ])
+            ->findOrFail($id);
+
+        $images = $project->images
+            ->filter(fn (ProjectImage $img) => $img->media !== null)
+            ->map(fn (ProjectImage $img) => [
+                'id'          => $img->id,
+                'url'         => route('media.serve', $img->media_id, false),
+                'filename'    => $img->media->original_filename,
+                'is_featured' => $img->media_id === $project->featured_image_id,
+                'is_og'       => $img->media_id === $project->og_image_id,
+            ])
+            ->values()
+            ->all();
+
+        return Inertia::render('Admin/Projects/Show', [
+            'project' => [
+                'id'                   => $project->id,
+                'slug'                 => $project->slug,
+                'title_en'             => $project->title_en,
+                'title_ar'             => $project->title_ar,
+                'category'             => $project->category,
+                'listing_status'       => $project->listing_status,
+                'group'                => $project->group,
+                'is_active'            => $project->is_active,
+                'short_description_en' => $project->short_description_en,
+                'short_description_ar' => $project->short_description_ar,
+                'description_en'       => $project->description_en,
+                'description_ar'       => $project->description_ar,
+                'location_en'          => $project->location_en,
+                'location_ar'          => $project->location_ar,
+                'address_en'           => $project->address_en,
+                'address_ar'           => $project->address_ar,
+                'area_sqm'             => $project->area_sqm,
+                'completion_year'      => $project->completion_year,
+                'floors'               => $project->floors,
+                'bedrooms'             => $project->bedrooms,
+                'bathrooms'            => $project->bathrooms,
+                'hidden_specs'         => $project->hidden_specs ?? [],
+                'seo_title_en'         => $project->seo_title_en,
+                'seo_title_ar'         => $project->seo_title_ar,
+                'seo_description_en'   => $project->seo_description_en,
+                'seo_description_ar'   => $project->seo_description_ar,
+                'images'               => $images,
+                'inquiries_count'      => $project->inquiries_count,
+                'created_by'           => $project->createdBy?->name,
+                'updated_by'           => $project->updatedBy?->name,
+                'created_at'           => $project->created_at?->toDayDateTimeString(),
+                'updated_at'           => $project->updated_at?->toDayDateTimeString(),
+                'public_url'           => route('properties.show', $project->slug),
+            ],
+        ]);
+    }
+
     public function update(UpdateProjectRequest $request, int $id, ChangeLogService $changeLog): RedirectResponse
     {
         $project = Project::findOrFail($id);
         $old = $project->attributesToArray();
         $data = $request->validated();
 
-        foreach (['short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
+        foreach (['title_en', 'title_ar', 'short_description_en', 'short_description_ar', 'description_en', 'description_ar'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = strip_tags($data[$field]);
+            }
+        }
+
+        // The featured/OG image must be one of THIS project's own gallery images
+        // (the UI only offers those). Reject a tampered id pointing elsewhere.
+        $ownMediaIds = $project->images()->pluck('media_id')->all();
+        foreach (['featured_image_id', 'og_image_id'] as $field) {
+            if (! empty($data[$field]) && ! in_array($data[$field], $ownMediaIds)) {
+                throw ValidationException::withMessages([
+                    $field => 'The selected image must belong to this project\'s gallery.',
+                ]);
             }
         }
 
         $data['updated_by'] = Auth::id();
 
         $project->update($data);
+
+        $changeLog->log('project', $project->id, 'update', $old, $project->fresh()->attributesToArray(), $project->title_en);
+
+        return redirect()->back()->with('success', 'Project updated.');
+    }
+
+    /**
+     * Quick status changes from the project show page — toggle active state and/or
+     * set the listing status (e.g. mark as sold) without opening the full form.
+     * Only the provided fields are touched; the change is logged (revertable).
+     */
+    public function updateStatus(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
+    {
+        $project = Project::findOrFail($id);
+
+        $data = $request->validate([
+            'is_active'      => ['sometimes', 'boolean'],
+            'listing_status' => ['sometimes', 'nullable', Rule::in(['for_sale', 'for_rent', 'sold', 'reserved'])],
+        ]);
+
+        $old = $project->attributesToArray();
+        $project->fill($data);
+
+        if (! $project->isDirty()) {
+            return redirect()->back();
+        }
+
+        $project->updated_by = Auth::id();
+        $project->save();
 
         $changeLog->log('project', $project->id, 'update', $old, $project->fresh()->attributesToArray(), $project->title_en);
 

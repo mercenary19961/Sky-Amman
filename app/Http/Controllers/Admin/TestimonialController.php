@@ -45,10 +45,10 @@ class TestimonialController extends Controller
         $mediaId = Media::storeFile($request->file('image'), 'testimonials', Auth::id())->id;
 
         $testimonial = Testimonial::create([
-            'name_en'    => ($data['name_en'] ?? '') ?: null,
-            'name_ar'    => ($data['name_ar'] ?? '') ?: null,
-            'quote_en'   => ($data['quote_en'] ?? '') ?: null,
-            'quote_ar'   => ($data['quote_ar'] ?? '') ?: null,
+            'name_en'    => strip_tags($data['name_en'] ?? '') ?: null,
+            'name_ar'    => strip_tags($data['name_ar'] ?? '') ?: null,
+            'quote_en'   => strip_tags($data['quote_en'] ?? '') ?: null,
+            'quote_ar'   => strip_tags($data['quote_ar'] ?? '') ?: null,
             'media_id'   => $mediaId,
             'is_active'  => true,
             'sort_order' => (int) Testimonial::query()->max('sort_order') + 1,
@@ -66,10 +66,10 @@ class TestimonialController extends Controller
         $old = $testimonial->attributesToArray();
 
         $attributes = [
-            'name_en'  => ($data['name_en'] ?? '') ?: null,
-            'name_ar'  => ($data['name_ar'] ?? '') ?: null,
-            'quote_en' => ($data['quote_en'] ?? '') ?: null,
-            'quote_ar' => ($data['quote_ar'] ?? '') ?: null,
+            'name_en'  => strip_tags($data['name_en'] ?? '') ?: null,
+            'name_ar'  => strip_tags($data['name_ar'] ?? '') ?: null,
+            'quote_en' => strip_tags($data['quote_en'] ?? '') ?: null,
+            'quote_ar' => strip_tags($data['quote_ar'] ?? '') ?: null,
         ];
 
         // A new upload replaces the avatar; the old media row is soft-deleted

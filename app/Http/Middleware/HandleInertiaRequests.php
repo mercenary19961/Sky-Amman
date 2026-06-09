@@ -38,8 +38,10 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
             ],
             // One-shot payload set by ChangeLogService after a tracked save, so the
-            // admin can revert the change just made via the UndoToast.
-            'undo' => fn () => $request->session()->get('undo'),
+            // admin can revert the change just made via the UndoToast. Admin-only:
+            // the revert route is behind the `admin` middleware, so surfacing the
+            // Undo affordance to editors would only hand them a button that 403s.
+            'undo' => fn () => $request->user()?->isAdmin() ? $request->session()->get('undo') : null,
             'siteSettings' => fn () => $this->getSiteSettings(),
             // Footer copy is admin-editable via the Site Content editor under the
             // "footer" pseudo-page. Both locales ship to the client so the language

@@ -46,10 +46,10 @@ class DepartmentMemberController extends Controller
             : null;
 
         $member = DepartmentMember::create([
-            'name_en'    => ($data['name_en'] ?? '') ?: null,
-            'name_ar'    => ($data['name_ar'] ?? '') ?: null,
-            'role_en'    => ($data['role_en'] ?? '') ?: null,
-            'role_ar'    => ($data['role_ar'] ?? '') ?: null,
+            'name_en'    => strip_tags($data['name_en'] ?? '') ?: null,
+            'name_ar'    => strip_tags($data['name_ar'] ?? '') ?: null,
+            'role_en'    => strip_tags($data['role_en'] ?? '') ?: null,
+            'role_ar'    => strip_tags($data['role_ar'] ?? '') ?: null,
             'media_id'   => $mediaId,
             'is_active'  => true,
             'sort_order' => (int) DepartmentMember::query()->max('sort_order') + 1,
@@ -67,10 +67,10 @@ class DepartmentMemberController extends Controller
         $old = $member->attributesToArray();
 
         $attributes = [
-            'name_en' => ($data['name_en'] ?? '') ?: null,
-            'name_ar' => ($data['name_ar'] ?? '') ?: null,
-            'role_en' => ($data['role_en'] ?? '') ?: null,
-            'role_ar' => ($data['role_ar'] ?? '') ?: null,
+            'name_en' => strip_tags($data['name_en'] ?? '') ?: null,
+            'name_ar' => strip_tags($data['name_ar'] ?? '') ?: null,
+            'role_en' => strip_tags($data['role_en'] ?? '') ?: null,
+            'role_ar' => strip_tags($data['role_ar'] ?? '') ?: null,
         ];
 
         // A new upload replaces the photo; the old media row is soft-deleted.

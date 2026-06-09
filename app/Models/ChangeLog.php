@@ -8,7 +8,39 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Persistent record of admin edits — drives the Change Log tab + Revert flow.
+ *
  * Created by ChangeLogService whenever a tracked model is created/updated/deleted.
+ *
+ * @property int $id
+ * @property string $model_type
+ * @property string $model_id
+ * @property string $action
+ * @property array<array-key, mixed>|null $old_data
+ * @property array<array-key, mixed>|null $new_data
+ * @property string|null $label
+ * @property int|null $changed_by
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon|null $reverted_at
+ * @property int|null $reverted_by
+ * @property-read \App\Models\User|null $changedByUser
+ * @property-read \App\Models\User|null $revertedByUser
+ * @method static Builder<static>|ChangeLog forModel(string $modelType, string|int $modelId)
+ * @method static Builder<static>|ChangeLog newModelQuery()
+ * @method static Builder<static>|ChangeLog newQuery()
+ * @method static Builder<static>|ChangeLog notReverted()
+ * @method static Builder<static>|ChangeLog query()
+ * @method static Builder<static>|ChangeLog whereAction($value)
+ * @method static Builder<static>|ChangeLog whereChangedBy($value)
+ * @method static Builder<static>|ChangeLog whereCreatedAt($value)
+ * @method static Builder<static>|ChangeLog whereId($value)
+ * @method static Builder<static>|ChangeLog whereLabel($value)
+ * @method static Builder<static>|ChangeLog whereModelId($value)
+ * @method static Builder<static>|ChangeLog whereModelType($value)
+ * @method static Builder<static>|ChangeLog whereNewData($value)
+ * @method static Builder<static>|ChangeLog whereOldData($value)
+ * @method static Builder<static>|ChangeLog whereRevertedAt($value)
+ * @method static Builder<static>|ChangeLog whereRevertedBy($value)
+ * @mixin \Eloquent
  */
 class ChangeLog extends Model
 {

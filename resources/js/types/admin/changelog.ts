@@ -18,20 +18,29 @@ export interface ChangeLogItem {
     changed_by: string | null;
     created_ago: string;
     created_at: string;
+    created_time: string;
+    day_key: string;
+    day_label: string;
     revertable: boolean;
     reverted: boolean;
     reverted_by: string | null;
     reverted_ago: string | null;
+    reverted_at: string | null;
 }
 
 export interface ChangeLogPageProps extends PageProps {
     logs: Paginator<ChangeLogItem>;
     users: Array<{ id: number; name: string }>;
     sectionLabels: Record<string, string>;
+    perPageOptions: number[];
     filters: {
         model_type?: string;
         changed_by?: string;
+        action?: string;
+        status?: string;
+        search?: string;
         period?: string;
+        per_page?: string;
     };
 }
 

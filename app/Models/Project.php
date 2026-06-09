@@ -13,6 +13,104 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * filter pill the project appears under on the homepage Project Showcase
  * (`under_development`, `ready`, `investment_opportunity`). The `listing_status`
  * enum drives the badge on the card ("FOR SALE", "FOR RENT", etc.).
+ *
+ * @property int $id
+ * @property string $title_en
+ * @property string $title_ar
+ * @property string $slug
+ * @property string $category
+ * @property string|null $listing_status
+ * @property string|null $short_description_en
+ * @property string|null $short_description_ar
+ * @property string|null $description_en
+ * @property string|null $description_ar
+ * @property string|null $location_en
+ * @property string|null $location_ar
+ * @property string|null $address_en
+ * @property string|null $address_ar
+ * @property int|null $area_sqm
+ * @property int|null $completion_year
+ * @property int|null $floors
+ * @property int|null $bedrooms
+ * @property int|null $bathrooms
+ * @property int|null $featured_image_id
+ * @property string|null $seo_title_en
+ * @property string|null $seo_title_ar
+ * @property string|null $seo_description_en
+ * @property string|null $seo_description_ar
+ * @property int|null $og_image_id
+ * @property bool $is_active
+ * @property bool $is_featured
+ * @property int $sort_order
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $group
+ * @property array<array-key, mixed>|null $hidden_specs
+ * @property-read \App\Models\User|null $createdBy
+ * @property-read \App\Models\Media|null $featuredImage
+ * @property-read string $address
+ * @property-read string $description
+ * @property-read string $location
+ * @property-read string $short_description
+ * @property-read string $title
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProjectImage> $images
+ * @property-read int|null $images_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ContactSubmission> $inquiries
+ * @property-read int|null $inquiries_count
+ * @property-read \App\Models\Media|null $ogImage
+ * @property-read \App\Models\User|null $updatedBy
+ * @method static Builder<static>|Project active()
+ * @method static Builder<static>|Project featured()
+ * @method static Builder<static>|Project inCategory(string $category)
+ * @method static Builder<static>|Project investmentOpportunity()
+ * @method static Builder<static>|Project newModelQuery()
+ * @method static Builder<static>|Project newQuery()
+ * @method static Builder<static>|Project onlyTrashed()
+ * @method static Builder<static>|Project ordered()
+ * @method static Builder<static>|Project query()
+ * @method static Builder<static>|Project ready()
+ * @method static Builder<static>|Project underDevelopment()
+ * @method static Builder<static>|Project whereAddressAr($value)
+ * @method static Builder<static>|Project whereAddressEn($value)
+ * @method static Builder<static>|Project whereAreaSqm($value)
+ * @method static Builder<static>|Project whereBathrooms($value)
+ * @method static Builder<static>|Project whereBedrooms($value)
+ * @method static Builder<static>|Project whereCategory($value)
+ * @method static Builder<static>|Project whereCompletionYear($value)
+ * @method static Builder<static>|Project whereCreatedAt($value)
+ * @method static Builder<static>|Project whereCreatedBy($value)
+ * @method static Builder<static>|Project whereDeletedAt($value)
+ * @method static Builder<static>|Project whereDescriptionAr($value)
+ * @method static Builder<static>|Project whereDescriptionEn($value)
+ * @method static Builder<static>|Project whereFeaturedImageId($value)
+ * @method static Builder<static>|Project whereFloors($value)
+ * @method static Builder<static>|Project whereGroup($value)
+ * @method static Builder<static>|Project whereHiddenSpecs($value)
+ * @method static Builder<static>|Project whereId($value)
+ * @method static Builder<static>|Project whereIsActive($value)
+ * @method static Builder<static>|Project whereIsFeatured($value)
+ * @method static Builder<static>|Project whereListingStatus($value)
+ * @method static Builder<static>|Project whereLocationAr($value)
+ * @method static Builder<static>|Project whereLocationEn($value)
+ * @method static Builder<static>|Project whereOgImageId($value)
+ * @method static Builder<static>|Project whereSeoDescriptionAr($value)
+ * @method static Builder<static>|Project whereSeoDescriptionEn($value)
+ * @method static Builder<static>|Project whereSeoTitleAr($value)
+ * @method static Builder<static>|Project whereSeoTitleEn($value)
+ * @method static Builder<static>|Project whereShortDescriptionAr($value)
+ * @method static Builder<static>|Project whereShortDescriptionEn($value)
+ * @method static Builder<static>|Project whereSlug($value)
+ * @method static Builder<static>|Project whereSortOrder($value)
+ * @method static Builder<static>|Project whereTitleAr($value)
+ * @method static Builder<static>|Project whereTitleEn($value)
+ * @method static Builder<static>|Project whereUpdatedAt($value)
+ * @method static Builder<static>|Project whereUpdatedBy($value)
+ * @method static Builder<static>|Project withTrashed(bool $withTrashed = true)
+ * @method static Builder<static>|Project withoutTrashed()
+ * @mixin \Eloquent
  */
 class Project extends Model
 {
@@ -83,6 +181,39 @@ class Project extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Ordered list of this project's image URLs for card carousels: the featured
+     * (lead) image first, then the OG pick, then the rest of the gallery (deduped).
+     * Returns real uploaded images only (no placeholder) — callers add their own
+     * fallback. Eager-load images.media + featuredImage + ogImage to avoid N+1.
+     */
+    public function cardImageUrls(): array
+    {
+        $urls = [];
+        $seen = [];
+        $push = function (?int $mediaId) use (&$urls, &$seen) {
+            if ($mediaId === null || isset($seen[$mediaId])) {
+                return;
+            }
+            $seen[$mediaId] = true;
+            $urls[] = route('media.serve', $mediaId, false);
+        };
+
+        if ($this->featuredImage) {
+            $push($this->featured_image_id);
+        }
+        if ($this->ogImage) {
+            $push($this->og_image_id);
+        }
+        foreach ($this->images as $img) {
+            if ($img->media !== null) {
+                $push($img->media_id);
+            }
+        }
+
+        return $urls;
     }
 
     public function inquiries(): HasMany

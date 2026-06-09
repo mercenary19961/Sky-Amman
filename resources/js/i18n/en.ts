@@ -259,6 +259,7 @@ const en = {
             name: 'Name',
             email: 'Email',
             phone: 'Phone',
+            phoneHint: 'Enter a Jordan mobile, e.g. +962 7XXXXXXXX or 07XXXXXXXX.',
             requestType: 'Request Type',
             subject: 'Subject',
             message: 'Message',

@@ -14,6 +14,42 @@ use Illuminate\Support\Str;
  * @property string $path
  * @property string $alt_text_en
  * @property string|null $alt_text_ar
+ * @property int $id
+ * @property string $filename
+ * @property string $original_filename
+ * @property string $mime_type
+ * @property int $size
+ * @property string $folder
+ * @property int|null $uploaded_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read string $alt_text
+ * @property-read string $formatted_size
+ * @property-read string $url
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProjectImage> $projectImages
+ * @property-read int|null $project_images_count
+ * @property-read \App\Models\User|null $uploadedByUser
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereAltTextAr($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereAltTextEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereFolder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereMimeType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereOriginalFilename($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media wherePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereSize($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media whereUploadedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Media withoutTrashed()
+ * @mixin \Eloquent
  */
 class Media extends Model
 {

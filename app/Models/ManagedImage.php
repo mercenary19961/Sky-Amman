@@ -10,6 +10,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * media record; when none is set the committed default path is used, so the site
  * looks the same out of the box but editors can swap specific images without a
  * deploy. Add a new entry to SLOTS to expose another image to the admin.
+ *
+ * @property int $id
+ * @property string $key
+ * @property int|null $media_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Media|null $media
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage whereKey($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage whereMediaId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagedImage whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class ManagedImage extends Model
 {
@@ -54,7 +70,9 @@ class ManagedImage extends Model
      */
     public static function urls(array $keys): array
     {
-        $rows = self::query()->whereIn('key', $keys)->with('media:id,path,mime_type')->get()->keyBy('key');
+        // The last two args ('and', false) are whereIn's defaults — passed
+        // explicitly only to satisfy intelephense's P1005 false positive.
+        $rows = self::query()->whereIn('key', $keys, 'and', false)->with('media:id,path,mime_type')->get()->keyBy('key');
 
         $out = [];
         foreach ($keys as $key) {

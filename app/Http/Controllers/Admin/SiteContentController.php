@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Models\SiteContent;
 use App\Services\ChangeLogService;
+use Database\Seeders\SiteContentSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,9 @@ class SiteContentController extends Controller
             'pages'    => $pages,
             // Persistent "Undo last save" pointer for this section (set by
             // ChangeLogService on the previous save; survives navigation).
-            'undoMeta' => session('undo:site_content'),
+            // Admin-only — the revert route is admin-gated (editors would get a
+            // button that 403s).
+            'undoMeta' => Auth::user()?->isAdmin() ? session('undo:site_content') : null,
         ]);
     }
 
@@ -139,5 +142,82 @@ class SiteContentController extends Controller
         );
 
         return redirect()->back()->with('success', 'Content saved.');
+    }
+
+    /**
+     * ADMIN-ONLY safeguard: restore every Site Content row to the shipped default
+     * copy (SiteContentSeeder::rows) — the recovery path when an editor's text
+     * edits need to be rolled back wholesale. Only rows that actually differ from
+     * the default are touched, so it's a no-op when everything is already default.
+     *
+     * Logged as a single revertable `site_content` change (model_id "all"), so
+     * the reset itself can be undone from the Change Log / Undo toast.
+     *
+     * NOTE: this restores section TEXT + visibility only. Page-level SEO has no
+     * seeded defaults yet — once it does, extend this to reset SEO too (CLAUDE.md).
+     */
+    public function reset(ChangeLogService $changeLog): RedirectResponse
+    {
+        $existing = SiteContent::all()->keyBy(fn (SiteContent $r) => "{$r->page}|{$r->section}|{$r->key}");
+
+        $oldRows = [];
+        $newRows = [];
+
+        foreach (SiteContentSeeder::rows() as [$page, $section, $key, $en, $ar]) {
+            $current = $existing->get("{$page}|{$section}|{$key}");
+
+            // Skip rows already matching the default (text + visible).
+            if ($current !== null
+                && $current->content_en === $en
+                && $current->content_ar === $ar
+                && (bool) $current->is_visible === true) {
+                continue;
+            }
+
+            $label = ucfirst(str_replace('_', ' ', $section)) . ' · ' . $key;
+
+            if ($current !== null) {
+                $oldRows[$current->id] = [
+                    'content_en' => $current->content_en,
+                    'content_ar' => $current->content_ar,
+                    'is_visible' => (bool) $current->is_visible,
+                    'label'      => $label,
+                ];
+            }
+
+            $row = SiteContent::updateOrCreate(
+                ['page' => $page, 'section' => $section, 'key' => $key],
+                [
+                    'content_en' => $en,
+                    'content_ar' => $ar,
+                    'type'       => strlen($en) > 120 ? 'textarea' : 'text',
+                    'is_visible' => true,
+                    'updated_by' => Auth::id(),
+                ],
+            );
+
+            $newRows[$row->id] = [
+                'content_en' => $en,
+                'content_ar' => $ar,
+                'is_visible' => true,
+                'label'      => $label,
+            ];
+        }
+
+        // No-op when nothing differed from the defaults.
+        if (empty($newRows)) {
+            return redirect()->back()->with('success', 'Site content is already at the defaults.');
+        }
+
+        $changeLog->log(
+            'site_content',
+            'all',
+            'update',
+            ['rows' => $oldRows],
+            ['rows' => $newRows],
+            'Site Content reset to defaults',
+        );
+
+        return redirect()->back()->with('success', 'Site content reset to the defaults.');
     }
 }

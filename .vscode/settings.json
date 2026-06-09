@@ -1,0 +1,14 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  // Laravel's Eloquent uses __callStatic / __call magic (e.g. Project::where(),
+  // ->count()) whose arity intelephense can't always resolve, producing
+  // false-positive P1005 "Not enough arguments" errors on valid code. The
+  // laravel-ide-helper docblocks fix most resolution; this disables just that one
+  // over-eager check. Every other intelephense diagnostic stays on.
+  "intelephense.diagnostics.argumentCount": false
+}

@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, ArrowLeft, Save, FileText, Tag, MapPin, SlidersHorizontal, Search, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
@@ -200,9 +201,32 @@ export default function ProjectForm() {
         });
     }
 
+    // Elements that make a listing presentable. Only enforced when the project is
+    // Active (i.e. it will actually appear on the public site) — drafts save freely.
+    const missing = useMemo(() => {
+        if (!data.is_active) return [];
+        const m: { key: string; label: string; Icon: typeof ImageIcon }[] = [];
+        if (images.length === 0) m.push({ key: 'image', label: 'Property image', Icon: ImageIcon });
+        if (!data.description_en?.trim() && !data.description_ar?.trim()) m.push({ key: 'description', label: 'Description', Icon: FileText });
+        if (!data.location_en?.trim() && !data.location_ar?.trim()) m.push({ key: 'location', label: 'Location', Icon: MapPin });
+        return m;
+    }, [data.is_active, data.description_en, data.description_ar, data.location_en, data.location_ar, images.length]);
+
+    // Confirmation gate: when an active listing is missing elements, ask first.
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
     function submit(e: React.FormEvent) {
         e.preventDefault();
         if (!canSave) return;
+        if (missing.length > 0) {
+            setConfirmOpen(true);
+            return;
+        }
+        performSave();
+    }
+
+    function performSave() {
+        setConfirmOpen(false);
         setProcessing(true);
 
         const payload = {
@@ -500,6 +524,80 @@ export default function ProjectForm() {
                     {processing ? 'Saving…' : dirty ? 'Save Changes' : 'Saved'}
                 </button>
             </div>
+
+            {/* Missing-elements confirmation — fires when an Active listing would go
+                live without an image / description / location. */}
+            <AnimatePresence>
+                {confirmOpen && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setConfirmOpen(false)} />
+                        <motion.div
+                            className="relative w-full max-w-md rounded-2xl bg-white dark:bg-zinc-800 p-6 shadow-2xl"
+                            initial={{ scale: 0.95, opacity: 0, y: 12 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 12 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+                        >
+                            <div className="flex items-start gap-4">
+                                <motion.div
+                                    initial={{ scale: 0.5, rotate: -12 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ delay: 0.05, type: 'spring', stiffness: 320, damping: 18 }}
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400"
+                                >
+                                    <AlertTriangle size={22} />
+                                </motion.div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-ink dark:text-zinc-100">Publish without these?</h3>
+                                    <p className="mt-1 text-sm text-ink-muted">
+                                        This property is set to <strong className="text-ink dark:text-zinc-200">Active</strong>, so it will be visible on the site — but it's missing:
+                                    </p>
+                                </div>
+                            </div>
+
+                            <ul className="mt-4 space-y-2">
+                                {missing.map(({ key, label, Icon }, i) => (
+                                    <motion.li
+                                        key={key}
+                                        initial={{ opacity: 0, x: -8 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.08 + i * 0.05 }}
+                                        className="flex items-center gap-2.5 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"
+                                    >
+                                        <Icon size={15} /> {label}
+                                    </motion.li>
+                                ))}
+                            </ul>
+
+                            {!isEdit && missing.some(m => m.key === 'image') && (
+                                <p className="mt-3 text-xs text-ink-muted">You can upload images on the next screen, right after creating.</p>
+                            )}
+
+                            <div className="mt-6 flex items-center justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmOpen(false)}
+                                    className="px-4 py-2 text-sm rounded-md text-ink-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                >
+                                    Go back &amp; add them
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={performSave}
+                                    className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
+                                >
+                                    {isEdit ? 'Save anyway' : 'Create anyway'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AdminLayout>
     );
 }
