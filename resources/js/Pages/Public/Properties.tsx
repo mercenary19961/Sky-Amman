@@ -501,6 +501,18 @@ function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProp
     };
     const status = project.listing_status ? statusKey[project.listing_status] : null;
 
+    // Swappable image set (featured/OG first); fall back to the single lead image.
+    const images = project.images && project.images.length > 0 ? project.images : [project.image_url];
+    const [idx, setIdx] = useState(0);
+    const multi = images.length > 1;
+
+    // Step through images without following the card link.
+    const step = (e: React.MouseEvent, dir: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIdx((i) => (i + dir + images.length) % images.length);
+    };
+
     return (
         // Whole card is the link (the SVG card has no separate button).
         // #E5EBF0 card rx=52, near-square image rx=44, white FOR SALE badge.
@@ -515,15 +527,52 @@ function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProp
         >
             <div className="relative aspect-square w-full overflow-hidden rounded-[44px] bg-primary-light/30">
                 <img
-                    src={project.image_url}
+                    src={images[idx]}
                     alt={title}
                     loading="lazy"
                     className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 />
                 {status && (
-                    <span className="absolute top-5 inset-s-5 rounded-full bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-ink shadow-sm">
+                    <span className="absolute top-5 inset-s-5 z-10 rounded-full bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-ink shadow-sm">
                         {t(status)}
                     </span>
+                )}
+
+                {/* Image swap controls — only when the project has more than one image. */}
+                {multi && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={(e) => step(e, -1)}
+                            aria-label="Previous image"
+                            className="absolute inset-s-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-ink opacity-0 shadow-sm transition-all hover:bg-white group-hover:opacity-100 focus:opacity-100 rtl:rotate-180"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => step(e, 1)}
+                            aria-label="Next image"
+                            className="absolute inset-e-3 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/85 text-ink opacity-0 shadow-sm transition-all hover:bg-white group-hover:opacity-100 focus:opacity-100 rtl:rotate-180"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                        {/* Dots */}
+                        <div className="absolute inset-x-0 bottom-4 z-10 flex justify-center gap-1.5">
+                            {images.map((_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i); }}
+                                    aria-label={`Go to image ${i + 1}`}
+                                    className={cn(
+                                        'h-2 rounded-full bg-white transition-all',
+                                        i === idx ? 'w-5 opacity-100' : 'w-2 opacity-60 hover:opacity-90',
+                                    )}
+                                />
+                            ))}
+                        </div>
+                    </>
                 )}
             </div>
 

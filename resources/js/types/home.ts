@@ -29,6 +29,8 @@ export interface FeaturedProject {
     location_ar: string | null;
     area_sqm: number | null;
     image_url: string;
+    /** Full swappable image set (featured/OG first). Absent on homepage cards. */
+    images?: string[];
 }
 
 export interface InstagramPost {

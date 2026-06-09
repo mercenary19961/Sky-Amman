@@ -28,21 +28,28 @@ class PropertiesController extends Controller
 
         $projects = Project::active()
             ->ordered()
-            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm'])
-            ->map(fn (Project $p) => [
-                'id' => $p->id,
-                'slug' => $p->slug,
-                'title_en' => $p->title_en,
-                'title_ar' => $p->title_ar,
-                'category' => $p->category,
-                'listing_status' => $p->listing_status,
-                'group' => $p->group,
-                'location_en' => $p->location_en,
-                'location_ar' => $p->location_ar,
-                'area_sqm' => $p->area_sqm,
-                // Placeholder image path until the Media Library is live.
-                'image_url' => "/images/projects/{$p->slug}.svg",
-            ]);
+            ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id'])
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm', 'featured_image_id', 'og_image_id'])
+            ->map(function (Project $p) {
+                $images = $this->cardImages($p);
+
+                return [
+                    'id' => $p->id,
+                    'slug' => $p->slug,
+                    'title_en' => $p->title_en,
+                    'title_ar' => $p->title_ar,
+                    'category' => $p->category,
+                    'listing_status' => $p->listing_status,
+                    'group' => $p->group,
+                    'location_en' => $p->location_en,
+                    'location_ar' => $p->location_ar,
+                    'area_sqm' => $p->area_sqm,
+                    // Full swappable image set (featured/OG first). image_url is the
+                    // lead image, kept for back-compat (homepage card / OG fallback).
+                    'images' => $images,
+                    'image_url' => $images[0],
+                ];
+            });
 
         return Inertia::render('Public/Properties', [
             'content_en' => SiteContent::getPage('properties', 'en'),
@@ -64,6 +71,42 @@ class PropertiesController extends Controller
     }
 
     /**
+     * Ordered image URLs for a listing card: the featured (card thumbnail) image
+     * leads, then the OG pick, then the rest of the uploaded gallery (deduped).
+     * Falls back to the committed placeholder SVG when the project has no images.
+     */
+    private function cardImages(Project $p): array
+    {
+        $urls = [];
+        $seen = [];
+        $push = function (?int $mediaId) use (&$urls, &$seen) {
+            if ($mediaId === null || isset($seen[$mediaId])) {
+                return;
+            }
+            $seen[$mediaId] = true;
+            $urls[] = route('media.serve', $mediaId, false);
+        };
+
+        if ($p->featuredImage) {
+            $push($p->featured_image_id);
+        }
+        if ($p->ogImage) {
+            $push($p->og_image_id);
+        }
+        foreach ($p->images as $img) {
+            if ($img->media !== null) {
+                $push($img->media_id);
+            }
+        }
+
+        if (empty($urls)) {
+            $urls[] = "/images/projects/{$p->slug}.svg";
+        }
+
+        return $urls;
+    }
+
+    /**
      * Single property detail page. Loads one active project by slug with its
      * gallery, a handful of related listings, and the site map embed. All
      * bilingual fields are sent raw so the client swaps language instantly.
@@ -72,14 +115,18 @@ class PropertiesController extends Controller
     {
         $project = Project::active()
             ->where('slug', $slug)
-            ->with(['images.media'])
+            ->with(['images.media', 'featuredImage:id', 'ogImage:id'])
             ->firstOrFail();
 
         // Full image set for the hero + thumbnail row + lightbox. Uses the
         // project's uploaded gallery; falls back to a demo set of villa renders
         // until real galleries are uploaded so the gallery/lightbox is testable.
+        // The featured (lead) image is floated to the front, then the OG pick.
+        $featuredId = $project->featured_image_id;
+        $ogId = $project->og_image_id;
         $images = $project->images
             ->filter(fn (ProjectImage $img) => $img->media !== null)
+            ->sortBy(fn (ProjectImage $img) => $img->media_id === $featuredId ? 0 : ($img->media_id === $ogId ? 1 : 2))
             ->map(fn (ProjectImage $img) => [
                 'id' => "img-{$img->id}",
                 'url' => route('media.serve', $img->media_id, false),
@@ -145,9 +192,10 @@ class PropertiesController extends Controller
                 'seo_title_ar' => $project->seo_title_ar,
                 'seo_description_en' => $project->seo_description_en,
                 'seo_description_ar' => $project->seo_description_ar,
-                // Absolute URLs for canonical link + OG image + JSON-LD.
+                // Absolute URLs for canonical link + OG image + JSON-LD. OG prefers
+                // the admin's chosen OG image, else the project's lead image.
                 'url' => route('properties.show', $project->slug),
-                'og_image' => url($images[0]['url']),
+                'og_image' => url($project->ogImage ? route('media.serve', $ogId, false) : $images[0]['url']),
             ],
             'images' => $images,
             'related' => $related,
