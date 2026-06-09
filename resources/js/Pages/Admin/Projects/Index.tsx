@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare, LayoutGrid, List } from 'lucide-react';
+import { Plus, Trash2, Pencil, Search, Archive, AlignLeft, Tag, Activity, ToggleRight, Image as ImageIcon, MessageSquare, LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { Select } from '@/Components/Admin/Select';
@@ -247,9 +247,9 @@ export default function ProjectsIndex() {
                                 <tr key={project.id} className="hover:bg-surface-muted/50 transition-colors">
                                     {/* Thumbnail */}
                                     <td className="px-4 py-3">
-                                        {project.featured_image ? (
+                                        {project.images.length > 0 ? (
                                             <img
-                                                src={project.featured_image.url}
+                                                src={project.images[0]}
                                                 alt=""
                                                 className="w-10 h-10 object-cover rounded"
                                             />
@@ -386,14 +386,52 @@ export default function ProjectsIndex() {
 }
 
 function ProjectCard({ project, onDelete }: { project: ProjectListItem; onDelete: () => void }) {
+    const [idx, setIdx] = useState(0);
+    const images = project.images;
+    const multi = images.length > 1;
+    const step = (dir: number) => setIdx((i) => (i + dir + images.length) % images.length);
+
     return (
         <div className="group relative flex flex-col overflow-hidden rounded-lg border border-ink/5 dark:border-white/10 bg-white dark:bg-zinc-800 transition-all hover:shadow-md">
             {/* Cover */}
             <div className="relative aspect-video bg-surface-muted">
-                {project.featured_image ? (
-                    <img src={project.featured_image.url} alt="" className="h-full w-full object-cover" />
+                {images.length > 0 ? (
+                    <img src={images[idx]} alt="" className="h-full w-full object-cover" />
                 ) : (
                     <ImgPlaceholder className="h-full w-full" />
+                )}
+
+                {/* Image swap controls — only when there's more than one image. */}
+                {multi && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => step(-1)}
+                            aria-label="Previous image"
+                            className="absolute inset-s-2 top-1/2 z-10 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-black/45 text-white opacity-0 transition-opacity hover:bg-black/65 group-hover:opacity-100 rtl:rotate-180"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => step(1)}
+                            aria-label="Next image"
+                            className="absolute inset-e-2 top-1/2 z-10 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-black/45 text-white opacity-0 transition-opacity hover:bg-black/65 group-hover:opacity-100 rtl:rotate-180"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                        <div className="absolute inset-x-0 bottom-1.5 z-10 flex justify-center gap-1">
+                            {images.map((_, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => setIdx(i)}
+                                    aria-label={`Image ${i + 1}`}
+                                    className={cn('h-1.5 rounded-full bg-white transition-all', i === idx ? 'w-4 opacity-100' : 'w-1.5 opacity-60 hover:opacity-90')}
+                                />
+                            ))}
+                        </div>
+                    </>
                 )}
 
                 {/* Listing status — top start */}

@@ -20,7 +20,7 @@ class ProjectController extends Controller
     public function index(Request $request): Response
     {
         $query = Project::withCount(['images', 'inquiries'])
-            ->with('featuredImage:id');
+            ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id']);
 
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -48,7 +48,20 @@ class ProjectController extends Controller
             $perPage = 12;
         }
 
-        $projects = $query->ordered()->paginate($perPage)->withQueryString();
+        $projects = $query->ordered()->paginate($perPage)->withQueryString()
+            ->through(fn (Project $p) => [
+                'id'              => $p->id,
+                'title_en'        => $p->title_en,
+                'title_ar'        => $p->title_ar,
+                'category'        => $p->category,
+                'listing_status'  => $p->listing_status,
+                'is_active'       => $p->is_active,
+                'images_count'    => $p->images_count,
+                'inquiries_count' => $p->inquiries_count,
+                // Ordered image URLs (featured/OG first) for the card carousel +
+                // list thumbnail; empty when the project has no uploads yet.
+                'images'          => $p->cardImageUrls(),
+            ]);
 
         return Inertia::render('Admin/Projects/Index', [
             'projects'     => $projects,

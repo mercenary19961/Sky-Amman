@@ -183,6 +183,39 @@ class Project extends Model
         return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
     }
 
+    /**
+     * Ordered list of this project's image URLs for card carousels: the featured
+     * (lead) image first, then the OG pick, then the rest of the gallery (deduped).
+     * Returns real uploaded images only (no placeholder) — callers add their own
+     * fallback. Eager-load images.media + featuredImage + ogImage to avoid N+1.
+     */
+    public function cardImageUrls(): array
+    {
+        $urls = [];
+        $seen = [];
+        $push = function (?int $mediaId) use (&$urls, &$seen) {
+            if ($mediaId === null || isset($seen[$mediaId])) {
+                return;
+            }
+            $seen[$mediaId] = true;
+            $urls[] = route('media.serve', $mediaId, false);
+        };
+
+        if ($this->featuredImage) {
+            $push($this->featured_image_id);
+        }
+        if ($this->ogImage) {
+            $push($this->og_image_id);
+        }
+        foreach ($this->images as $img) {
+            if ($img->media !== null) {
+                $push($img->media_id);
+            }
+        }
+
+        return $urls;
+    }
+
     public function inquiries(): HasMany
     {
         return $this->hasMany(ContactSubmission::class, 'project_id');

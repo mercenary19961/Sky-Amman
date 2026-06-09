@@ -7,17 +7,13 @@ export interface ProjectListItem {
     id: number;
     title_en: string;
     title_ar: string;
-    slug: string;
     category: ProjectCategory;
     listing_status: ProjectListingStatus | null;
     is_active: boolean;
-    is_featured: boolean;
-    sort_order: number;
     images_count: number;
     inquiries_count: number;
-    featured_image: { id: number; url: string } | null;
-    created_at: string;
-    updated_at: string;
+    /** Ordered image URLs (featured/OG first); empty when the project has no uploads. */
+    images: string[];
 }
 
 export interface ProjectImageItem {
@@ -77,8 +73,16 @@ export interface ProjectIndexProps extends PageProps {
     trashedCount: number;
 }
 
+export interface ProjectTrashItem {
+    id: number;
+    title_en: string;
+    title_ar: string;
+    category: ProjectCategory;
+    updated_at: string;
+}
+
 export interface ProjectTrashProps extends PageProps {
-    projects: Paginator<ProjectListItem>;
+    projects: Paginator<ProjectTrashItem>;
 }
 
 export interface ProjectFormProps extends PageProps {

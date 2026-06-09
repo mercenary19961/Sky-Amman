@@ -3,7 +3,7 @@ import { ArrowLeft, RotateCcw, Trash2, AlignLeft, Tag, Clock } from 'lucide-reac
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
-import type { ProjectTrashProps, ProjectListItem, ProjectCategory } from '@/types/admin/project';
+import type { ProjectTrashProps, ProjectTrashItem, ProjectCategory } from '@/types/admin/project';
 
 const CATEGORY_LABELS: Record<ProjectCategory, string> = {
     under_development:      'Under Development',
@@ -61,7 +61,7 @@ export default function ProjectsTrash() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-ink/5">
-                            {projects.data.map((project: ProjectListItem) => (
+                            {projects.data.map((project: ProjectTrashItem) => (
                                 <tr key={project.id} className="hover:bg-surface-muted/50 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="font-medium text-ink">{project.title_en}</div>

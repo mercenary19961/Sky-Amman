@@ -77,33 +77,9 @@ class PropertiesController extends Controller
      */
     private function cardImages(Project $p): array
     {
-        $urls = [];
-        $seen = [];
-        $push = function (?int $mediaId) use (&$urls, &$seen) {
-            if ($mediaId === null || isset($seen[$mediaId])) {
-                return;
-            }
-            $seen[$mediaId] = true;
-            $urls[] = route('media.serve', $mediaId, false);
-        };
-
-        if ($p->featuredImage) {
-            $push($p->featured_image_id);
-        }
-        if ($p->ogImage) {
-            $push($p->og_image_id);
-        }
-        foreach ($p->images as $img) {
-            if ($img->media !== null) {
-                $push($img->media_id);
-            }
-        }
-
-        if (empty($urls)) {
-            $urls[] = "/images/projects/{$p->slug}.svg";
-        }
-
-        return $urls;
+        // Real uploaded images (featured/OG first); fall back to the committed
+        // placeholder SVG so the public card always shows something.
+        return $p->cardImageUrls() ?: ["/images/projects/{$p->slug}.svg"];
     }
 
     /**
