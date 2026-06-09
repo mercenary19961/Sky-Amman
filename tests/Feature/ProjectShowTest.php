@@ -83,4 +83,61 @@ class ProjectShowTest extends TestCase
             ->get('/admin/projects/99999')
             ->assertNotFound();
     }
+
+    public function test_editor_can_toggle_active(): void
+    {
+        $project = $this->project(); // starts active
+
+        $this->actingAs($this->user('editor'))
+            ->post("/admin/projects/{$project->id}/status", ['is_active' => false])
+            ->assertRedirect();
+
+        $this->assertFalse($project->fresh()->is_active);
+    }
+
+    public function test_editor_can_mark_sold(): void
+    {
+        $project = $this->project(); // for_sale
+
+        $this->actingAs($this->user('editor'))
+            ->post("/admin/projects/{$project->id}/status", ['listing_status' => 'sold'])
+            ->assertRedirect();
+
+        $this->assertSame('sold', $project->fresh()->listing_status);
+    }
+
+    public function test_invalid_listing_status_is_rejected(): void
+    {
+        $project = $this->project();
+
+        $this->actingAs($this->user())
+            ->post("/admin/projects/{$project->id}/status", ['listing_status' => 'bogus'])
+            ->assertSessionHasErrors('listing_status');
+
+        $this->assertSame('for_sale', $project->fresh()->listing_status);
+    }
+
+    public function test_status_change_is_logged(): void
+    {
+        $project = $this->project();
+
+        $this->actingAs($this->user())
+            ->post("/admin/projects/{$project->id}/status", ['listing_status' => 'sold']);
+
+        $this->assertDatabaseHas('change_logs', [
+            'model_type' => 'project',
+            'model_id'   => (string) $project->id,
+            'action'     => 'update',
+        ]);
+    }
+
+    public function test_guest_cannot_change_status(): void
+    {
+        $project = $this->project();
+
+        $this->post("/admin/projects/{$project->id}/status", ['is_active' => false])
+            ->assertRedirect('/admin/login');
+
+        $this->assertTrue($project->fresh()->is_active);
+    }
 }

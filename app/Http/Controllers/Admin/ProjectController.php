@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -236,6 +237,35 @@ class ProjectController extends Controller
         $data['updated_by'] = Auth::id();
 
         $project->update($data);
+
+        $changeLog->log('project', $project->id, 'update', $old, $project->fresh()->attributesToArray(), $project->title_en);
+
+        return redirect()->back()->with('success', 'Project updated.');
+    }
+
+    /**
+     * Quick status changes from the project show page — toggle active state and/or
+     * set the listing status (e.g. mark as sold) without opening the full form.
+     * Only the provided fields are touched; the change is logged (revertable).
+     */
+    public function updateStatus(Request $request, int $id, ChangeLogService $changeLog): RedirectResponse
+    {
+        $project = Project::findOrFail($id);
+
+        $data = $request->validate([
+            'is_active'      => ['sometimes', 'boolean'],
+            'listing_status' => ['sometimes', 'nullable', Rule::in(['for_sale', 'for_rent', 'sold', 'reserved'])],
+        ]);
+
+        $old = $project->attributesToArray();
+        $project->fill($data);
+
+        if (! $project->isDirty()) {
+            return redirect()->back();
+        }
+
+        $project->updated_by = Auth::id();
+        $project->save();
 
         $changeLog->log('project', $project->id, 'update', $old, $project->fresh()->attributesToArray(), $project->title_en);
 

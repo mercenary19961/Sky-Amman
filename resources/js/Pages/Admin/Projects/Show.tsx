@@ -1,10 +1,11 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     ArrowLeft, Pencil, ExternalLink, ChevronLeft, ChevronRight, Star, Share2,
     MapPin, Ruler, CalendarDays, Layers, BedDouble, Bath, MessageSquare, EyeOff,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
 import type { ProjectShowProps, ProjectCategory, ProjectListingStatus } from '@/types/admin/project';
 
@@ -57,6 +58,16 @@ export default function ProjectShow() {
     const images = p.images;
     const multi = images.length > 1;
     const step = (dir: number) => setIdx((i) => (i + dir + images.length) % images.length);
+
+    // Quick status changes (no full form). Reuses the lightweight status endpoint.
+    const [saving, setSaving] = useState(false);
+    const patchStatus = (payload: { is_active?: boolean; listing_status?: string }) => {
+        setSaving(true);
+        router.post(`/admin/projects/${p.id}/status`, payload, {
+            preserveScroll: true,
+            onFinish: () => setSaving(false),
+        });
+    };
 
     const specs = [
         { key: 'area_sqm', icon: Ruler, label: 'Area', value: p.area_sqm != null ? `${p.area_sqm} m²` : null },
@@ -199,6 +210,51 @@ export default function ProjectShow() {
 
                 {/* Right: facts */}
                 <div className="space-y-5">
+                    <Card title="Status & visibility">
+                        <div className="space-y-4">
+                            {/* Active toggle */}
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <div className="text-sm text-ink dark:text-zinc-100">Active</div>
+                                    <div className="text-xs text-ink-muted">Shown on the public site</div>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={p.is_active}
+                                    disabled={saving}
+                                    onClick={() => patchStatus({ is_active: !p.is_active })}
+                                    className={cn(
+                                        'relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50',
+                                        p.is_active ? 'bg-emerald-500' : 'bg-ink/20 dark:bg-white/20',
+                                    )}
+                                >
+                                    <span className={cn(
+                                        'absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform',
+                                        p.is_active && 'translate-x-5',
+                                    )} />
+                                </button>
+                            </div>
+
+                            {/* Listing status */}
+                            <div>
+                                <label className="block text-xs text-ink-muted mb-1.5">Listing status</label>
+                                <Select
+                                    value={p.listing_status ?? ''}
+                                    onChange={(v) => patchStatus({ listing_status: v })}
+                                    disabled={saving}
+                                    placeholder="Set status…"
+                                    options={[
+                                        { value: 'for_sale', label: 'For Sale' },
+                                        { value: 'for_rent', label: 'For Rent' },
+                                        { value: 'sold', label: 'Sold' },
+                                        { value: 'reserved', label: 'Reserved' },
+                                    ]}
+                                />
+                            </div>
+                        </div>
+                    </Card>
+
                     <Card title="Location">
                         <div className="space-y-3">
                             <Field label="Location (EN)" value={p.location_en} />
