@@ -31,44 +31,52 @@ use App\Http\Controllers\MediaServeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/properties', [PropertiesController::class, 'index'])->name('properties');
-Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
-    ->where('slug', '[a-z0-9-]+')
-    ->name('properties.show');
+// Public pages get a generous per-IP ceiling (defense-in-depth for the dynamic
+// DB/Instagram-backed routes if the origin is hit directly, bypassing Cloudflare).
+// 120/min is far above human browsing; it only bites scraping/flood traffic.
+Route::middleware('throttle:120,1')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/properties', [PropertiesController::class, 'index'])->name('properties');
+    Route::get('/properties/{slug}', [PropertiesController::class, 'show'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('properties.show');
+    Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-build');
+    Route::get('/security', [SecurityController::class, 'show'])->name('security');
+    Route::get('/about', [AboutController::class, 'show'])->name('about');
+    Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+});
 
 // Investment — content-only editorial page (why invest in Amman).
-// PARKED for now — route disabled (see CLAUDE.md). Uncomment + restore the import to relist.
+// PARKED for now — route disabled (see CLAUDE.md). Uncomment + restore the import
+// to relist (add it inside the throttled public-pages group above).
 // Route::get('/investment', [InvestmentController::class, 'show'])->name('investment');
 
-// Self Build — content-only service page (8-step process-flow timeline).
-Route::get('/self-build', [SelfBuildController::class, 'show'])->name('self-build');
-
-// Security With SkyAmman — content-only page (three security pillars).
-Route::get('/security', [SecurityController::class, 'show'])->name('security');
-
-// About Us — content-only page (intro, crafted, mission, vision, leadership).
-Route::get('/about', [AboutController::class, 'show'])->name('about');
-
-// Contact — single inbox for all public inquiries. POST is rate-limited like
-// every public form; Turnstile-gated server-side in the controller.
-Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+// Contact form submission — Turnstile-gated server-side; tight 5/min anti-spam
+// limit (kept separate from the public-pages group so the limits don't stack).
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('contact.submit');
 
 // Public media serving — scoped to image/pdf MIME types, SVG excluded.
+// Generous per-IP/per-user ceiling: image-heavy admin pages (the Gallery loads
+// 100+ tiles) must not 429, but a direct-origin scraping flood gets capped.
+// (Cloudflare edge-caches these, so origin rarely sees repeat hits.)
 Route::get('/media/{id}', [MediaServeController::class, 'show'])
+    ->middleware('throttle:600,1')
     ->name('media.serve')
     ->where('id', '[0-9]+');
 
 // Code-managed video streaming with Range support (see VideoController).
+// Generous — seeking fires several Range requests per play.
 Route::get('/video/{filename}', [VideoController::class, 'show'])
+    ->middleware('throttle:120,1')
     ->where('filename', '[A-Za-z0-9._-]+\.(mp4|webm|ogg|mov)')
     ->name('video.serve');
 
 // Locale toggle — hit by LanguageContext via fetch POST (not an Inertia visit).
+// The only public write that wasn't rate-limited; capped to stop session-write spam.
 Route::post('/locale/{locale}', [LocaleController::class, 'set'])
+    ->middleware('throttle:30,1')
     ->whereIn('locale', ['en', 'ar'])
     ->name('locale.set');
 
