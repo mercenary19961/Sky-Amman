@@ -235,8 +235,12 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     const centerIndex = activeIndex;
     const leftIndex = wrap(activeIndex - 1);
     const rightIndex = wrap(activeIndex + 1);
-    // Exactly three → static 3-up layout. More than three → carousel: arrows +
-    // dots appear and the side previews rotate the active video.
+    // Whenever there's more than one video the user can swap: the side previews
+    // become clickable (rotate that video into the playable centre) and dots
+    // appear. The overlay arrows are reserved for when there are MORE videos
+    // than the three shown on screen (N > 3) — with exactly three, every video
+    // is already visible, so clicking a side preview is enough.
+    const canSwap = N > 1;
     const multi = N > 3;
 
     return (
@@ -249,7 +253,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                     src={videos[leftIndex]}
                     variant="side"
                     direction={direction}
-                    onClick={multi ? prev : undefined}
+                    onClick={canSwap ? prev : undefined}
                     ariaLabel="Previous video"
                 />
 
@@ -260,7 +264,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                     src={videos[rightIndex]}
                     variant="side"
                     direction={direction}
-                    onClick={multi ? next : undefined}
+                    onClick={canSwap ? next : undefined}
                     ariaLabel="Next video"
                 />
 
@@ -297,7 +301,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
             </div>
 
             {/* Pagination dots (one per video). */}
-            {multi && (
+            {canSwap && (
                 <div className="mt-6 flex justify-center items-center gap-3">
                     {videos.map((_, i) => (
                         <button
@@ -383,7 +387,10 @@ function CenterVideo({ src }: { src: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [started, setStarted] = useState(false);
 
-    const base = 'relative w-full h-full rounded-[56px] overflow-hidden shadow-lg bg-black';
+    // Moderate rounding: a heavy radius (the old 56px) cropped the corners
+    // exactly where YouTube parks its controls (fullscreen/CC), making them
+    // look misplaced. rounded-3xl keeps a soft card look without clipping them.
+    const base = 'relative w-full h-full rounded-3xl overflow-hidden shadow-lg bg-black';
 
     if (src && VIDEO_FILE_RE.test(src)) {
         return (
@@ -492,7 +499,7 @@ function SidePreview({ src }: { src: string }) {
                 playsInline
                 preload="metadata"
                 aria-hidden="true"
-                className="w-full h-full rounded-[56px] object-cover opacity-60 shadow-md pointer-events-none"
+                className="w-full h-full rounded-3xl object-cover opacity-60 shadow-md pointer-events-none"
             />
         );
     }
@@ -503,11 +510,11 @@ function SidePreview({ src }: { src: string }) {
                 src={youtubeThumb(ytId)}
                 alt=""
                 aria-hidden="true"
-                className="w-full h-full rounded-[56px] object-cover opacity-60 shadow-md pointer-events-none"
+                className="w-full h-full rounded-3xl object-cover opacity-60 shadow-md pointer-events-none"
             />
         );
     }
-    return <div className="w-full h-full rounded-[56px] bg-primary-light/30 opacity-60 shadow-md pointer-events-none" />;
+    return <div className="w-full h-full rounded-3xl bg-primary-light/30 opacity-60 shadow-md pointer-events-none" />;
 }
 
 function ClientCard({ client }: { client: Client }) {
