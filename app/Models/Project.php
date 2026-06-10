@@ -220,14 +220,26 @@ class Project extends Model
 
     /**
      * Image URLs for display, with a committed-file fallback so a project always
-     * shows something: uploaded gallery Media first, then a code-managed render
-     * committed at /images/projects/{slug}.(webp|svg), then a generic placeholder.
+     * shows something. Order of preference:
+     *  1. uploaded gallery Media (admin), featured/OG first;
+     *  2. a committed gallery folder /images/projects/{slug}/NN.webp (seeded renders);
+     *  3. a single committed render /images/projects/{slug}.(webp|svg);
+     *  4. a generic placeholder.
      */
     public function displayImageUrls(): array
     {
         $urls = $this->cardImageUrls();
         if (! empty($urls)) {
             return $urls;
+        }
+
+        $dir = public_path("images/projects/{$this->slug}");
+        if (is_dir($dir)) {
+            $files = glob($dir . '/*.webp') ?: [];
+            sort($files);
+            if (! empty($files)) {
+                return array_map(fn (string $f) => "/images/projects/{$this->slug}/" . basename($f), $files);
+            }
         }
 
         foreach (["images/projects/{$this->slug}.webp", "images/projects/{$this->slug}.svg"] as $rel) {
