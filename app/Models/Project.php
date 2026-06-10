@@ -135,6 +135,7 @@ class Project extends Model
         'location_ar',
         'address_en',
         'address_ar',
+        'map_embed_url',     // per-project Google Maps embed (overrides the site default)
         'area_sqm',          // built-up area (m²) — labelled "Built-up Area" in the UI
         'land_area_sqm',     // land/plot area (m²)
         'completion_year',

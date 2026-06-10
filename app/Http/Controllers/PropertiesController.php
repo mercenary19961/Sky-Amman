@@ -168,7 +168,8 @@ class PropertiesController extends Controller
             ],
             'images' => $images,
             'related' => $related,
-            'mapEmbedUrl' => Setting::get('google_maps_embed_url', ''),
+            // Per-project map wins over the site-wide default when set.
+            'mapEmbedUrl' => $project->map_embed_url ?: Setting::get('google_maps_embed_url', ''),
         ]);
     }
 
