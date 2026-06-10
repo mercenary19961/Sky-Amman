@@ -56,25 +56,29 @@ class GalleryImage extends Model
             ->with(['images.media'])
             ->get()
             ->flatMap(function (Project $p) {
-                if ($p->images->isNotEmpty()) {
-                    return $p->images
-                        ->filter(fn (ProjectImage $img) => $img->media !== null)
-                        ->map(fn (ProjectImage $img) => [
-                            'id'     => "img-{$img->id}",
-                            'url'    => route('media.serve', $img->media_id, false),
-                            'alt'    => $p->title_en,
-                            'source' => 'project',
-                            'label'  => $p->title_en,
-                        ]);
+                $mediaImages = $p->images
+                    ->filter(fn (ProjectImage $img) => $img->media !== null)
+                    ->map(fn (ProjectImage $img) => [
+                        'id'     => "img-{$img->id}",
+                        'url'    => route('media.serve', $img->media_id, false),
+                        'alt'    => $p->title_en,
+                        'source' => 'project',
+                        'label'  => $p->title_en,
+                    ]);
+
+                if ($mediaImages->isNotEmpty()) {
+                    return $mediaImages;
                 }
 
-                return [[
-                    'id'     => "slug-{$p->slug}",
-                    'url'    => "/images/projects/{$p->slug}.svg",
+                // No uploaded Media → use the committed render gallery
+                // (/images/projects/{slug}/NN.webp), or the placeholder.
+                return collect($p->displayImageUrls())->map(fn (string $url, int $i) => [
+                    'id'     => "proj-{$p->id}-{$i}",
+                    'url'    => $url,
                     'alt'    => $p->title_en,
                     'source' => 'project',
                     'label'  => $p->title_en,
-                ]];
+                ]);
             });
 
         $editor = self::ordered()
