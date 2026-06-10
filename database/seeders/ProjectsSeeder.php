@@ -42,10 +42,12 @@ class ProjectsSeeder extends Seeder
 
         // Drop any previously-seeded/demo projects no longer in the catalogue
         // (FK-safe: detach their inquiries first, then permanently remove).
-        $stale = Project::withTrashed()->whereNotIn('slug', $slugs)->pluck('id');
+        // Trailing 'and'/false are whereIn/whereNotIn defaults — explicit only to
+        // silence intelephense's P1005 false positive on Eloquent magic methods.
+        $stale = Project::withTrashed()->whereNotIn('slug', $slugs, 'and')->pluck('id');
         if ($stale->isNotEmpty()) {
-            \App\Models\ContactSubmission::withTrashed()->whereIn('project_id', $stale)->update(['project_id' => null]);
-            foreach (Project::withTrashed()->whereIn('id', $stale)->get() as $old) {
+            \App\Models\ContactSubmission::withTrashed()->whereIn('project_id', $stale, 'and', false)->update(['project_id' => null]);
+            foreach (Project::withTrashed()->whereIn('id', $stale, 'and', false)->get() as $old) {
                 $old->images()->forceDelete();
                 $old->forceDelete();
             }
