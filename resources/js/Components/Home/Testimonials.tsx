@@ -349,7 +349,12 @@ interface VideoSlotProps {
 function VideoSlot({ className, index, src, variant, direction, onClick, ariaLabel }: VideoSlotProps) {
     return (
         <div className={`absolute ${className}`}>
-            <AnimatePresence custom={direction} initial={false} mode="popLayout">
+            {/* Default (sync) mode — NOT popLayout. The two slides are already
+                absolutely positioned over the same box, so they can overlap
+                during the transition without popLayout pulling the outgoing
+                slide out of document flow (which nudged the page scroll and made
+                the fixed header flicker hidden→shown on every swap). */}
+            <AnimatePresence custom={direction} initial={false}>
                 <motion.div
                     key={index}
                     custom={direction}
