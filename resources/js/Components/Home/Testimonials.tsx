@@ -245,7 +245,14 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
 
     return (
         <>
-            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
+            {/* overflow-x-clip: the slide animation translates each slot by ±60px,
+                which on narrow screens pushes a slot past the viewport edge and
+                momentarily widens the page — that shifted the fixed WhatsApp
+                button + header and fired phantom scroll/resize events. Clipping
+                horizontally contains it; overflow-y stays visible so the centre
+                video's drop-shadow isn't cut off (clip, unlike hidden, allows a
+                visible cross-axis). */}
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9 overflow-x-clip">
                 {/* Left preview (previous video) — 16:9, peeks out behind the centre. */}
                 <VideoSlot
                     className="left-0 top-[11%] w-[50%] h-[78%] z-10"
