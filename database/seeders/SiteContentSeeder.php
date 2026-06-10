@@ -167,7 +167,6 @@ class SiteContentSeeder extends Seeder
             ['footer', 'subscribe', 'label', 'Subscribe To Our Newsletter', 'اشترك في نشرتنا الإخبارية'],
             ['footer', 'subscribe', 'cta',   'Contact Us',                  'تواصل معنا'],
             ['footer', 'sections',  'main_pages',  'Main pages',  'الصفحات الرئيسية'],
-            ['footer', 'sections',  'other_pages', 'Other pages', 'صفحات أخرى'],
             ['footer', 'sections',  'follow_us',   'Follow us',   'تابعنا'],
             ['footer', 'copyright', 'text',           'All rights reserved', 'جميع الحقوق محفوظة'],
             ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],

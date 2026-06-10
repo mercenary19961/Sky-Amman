@@ -290,23 +290,16 @@ const en = {
         },
         sections: {
             mainPages: 'Main pages',
-            otherPages: 'Other pages',
             followUs: 'Follow us',
             contact: 'Contact',
         },
         mainPages: {
             home: 'Home',
             listings: 'Listings',
-            blog: 'Blog',
+            selfBuild: 'Self Build',
+            security: 'Security',
             about: 'About',
             contact: 'Contact',
-        },
-        otherPages: {
-            listing: 'Listing',
-            blog: 'Blog',
-            agent: 'Agent',
-            privacy: 'Privacy policy',
-            notFound: '404',
         },
         socials: {
             linkedin: 'Linkedin',

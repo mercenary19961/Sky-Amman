@@ -8,23 +8,15 @@ import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 
+// The real public pages we ship (mirrors Header NAV_ITEMS). "Listings" in the
+// design maps to our /properties route.
 const MAIN_PAGES = [
     { key: 'home', href: '/' },
-    // "Listings" in the design maps to our /properties route.
     { key: 'listings', href: '/properties' },
-    { key: 'blog', href: '#' },
+    { key: 'selfBuild', href: '/self-build' },
+    { key: 'security', href: '/security' },
     { key: 'about', href: '/about' },
     { key: 'contact', href: '/contact' },
-] as const;
-
-// Pages from the design that don't exist yet — rendered as dead links so the
-// footer matches the mockup. Swap href → real route as each page ships.
-const OTHER_PAGES = [
-    { key: 'listing', href: '#' },
-    { key: 'blog', href: '#' },
-    { key: 'agent', href: '#' },
-    { key: 'privacy', href: '#' },
-    { key: 'notFound', href: '#' },
 ] as const;
 
 const SOCIAL_KEYS = [
@@ -286,23 +278,7 @@ function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; 
                 </ul>
             </div>
 
-            {/* Column 3 — Other pages (placeholder until those routes exist) */}
-            <div>
-                <h3 className="text-sm font-semibold mb-3 text-white">
-                    {ft('sections', 'other_pages', 'footer.sections.otherPages')}
-                </h3>
-                <ul className="space-y-2 text-sm text-white/85">
-                    {OTHER_PAGES.map((p) => (
-                        <li key={p.key}>
-                            <a href={p.href} className="hover:text-white transition-colors">
-                                {t(`footer.otherPages.${p.key}`)}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Column 4 — Follow us (text links to social URLs from Settings) */}
+            {/* Column 3 — Follow us (text links to social URLs from Settings) */}
             <div>
                 <h3 className="text-sm font-semibold mb-3 text-white">
                     {ft('sections', 'follow_us', 'footer.sections.followUs')}
