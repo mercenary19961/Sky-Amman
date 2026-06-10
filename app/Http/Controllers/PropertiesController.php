@@ -83,6 +83,10 @@ class PropertiesController extends Controller
             ->with(['images.media', 'featuredImage:id', 'ogImage:id'])
             ->firstOrFail();
 
+        // Sold listings are shown (dimmed, SOLD badge) on the index but their
+        // detail page is off-limits to the public — there's nothing to act on.
+        abort_if($project->listing_status === 'sold', 404);
+
         // Full image set for the hero + thumbnail row + lightbox. Uses the
         // project's uploaded gallery; falls back to a demo set of villa renders
         // until real galleries are uploaded so the gallery/lightbox is testable.
@@ -113,6 +117,8 @@ class PropertiesController extends Controller
         // the "Find homes…" row.
         $related = Project::active()
             ->where('id', '!=', $project->id)
+            // Don't suggest sold listings — their detail page can't be opened.
+            ->where(fn ($q) => $q->whereNull('listing_status')->orWhere('listing_status', '!=', 'sold'))
             ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id'])
             ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$project->category])
             ->orderBy('sort_order')

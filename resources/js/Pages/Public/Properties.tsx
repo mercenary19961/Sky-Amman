@@ -514,18 +514,22 @@ function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProp
         setIdx((i) => (i + dir + images.length) % images.length);
     };
 
+    // Sold listings stay visible (dimmed + SOLD badge) but can't be opened — the
+    // detail route 404s for them, so the card is a plain div, not a link.
+    const sold = project.listing_status === 'sold';
+    const cardClass = cn(
+        'group flex flex-col rounded-[52px] bg-[#E5EBF0] p-2 transition-all',
+        sold ? 'cursor-default' : 'hover:shadow-lg',
+        dimmed && 'opacity-55 hover:opacity-80',
+    );
+    const Wrapper: React.ElementType = sold ? 'div' : Link;
+    const wrapperProps = sold
+        ? { className: cardClass }
+        : { href: `/properties/${project.slug}`, className: cardClass };
+
     return (
-        // Whole card is the link (the SVG card has no separate button).
-        // #E5EBF0 card rx=52, near-square image rx=44, white FOR SALE badge.
-        <Link
-            href={`/properties/${project.slug}`}
-            className={cn(
-                'group flex flex-col rounded-[52px] bg-[#E5EBF0] p-2 transition-all hover:shadow-lg',
-                // Sold / reserved listings (shown when "Available For Sale" is
-                // off) are faded to signal they're not currently available.
-                dimmed && 'opacity-55 hover:opacity-80',
-            )}
-        >
+        // #E5EBF0 card rx=52, near-square image rx=44, white status badge.
+        <Wrapper {...wrapperProps}>
             <div className="relative aspect-square w-full overflow-hidden rounded-[44px] bg-primary-light/30">
                 <img
                     src={images[idx]}
@@ -590,6 +594,6 @@ function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProp
                     </p>
                 )}
             </div>
-        </Link>
+        </Wrapper>
     );
 }
