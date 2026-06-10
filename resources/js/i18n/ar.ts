@@ -152,6 +152,8 @@ const ar = {
         detail: {
             details: 'التفاصيل',
             livingSpace: 'المساحة',
+            builtUpArea: 'مساحة البناء',
+            landArea: 'مساحة الأرض',
             completionYear: 'سنة الإنجاز',
             floors: 'الطوابق',
             bedrooms: 'غرف النوم',

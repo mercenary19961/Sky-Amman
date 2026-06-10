@@ -64,9 +64,10 @@ class PropertiesCardImagesTest extends TestCase
             'listing_status' => 'for_sale', 'is_active' => true,
         ]);
 
+        // No Media and no committed render for this slug → the generic placeholder.
         $this->get('/properties')->assertInertia(fn (Assert $p) => $p
             ->has('projects.0.images', 1)
-            ->where('projects.0.images.0', '/images/projects/no-images.svg'));
+            ->where('projects.0.images.0', '/images/projects/placeholder.svg'));
     }
 
     public function test_admin_project_cards_send_ordered_images(): void

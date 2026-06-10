@@ -6,249 +6,111 @@ use App\Models\Project;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeds the four DABOUQ villa projects shown on the Figma homepage Project
- * Showcase carousel. Featured images are placeholders served from
- * /images/projects/dabouq-N.webp until the designer delivers final renders.
+ * Real catalogue — the DABOUQ-7 luxury villa development (from the DABOUQ-7
+ * brochure). Eight villas on a 5,288 m² site in the heart of Dabouq, Amman:
+ * villas 3,4,5,7,8 are available (Ready, for sale); villas 1,2,6 are sold.
+ *
+ * Each available villa ships with a committed render at
+ * /images/projects/dabouq-7-villa-{n}.webp (extracted from the brochure); the
+ * Project::displayImageUrls() fallback serves it until an admin uploads gallery
+ * images. Bedrooms (4) + bathrooms (3) are stored but HIDDEN via hidden_specs
+ * for the admin to confirm/adjust later. `area_sqm` = built-up area; the new
+ * `land_area_sqm` = plot/land area.
  */
 class ProjectsSeeder extends Seeder
 {
+    private const LOCATION_EN = 'Dabouq, Amman';
+    private const LOCATION_AR = 'دابوق، عمّان';
+    private const ADDRESS_EN = 'Ahl Al-Beit St., Dabouq, Amman';
+    private const ADDRESS_AR = 'شارع أهل البيت، دابوق، عمّان';
+
     public function run(): void
     {
-        $rows = [
-            [
-                'slug' => 'dabouq-3',
-                'title_en' => 'DABOUQ 3 PROJECT',
-                'title_ar' => 'مشروع دابوق 3',
-                'category' => Project::CATEGORY_UNDER_DEVELOPMENT,
-                'listing_status' => 'for_sale',
-                'group' => 'Dabbouq 7',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq',
-                'address_ar' => 'عمّان - دابوق',
-                'area_sqm' => 2500,
-                'floors' => 3,
-                'bedrooms' => 5,
-                'bathrooms' => 6,
-                'completion_year' => 2026,
-                'placeholder' => '/images/projects/dabouq-3.webp',
-                'sort_order' => 1,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'dabouq-4',
-                'title_en' => 'DABOUQ 4 PROJECT',
-                'title_ar' => 'مشروع دابوق 4',
-                'category' => Project::CATEGORY_UNDER_DEVELOPMENT,
-                'listing_status' => 'for_sale',
-                'group' => 'Dabbouq 7',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq',
-                'address_ar' => 'عمّان - دابوق',
-                'area_sqm' => 1954,
-                'floors' => 3,
-                'bedrooms' => 4,
-                'bathrooms' => 5,
-                'completion_year' => 2026,
-                'placeholder' => '/images/projects/dabouq-4.webp',
-                'sort_order' => 2,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'dabouq-5',
-                'title_en' => 'DABOUQ 5 PROJECT',
-                'title_ar' => 'مشروع دابوق 5',
-                'category' => Project::CATEGORY_READY,
-                // Sold — used to demo the "Available For Sale" dimming.
-                'listing_status' => 'sold',
-                'group' => 'Dabbouq 7',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq - Yazan Abu Shawish St.',
-                'address_ar' => 'عمّان - دابوق - شارع يزن أبو شاويش',
-                'description_en' => 'A ready 850 SQM villa with super-deluxe finishing across 2 floors. 3 bedrooms (1 master) and 4 bathrooms, a central heating and cooling system, a spacious salon and living room, a private water well, 2 balconies, and 2 garages.',
-                'description_ar' => 'فيلا جاهزة بمساحة 850 م² بتشطيب سوبر ديلوكس على طابقين. 3 غرف نوم (غرفة ماستر) و4 حمامات، نظام تدفئة وتبريد مركزي، صالون وغرفة معيشة واسعة، بئر ماء خاص، شرفتان، ومرآبان.',
-                'area_sqm' => 850,
-                'floors' => 2,
-                'bedrooms' => 3,
-                'bathrooms' => 4,
-                'completion_year' => 2025,
-                'placeholder' => '/images/projects/dabouq-5.webp',
-                'sort_order' => 3,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'dabouq-6',
-                'title_en' => 'DABOUQ 6 PROJECT',
-                'title_ar' => 'مشروع دابوق 6',
-                'category' => Project::CATEGORY_INVESTMENT,
-                'listing_status' => 'for_sale',
-                'group' => 'Dabbouq 8',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq',
-                'address_ar' => 'عمّان - دابوق',
-                'area_sqm' => 2900,
-                'floors' => null,
-                'bedrooms' => null,
-                'bathrooms' => null,
-                'completion_year' => null,
-                'placeholder' => '/images/projects/dabouq-6.webp',
-                'sort_order' => 4,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'dabouq-7',
-                'title_en' => 'DABOUQ 7 PROJECT',
-                'title_ar' => 'مشروع دابوق 7',
-                'category' => Project::CATEGORY_UNDER_DEVELOPMENT,
-                'listing_status' => 'for_sale',
-                'group' => 'Dabbouq 8',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq',
-                'address_ar' => 'عمّان - دابوق',
-                'area_sqm' => 1680,
-                'floors' => 2,
-                'bedrooms' => 4,
-                'bathrooms' => 4,
-                'completion_year' => 2027,
-                'placeholder' => '/images/projects/dabouq-7.webp',
-                'sort_order' => 5,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'dabouq-8',
-                'title_en' => 'DABOUQ 8 PROJECT',
-                'title_ar' => 'مشروع دابوق 8',
-                'category' => Project::CATEGORY_READY,
-                // Reserved — used to demo the "Available For Sale" dimming.
-                'listing_status' => 'reserved',
-                'group' => 'Dabbouq 8',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Dabouq',
-                'address_ar' => 'عمّان - دابوق',
-                'area_sqm' => 3200,
-                'floors' => 3,
-                'bedrooms' => 6,
-                'bathrooms' => 7,
-                'completion_year' => 2025,
-                'placeholder' => '/images/projects/dabouq-8.webp',
-                'sort_order' => 6,
-                'is_featured' => true,
-            ],
+        // [villa no., land m², built-up m², EN highlight, AR highlight]
+        $available = [
+            [3, 657, 460, 'a spacious guest hall, family living area and modern kitchen on the ground floor, with four bedrooms upstairs including a master suite with dressing room', 'صالة ضيوف واسعة ومنطقة معيشة عائلية ومطبخ عصري في الطابق الأرضي، وأربع غرف نوم في الطابق العلوي تشمل جناحاً رئيسياً بغرفة ملابس'],
+            [4, 615, 460, 'open-plan living spaces, a modern kitchen and four bedrooms across two elegant floors', 'مساحات معيشة مفتوحة ومطبخ عصري وأربع غرف نوم موزّعة على طابقين أنيقين'],
+            [5, 615, 460, 'a welcoming guest hall, family living and modern kitchen, with four bedrooms upstairs including a master suite', 'صالة ضيوف مرحّبة ومعيشة عائلية ومطبخ عصري، وأربع غرف نوم في الأعلى تشمل جناحاً رئيسياً'],
+            [7, 627, 445, 'expansive living and guest halls on the ground floor, and a king master bedroom plus three further bedrooms with a sitting area upstairs', 'صالات معيشة وضيوف واسعة في الطابق الأرضي، وغرفة نوم رئيسية كبرى مع ثلاث غرف نوم إضافية ومنطقة جلوس في الأعلى'],
+            [8, 626, 445, 'a large guest hall, separate dining and family living rooms, and four master bedrooms with a store upstairs', 'صالة ضيوف كبيرة وغرفة طعام ومعيشة عائلية منفصلتين، وأربع غرف نوم رئيسية مع غرفة تخزين في الأعلى'],
+        ];
 
-            // ---------------- FOR RENT ----------------
-            [
-                'slug' => 'abdoun-1',
-                'title_en' => 'ABDOUN 1 PROJECT',
-                'title_ar' => 'مشروع عبدون 1',
+        $rows = [];
+        $sort = 1;
+
+        foreach ($available as [$n, $land, $built, $hlEn, $hlAr]) {
+            $rows[] = [
+                'slug' => "dabouq-7-villa-{$n}",
+                'title_en' => "Dabouq 7 – Villa {$n}",
+                'title_ar' => "دابوق 7 – فيلا {$n}",
                 'category' => Project::CATEGORY_READY,
-                'listing_status' => 'for_rent',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Abdoun',
-                'address_ar' => 'عمّان - عبدون',
-                'area_sqm' => 320,
+                'listing_status' => 'for_sale',
+                'group' => 'Dabouq 7',
+                'location_en' => self::LOCATION_EN,
+                'location_ar' => self::LOCATION_AR,
+                'address_en' => self::ADDRESS_EN,
+                'address_ar' => self::ADDRESS_AR,
+                'short_description_en' => "{$land} m² land · {$built} m² built-up",
+                'short_description_ar' => "{$land} م² أرض · {$built} م² بناء",
+                'description_en' => "Part of the DABOUQ-7 luxury villa development in the heart of Dabouq, Amman. Villa {$n} offers {$land} m² of land and {$built} m² of built-up area across two floors, featuring {$hlEn}.",
+                'description_ar' => "ضمن مجمّع فلل دابوق-7 الفاخر في قلب دابوق، عمّان. تقدّم فيلا {$n} مساحة أرض {$land} م² ومساحة بناء {$built} م² على طابقين، وتتميّز بـ{$hlAr}.",
+                'area_sqm' => $built,
+                'land_area_sqm' => $land,
                 'floors' => 2,
                 'bedrooms' => 4,
                 'bathrooms' => 3,
-                'completion_year' => 2024,
-                'placeholder' => '/images/projects/abdoun-1.webp',
-                'sort_order' => 7,
+                // Stored but hidden on the public detail page — admin reveals later.
+                'hidden_specs' => ['bedrooms', 'bathrooms'],
+                'completion_year' => null,
                 'is_featured' => true,
-            ],
-            [
-                'slug' => 'abdoun-2',
-                'title_en' => 'ABDOUN 2 PROJECT',
-                'title_ar' => 'مشروع عبدون 2',
-                'category' => Project::CATEGORY_READY,
-                'listing_status' => 'for_rent',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Abdoun',
-                'address_ar' => 'عمّان - عبدون',
-                'area_sqm' => 240,
-                'floors' => 1,
-                'bedrooms' => 3,
-                'bathrooms' => 2,
-                'completion_year' => 2023,
-                'placeholder' => '/images/projects/abdoun-2.webp',
-                'sort_order' => 8,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'abdoun-3',
-                'title_en' => 'ABDOUN 3 PROJECT',
-                'title_ar' => 'مشروع عبدون 3',
-                'category' => Project::CATEGORY_READY,
-                'listing_status' => 'for_rent',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Abdoun',
-                'address_ar' => 'عمّان - عبدون',
-                'area_sqm' => 410,
-                'floors' => 2,
-                'bedrooms' => 5,
-                'bathrooms' => 4,
-                'completion_year' => 2024,
-                'placeholder' => '/images/projects/abdoun-3.webp',
-                'sort_order' => 9,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'abdoun-4',
-                'title_en' => 'ABDOUN 4 PROJECT',
-                'title_ar' => 'مشروع عبدون 4',
-                'category' => Project::CATEGORY_READY,
-                'listing_status' => 'for_rent',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Abdoun',
-                'address_ar' => 'عمّان - عبدون',
-                'area_sqm' => 185,
-                'floors' => 1,
-                'bedrooms' => 2,
-                'bathrooms' => 2,
-                'completion_year' => 2022,
-                'placeholder' => '/images/projects/abdoun-4.webp',
-                'sort_order' => 10,
-                'is_featured' => true,
-            ],
-            [
-                'slug' => 'abdoun-5',
-                'title_en' => 'ABDOUN 5 PROJECT',
-                'title_ar' => 'مشروع عبدون 5',
-                'category' => Project::CATEGORY_READY,
-                'listing_status' => 'for_rent',
-                'location_en' => 'Jordan - Amman',
-                'location_ar' => 'الأردن - عمّان',
-                'address_en' => 'Amman - Abdoun',
-                'address_ar' => 'عمّان - عبدون',
-                'area_sqm' => 560,
-                'floors' => 2,
-                'bedrooms' => 6,
-                'bathrooms' => 5,
-                'completion_year' => 2025,
-                'placeholder' => '/images/projects/abdoun-5.webp',
-                'sort_order' => 11,
-                'is_featured' => true,
-            ],
-        ];
+                'sort_order' => $sort++,
+            ];
+        }
 
+        // Sold villas — minimal records (areas not published in the brochure).
+        foreach ([1, 2, 6] as $n) {
+            $rows[] = [
+                'slug' => "dabouq-7-villa-{$n}",
+                'title_en' => "Dabouq 7 – Villa {$n}",
+                'title_ar' => "دابوق 7 – فيلا {$n}",
+                'category' => Project::CATEGORY_READY,
+                'listing_status' => 'sold',
+                'group' => 'Dabouq 7',
+                'location_en' => self::LOCATION_EN,
+                'location_ar' => self::LOCATION_AR,
+                'address_en' => self::ADDRESS_EN,
+                'address_ar' => self::ADDRESS_AR,
+                'short_description_en' => 'Sold — Dabouq 7',
+                'short_description_ar' => 'تم البيع — دابوق 7',
+                'description_en' => "Villa {$n} in the DABOUQ-7 luxury development in Dabouq, Amman — sold.",
+                'description_ar' => "فيلا {$n} ضمن مجمّع دابوق-7 الفاخر في دابوق، عمّان — تم بيعها.",
+                'area_sqm' => null,
+                'land_area_sqm' => null,
+                'floors' => null,
+                'bedrooms' => null,
+                'bathrooms' => null,
+                'hidden_specs' => [],
+                'completion_year' => null,
+                'is_featured' => false,
+                'sort_order' => 5 + $n,
+            ];
+        }
+
+        $slugs = [];
         foreach ($rows as $row) {
-            unset($row['placeholder']);
+            $slugs[] = $row['slug'];
+            Project::updateOrCreate(['slug' => $row['slug']], $row + ['is_active' => true]);
+        }
 
-            Project::updateOrCreate(
-                ['slug' => $row['slug']],
-                array_merge($row, [
-                    'is_active' => true,
-                    'short_description_en' => $row['area_sqm'].' M²',
-                    'short_description_ar' => $row['area_sqm'].' م²',
-                ]),
-            );
+        // Drop any previously-seeded/demo projects no longer in the catalogue
+        // (FK-safe: detach their inquiries first, then permanently remove).
+        $stale = Project::withTrashed()->whereNotIn('slug', $slugs)->pluck('id');
+        if ($stale->isNotEmpty()) {
+            \App\Models\ContactSubmission::withTrashed()->whereIn('project_id', $stale)->update(['project_id' => null]);
+            foreach (Project::withTrashed()->whereIn('id', $stale)->get() as $old) {
+                $old->images()->forceDelete();
+                $old->forceDelete();
+            }
         }
     }
 }

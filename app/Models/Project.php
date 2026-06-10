@@ -135,7 +135,8 @@ class Project extends Model
         'location_ar',
         'address_en',
         'address_ar',
-        'area_sqm',
+        'area_sqm',          // built-up area (m²) — labelled "Built-up Area" in the UI
+        'land_area_sqm',     // land/plot area (m²)
         'completion_year',
         'floors',
         'bedrooms',
@@ -160,6 +161,7 @@ class Project extends Model
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'area_sqm' => 'integer',
+            'land_area_sqm' => 'integer',
             'completion_year' => 'integer',
             'floors' => 'integer',
             'bedrooms' => 'integer',
@@ -214,6 +216,27 @@ class Project extends Model
         }
 
         return $urls;
+    }
+
+    /**
+     * Image URLs for display, with a committed-file fallback so a project always
+     * shows something: uploaded gallery Media first, then a code-managed render
+     * committed at /images/projects/{slug}.(webp|svg), then a generic placeholder.
+     */
+    public function displayImageUrls(): array
+    {
+        $urls = $this->cardImageUrls();
+        if (! empty($urls)) {
+            return $urls;
+        }
+
+        foreach (["images/projects/{$this->slug}.webp", "images/projects/{$this->slug}.svg"] as $rel) {
+            if (is_file(public_path($rel))) {
+                return ["/{$rel}"];
+            }
+        }
+
+        return ['/images/projects/placeholder.svg'];
     }
 
     public function inquiries(): HasMany

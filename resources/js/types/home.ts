@@ -27,7 +27,8 @@ export interface FeaturedProject {
     group: string | null;
     location_en: string | null;
     location_ar: string | null;
-    area_sqm: number | null;
+    area_sqm: number | null;        // built-up area (m²)
+    land_area_sqm: number | null;   // land/plot area (m²)
     image_url: string;
     /** Full swappable image set (featured/OG first). Absent on homepage cards. */
     images?: string[];
@@ -69,7 +70,8 @@ export interface PropertyDetail {
     location_ar: string | null;
     description_en: string | null;
     description_ar: string | null;
-    area_sqm: number | null;
+    area_sqm: number | null;        // built-up area
+    land_area_sqm: number | null;
     completion_year: number | null;
     floors: number | null;
     bedrooms: number | null;

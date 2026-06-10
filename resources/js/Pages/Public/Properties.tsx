@@ -491,7 +491,8 @@ interface PropertyCardProps {
 function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProps) {
     const title = language === 'ar' ? project.title_ar : project.title_en;
     const location = language === 'ar' ? project.location_ar : project.location_en;
-    const areaLabel = language === 'ar' ? `${project.area_sqm} م²` : `${project.area_sqm} M²`;
+    const ar = language === 'ar';
+    const unit = ar ? 'م²' : 'm²';
 
     const statusKey: Record<string, string> = {
         for_sale: 'properties.card.forSale',
@@ -581,8 +582,12 @@ function PropertyCard({ project, language, t, dimmed = false }: PropertyCardProp
                     {title}
                 </h3>
                 {location && <p className="mt-1 text-sm sm:text-base text-ink">{location}</p>}
-                {project.area_sqm != null && (
-                    <p className="text-sm sm:text-base text-ink">{areaLabel}</p>
+                {(project.area_sqm != null || project.land_area_sqm != null) && (
+                    <p className="text-sm sm:text-base text-ink">
+                        {project.area_sqm != null && <span>{ar ? 'بناء' : 'Built'} {project.area_sqm} {unit}</span>}
+                        {project.area_sqm != null && project.land_area_sqm != null && <span className="text-ink-muted"> · </span>}
+                        {project.land_area_sqm != null && <span>{ar ? 'أرض' : 'Land'} {project.land_area_sqm} {unit}</span>}
+                    </p>
                 )}
             </div>
         </Link>

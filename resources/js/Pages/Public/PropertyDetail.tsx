@@ -35,13 +35,16 @@ export default function PropertyDetail() {
     const description = (ar ? p.description_ar : p.description_en) || '';
     const status = p.listing_status ? STATUS_KEY[p.listing_status] : null;
 
-    const areaLabel = p.area_sqm != null ? (ar ? `${p.area_sqm} م²` : `${p.area_sqm} SQM`) : null;
+    const unit = ar ? 'م²' : 'm²';
+    const builtUpLabel = p.area_sqm != null ? `${p.area_sqm} ${unit}` : null;
+    const landLabel = p.land_area_sqm != null ? `${p.land_area_sqm} ${unit}` : null;
 
     // Detail rows — only the specs that are set AND not hidden by the editor.
     const hidden = p.hidden_specs ?? [];
     const show = (key: string) => !hidden.includes(key);
     const specs: { label: string; value: string }[] = [];
-    if (areaLabel && show('area_sqm')) specs.push({ label: t('properties.detail.livingSpace'), value: areaLabel });
+    if (builtUpLabel && show('area_sqm')) specs.push({ label: t('properties.detail.builtUpArea'), value: builtUpLabel });
+    if (landLabel && show('land_area_sqm')) specs.push({ label: t('properties.detail.landArea'), value: landLabel });
     if (p.completion_year != null && show('completion_year')) specs.push({ label: t('properties.detail.completionYear'), value: String(p.completion_year) });
     if (p.floors != null && show('floors')) specs.push({ label: t('properties.detail.floors'), value: String(p.floors) });
     if (p.bedrooms != null && show('bedrooms')) specs.push({ label: t('properties.detail.bedrooms'), value: String(p.bedrooms) });

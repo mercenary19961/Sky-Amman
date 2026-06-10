@@ -70,7 +70,8 @@ export default function ProjectShow() {
     };
 
     const specs = [
-        { key: 'area_sqm', icon: Ruler, label: 'Area', value: p.area_sqm != null ? `${p.area_sqm} m²` : null },
+        { key: 'area_sqm', icon: Ruler, label: 'Built-up area', value: p.area_sqm != null ? `${p.area_sqm} m²` : null },
+        { key: 'land_area_sqm', icon: Ruler, label: 'Land area', value: p.land_area_sqm != null ? `${p.land_area_sqm} m²` : null },
         { key: 'completion_year', icon: CalendarDays, label: 'Completion year', value: p.completion_year },
         { key: 'floors', icon: Layers, label: 'Floors', value: p.floors },
         { key: 'bedrooms', icon: BedDouble, label: 'Bedrooms', value: p.bedrooms },

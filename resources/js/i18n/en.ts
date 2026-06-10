@@ -156,6 +156,8 @@ const en = {
         detail: {
             details: 'Details',
             livingSpace: 'Living Space',
+            builtUpArea: 'Built-up Area',
+            landArea: 'Land Area',
             completionYear: 'Completion Year',
             floors: 'Floors',
             bedrooms: 'Bedrooms',
