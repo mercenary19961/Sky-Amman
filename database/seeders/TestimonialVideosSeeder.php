@@ -8,16 +8,18 @@ use Illuminate\Database\Seeder;
 class TestimonialVideosSeeder extends Seeder
 {
     /**
-     * Seeds the homepage Testimonials carousel with three placeholder entries
-     * pointing at the committed sample clip. Admin manages these via
-     * Admin → Testimonial Videos (add/remove, reorder, active toggle).
+     * Seeds the homepage Testimonials carousel with three real, embeddable
+     * YouTube clips (architecture / apartments — placeholders until the client
+     * supplies actual testimonial videos). Admin manages these via
+     * Admin → Testimonial Videos (add/remove, reorder, active toggle); the
+     * field accepts a YouTube URL (file upload is intentionally not supported).
      */
     public function run(): void
     {
         $videos = [
-            ['Testimonial 1', '/video/testimonials.mp4'],
-            ['Testimonial 2', '/video/testimonials.mp4'],
-            ['Testimonial 3', '/video/testimonials.mp4'],
+            ['Testimonial 1', 'https://www.youtube.com/watch?v=_Vp5qoe6BdE'],
+            ['Testimonial 2', 'https://www.youtube.com/watch?v=xfXMoGmb74w'],
+            ['Testimonial 3', 'https://www.youtube.com/watch?v=qtJtdyz3Kqc'],
         ];
 
         foreach ($videos as $i => [$title, $url]) {

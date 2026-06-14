@@ -48,6 +48,7 @@ export default function SelfBuild() {
     const text = makeText(content, t);
 
     const heroTagline = text('hero', 'title', 'selfBuild.hero.title');
+    const heroSubtitle = text('hero', 'subtitle', 'selfBuild.hero.subtitle');
     const processTitle = text('process', 'title', 'selfBuild.process.title');
 
     // --- SEO: admin per-page values win, else fall back to the page copy. ---
@@ -108,7 +109,7 @@ export default function SelfBuild() {
                                         {heroTagline}
                                     </p>
                                     <h1 className="text-2xl font-bold uppercase text-white drop-shadow-sm sm:text-4xl lg:text-7xl">
-                                        {processTitle}
+                                        {heroSubtitle}
                                     </h1>
                                 </div>
                             </div>

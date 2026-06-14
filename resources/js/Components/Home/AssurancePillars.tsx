@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { SiteContentBundle } from '@/types/home';
 
@@ -139,6 +140,17 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
     const direction: 1 | -1 = isRTL ? -1 : 1;
     const active = pillars[activeIndex] ?? pillars[0];
 
+    // Jump to a specific pillar (used by the mobile dots + arrows). Routes
+    // through the same single-flight gate as the scroll driver.
+    const goTo = (i: number) => {
+        targetIndexRef.current = i;
+        if (!isAnimatingRef.current && i !== activeIndexRef.current) {
+            startTransition(i);
+        }
+    };
+    const goPrev = () => goTo((activeIndex - 1 + pillars.length) % pillars.length);
+    const goNext = () => goTo((activeIndex + 1) % pillars.length);
+
     return (
         <>
             {/* Desktop / tablet: pinned-scroll. */}
@@ -157,35 +169,74 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
                 </div>
             </section>
 
-            {/* Mobile: tab buttons advance the active pillar. */}
+            {/* Mobile: a self-sizing card (no arc mask, so text never clips) with
+                arrow + dot navigation between the three pillars. */}
             <section className="md:hidden bg-surface py-12" aria-label="SkyAmman assurance pillars">
                 <div className="px-4">
-                    <PillarStage
-                        active={active}
-                        activeIndex={activeIndex}
-                        direction={direction}
-                        transitionSign={transitionSign}
-                        compact
-                    />
+                    <div className="relative mx-auto max-w-sm">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeIndex}
+                                initial={{ opacity: 0, y: 14 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -14 }}
+                                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                                className="flex flex-col items-center"
+                            >
+                                {/* Number + title circle, straddling the panel top. */}
+                                <div className="relative z-10 grid h-28 w-28 place-content-center rounded-full border-4 border-primary bg-white px-3 text-center shadow-xl">
+                                    <span className="text-2xl font-bold text-primary">{active.number}</span>
+                                    <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-ink leading-tight">
+                                        {active.title}
+                                    </span>
+                                </div>
 
-                    <div className="mt-6 flex items-center justify-center gap-2">
-                        {pillars.map((p, i) => (
-                            <button
-                                key={i}
-                                type="button"
-                                onClick={() => {
-                                    targetIndexRef.current = i;
-                                    if (!isAnimatingRef.current && i !== activeIndexRef.current) {
-                                        startTransition(i);
-                                    }
-                                }}
-                                aria-label={`Show pillar ${p.number}`}
-                                aria-current={i === activeIndex}
-                                className={`h-2.5 rounded-full transition-all ${
-                                    i === activeIndex ? 'w-8 bg-primary' : 'w-2.5 bg-primary/30'
-                                }`}
-                            />
-                        ))}
+                                {/* Panel grows to fit the bullets — no fade clipping. */}
+                                <div className="-mt-14 w-full rounded-4xl bg-primary px-6 pb-8 pt-20">
+                                    <ul className="space-y-3 text-center text-sm text-white">
+                                        {active.bullets.map((b, i) => (
+                                            <li key={i}>{b}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Prev · dots · next */}
+                    <div className="mt-6 flex items-center justify-center gap-4">
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            aria-label="Previous pillar"
+                            className="grid h-9 w-9 place-content-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white"
+                        >
+                            <ChevronLeft size={18} className="rtl:rotate-180" />
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            {pillars.map((p, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => goTo(i)}
+                                    aria-label={`Show pillar ${p.number}`}
+                                    aria-current={i === activeIndex}
+                                    className={`h-2.5 rounded-full transition-all ${
+                                        i === activeIndex ? 'w-8 bg-primary' : 'w-2.5 bg-primary/30'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            aria-label="Next pillar"
+                            className="grid h-9 w-9 place-content-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white"
+                        >
+                            <ChevronRight size={18} className="rtl:rotate-180" />
+                        </button>
                     </div>
                 </div>
             </section>

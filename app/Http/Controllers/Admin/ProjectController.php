@@ -61,8 +61,8 @@ class ProjectController extends Controller
                 'images_count'    => $p->images_count,
                 'inquiries_count' => $p->inquiries_count,
                 // Ordered image URLs (featured/OG first) for the card carousel +
-                // list thumbnail; empty when the project has no uploads yet.
-                'images'          => $p->cardImageUrls(),
+                // list thumbnail; falls back to the committed render / placeholder.
+                'images'          => $p->displayImageUrls(),
             ]);
 
         return Inertia::render('Admin/Projects/Index', [
@@ -172,6 +172,17 @@ class ProjectController extends Controller
             ->values()
             ->all();
 
+        // No uploaded gallery yet → show the committed render / placeholder.
+        if (empty($images)) {
+            $images = collect($project->displayImageUrls())->map(fn (string $url, int $i) => [
+                'id'          => -($i + 1),
+                'url'         => $url,
+                'filename'    => 'Render',
+                'is_featured' => false,
+                'is_og'       => false,
+            ])->all();
+        }
+
         return Inertia::render('Admin/Projects/Show', [
             'project' => [
                 'id'                   => $project->id,
@@ -190,7 +201,8 @@ class ProjectController extends Controller
                 'location_ar'          => $project->location_ar,
                 'address_en'           => $project->address_en,
                 'address_ar'           => $project->address_ar,
-                'area_sqm'             => $project->area_sqm,
+                'area_sqm'             => $project->area_sqm,            // built-up area
+                'land_area_sqm'        => $project->land_area_sqm,
                 'completion_year'      => $project->completion_year,
                 'floors'               => $project->floors,
                 'bedrooms'             => $project->bedrooms,

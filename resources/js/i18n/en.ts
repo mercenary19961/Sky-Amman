@@ -156,6 +156,8 @@ const en = {
         detail: {
             details: 'Details',
             livingSpace: 'Living Space',
+            builtUpArea: 'Built-up Area',
+            landArea: 'Land Area',
             completionYear: 'Completion Year',
             floors: 'Floors',
             bedrooms: 'Bedrooms',
@@ -183,6 +185,7 @@ const en = {
     selfBuild: {
         hero: {
             title: 'BUILD YOUR PROPERTY, YOUR VISION',
+            subtitle: 'UNDER SKYAMMAN SUPERVISION',
         },
         process: {
             title: 'Process Flow',
@@ -288,23 +291,16 @@ const en = {
         },
         sections: {
             mainPages: 'Main pages',
-            otherPages: 'Other pages',
             followUs: 'Follow us',
             contact: 'Contact',
         },
         mainPages: {
             home: 'Home',
             listings: 'Listings',
-            blog: 'Blog',
+            selfBuild: 'Self Build',
+            security: 'Security',
             about: 'About',
             contact: 'Contact',
-        },
-        otherPages: {
-            listing: 'Listing',
-            blog: 'Blog',
-            agent: 'Agent',
-            privacy: 'Privacy policy',
-            notFound: '404',
         },
         socials: {
             linkedin: 'Linkedin',

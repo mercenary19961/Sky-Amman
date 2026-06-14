@@ -64,9 +64,44 @@ class PropertiesCardImagesTest extends TestCase
             'listing_status' => 'for_sale', 'is_active' => true,
         ]);
 
+        // No Media and no committed render for this slug → the generic placeholder.
         $this->get('/properties')->assertInertia(fn (Assert $p) => $p
             ->has('projects.0.images', 1)
-            ->where('projects.0.images.0', '/images/projects/no-images.svg'));
+            ->where('projects.0.images.0', '/images/projects/placeholder.svg'));
+    }
+
+    public function test_sold_property_detail_is_not_accessible(): void
+    {
+        Project::create([
+            'title_en' => 'Sold Villa', 'title_ar' => 'فيلا مباعة',
+            'slug' => 'sold-villa', 'category' => 'ready',
+            'listing_status' => 'sold', 'is_active' => true,
+        ]);
+
+        $this->get('/properties/sold-villa')->assertNotFound();
+    }
+
+    public function test_available_property_detail_is_accessible(): void
+    {
+        Project::create([
+            'title_en' => 'Open Villa', 'title_ar' => 'فيلا متاحة',
+            'slug' => 'open-villa', 'category' => 'ready',
+            'listing_status' => 'for_sale', 'is_active' => true,
+        ]);
+
+        $this->get('/properties/open-villa')
+            ->assertOk()
+            ->assertInertia(fn (Assert $p) => $p->component('Public/PropertyDetail'));
+    }
+
+    public function test_sold_listings_are_excluded_from_related(): void
+    {
+        Project::create(['title_en' => 'Main', 'title_ar' => 'م', 'slug' => 'main-villa', 'category' => 'ready', 'listing_status' => 'for_sale', 'is_active' => true]);
+        Project::create(['title_en' => 'Sold Rel', 'title_ar' => 'م', 'slug' => 'sold-rel', 'category' => 'ready', 'listing_status' => 'sold', 'is_active' => true]);
+        Project::create(['title_en' => 'Open Rel', 'title_ar' => 'م', 'slug' => 'open-rel', 'category' => 'ready', 'listing_status' => 'for_sale', 'is_active' => true]);
+
+        $this->get('/properties/main-villa')->assertInertia(fn (Assert $p) => $p
+            ->where('related', fn ($related) => collect($related)->every(fn ($r) => $r['slug'] !== 'sold-rel')));
     }
 
     public function test_admin_project_cards_send_ordered_images(): void

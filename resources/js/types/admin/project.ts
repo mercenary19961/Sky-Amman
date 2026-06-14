@@ -43,7 +43,8 @@ export interface ProjectFormItem {
     location_ar: string | null;
     address_en: string | null;
     address_ar: string | null;
-    area_sqm: number | null;
+    area_sqm: number | null;        // built-up area
+    land_area_sqm: number | null;
     completion_year: number | null;
     floors: number | null;
     bedrooms: number | null;
@@ -110,7 +111,8 @@ export interface ProjectShowItem {
     location_ar: string | null;
     address_en: string | null;
     address_ar: string | null;
-    area_sqm: number | null;
+    area_sqm: number | null;        // built-up area
+    land_area_sqm: number | null;
     completion_year: number | null;
     floors: number | null;
     bedrooms: number | null;

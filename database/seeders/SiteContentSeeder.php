@@ -110,6 +110,7 @@ class SiteContentSeeder extends Seeder
 
             // ---------------- SELF BUILD ----------------
             ['self_build', 'hero', 'title', 'BUILD YOUR PROPERTY, YOUR VISION', 'ابنِ عقارك، حقّق رؤيتك'],
+            ['self_build', 'hero', 'subtitle', 'UNDER SKYAMMAN SUPERVISION', 'تحت إشراف سكاي عمّان'],
             ['self_build', 'process', 'title', 'Process Flow', 'مراحل العمل'],
             ['self_build', 'process', 'step_1', 'Land Selection', 'اختيار الأرض'],
             ['self_build', 'process', 'step_2', 'Legal Verification', 'التحقق القانوني'],
@@ -167,7 +168,6 @@ class SiteContentSeeder extends Seeder
             ['footer', 'subscribe', 'label', 'Subscribe To Our Newsletter', 'اشترك في نشرتنا الإخبارية'],
             ['footer', 'subscribe', 'cta',   'Contact Us',                  'تواصل معنا'],
             ['footer', 'sections',  'main_pages',  'Main pages',  'الصفحات الرئيسية'],
-            ['footer', 'sections',  'other_pages', 'Other pages', 'صفحات أخرى'],
             ['footer', 'sections',  'follow_us',   'Follow us',   'تابعنا'],
             ['footer', 'copyright', 'text',           'All rights reserved', 'جميع الحقوق محفوظة'],
             ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],

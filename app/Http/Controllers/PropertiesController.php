@@ -29,9 +29,9 @@ class PropertiesController extends Controller
         $projects = Project::active()
             ->ordered()
             ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id'])
-            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm', 'featured_image_id', 'og_image_id'])
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'group', 'location_en', 'location_ar', 'area_sqm', 'land_area_sqm', 'featured_image_id', 'og_image_id'])
             ->map(function (Project $p) {
-                $images = $this->cardImages($p);
+                $images = $p->displayImageUrls();
 
                 return [
                     'id' => $p->id,
@@ -43,7 +43,8 @@ class PropertiesController extends Controller
                     'group' => $p->group,
                     'location_en' => $p->location_en,
                     'location_ar' => $p->location_ar,
-                    'area_sqm' => $p->area_sqm,
+                    'area_sqm' => $p->area_sqm,            // built-up area
+                    'land_area_sqm' => $p->land_area_sqm,
                     // Full swappable image set (featured/OG first). image_url is the
                     // lead image, kept for back-compat (homepage card / OG fallback).
                     'images' => $images,
@@ -71,18 +72,6 @@ class PropertiesController extends Controller
     }
 
     /**
-     * Ordered image URLs for a listing card: the featured (card thumbnail) image
-     * leads, then the OG pick, then the rest of the uploaded gallery (deduped).
-     * Falls back to the committed placeholder SVG when the project has no images.
-     */
-    private function cardImages(Project $p): array
-    {
-        // Real uploaded images (featured/OG first); fall back to the committed
-        // placeholder SVG so the public card always shows something.
-        return $p->cardImageUrls() ?: ["/images/projects/{$p->slug}.svg"];
-    }
-
-    /**
      * Single property detail page. Loads one active project by slug with its
      * gallery, a handful of related listings, and the site map embed. All
      * bilingual fields are sent raw so the client swaps language instantly.
@@ -93,6 +82,10 @@ class PropertiesController extends Controller
             ->where('slug', $slug)
             ->with(['images.media', 'featuredImage:id', 'ogImage:id'])
             ->firstOrFail();
+
+        // Sold listings are shown (dimmed, SOLD badge) on the index but their
+        // detail page is off-limits to the public — there's nothing to act on.
+        abort_if($project->listing_status === 'sold', 404);
 
         // Full image set for the hero + thumbnail row + lightbox. Uses the
         // project's uploaded gallery; falls back to a demo set of villa renders
@@ -112,13 +105,9 @@ class PropertiesController extends Controller
             ->all();
 
         if (empty($images)) {
-            $images = collect([
-                '/images/properties/detail-hero.webp',
-                '/images/properties/properties-hero.webp',
-                '/images/properties/find-the-right-space.webp',
-                '/images/home/hero-villa-trimmed.webp',
-            ])->map(fn (string $url, int $i) => [
-                'id' => "demo-{$i}",
+            // No uploaded gallery yet → fall back to the committed render (or placeholder).
+            $images = collect($project->displayImageUrls())->map(fn (string $url, int $i) => [
+                'id' => "fallback-{$i}",
                 'url' => $url,
                 'alt' => $project->title_en,
             ])->all();
@@ -128,18 +117,21 @@ class PropertiesController extends Controller
         // the "Find homes…" row.
         $related = Project::active()
             ->where('id', '!=', $project->id)
+            // Don't suggest sold listings — their detail page can't be opened.
+            ->where(fn ($q) => $q->whereNull('listing_status')->orWhere('listing_status', '!=', 'sold'))
+            ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id'])
             ->orderByRaw('CASE WHEN category = ? THEN 0 ELSE 1 END', [$project->category])
             ->orderBy('sort_order')
             ->orderBy('id', 'desc')
             ->take(6)
-            ->get(['id', 'slug', 'title_en', 'title_ar', 'listing_status'])
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'listing_status', 'featured_image_id', 'og_image_id'])
             ->map(fn (Project $p) => [
                 'id' => $p->id,
                 'slug' => $p->slug,
                 'title_en' => $p->title_en,
                 'title_ar' => $p->title_ar,
                 'listing_status' => $p->listing_status,
-                'image_url' => "/images/projects/{$p->slug}.svg",
+                'image_url' => $p->displayImageUrls()[0],
             ])
             ->all();
 
@@ -156,7 +148,8 @@ class PropertiesController extends Controller
                 'location_ar' => $project->location_ar,
                 'description_en' => $project->description_en,
                 'description_ar' => $project->description_ar,
-                'area_sqm' => $project->area_sqm,
+                'area_sqm' => $project->area_sqm,            // built-up area
+                'land_area_sqm' => $project->land_area_sqm,
                 'completion_year' => $project->completion_year,
                 'floors' => $project->floors,
                 'bedrooms' => $project->bedrooms,
@@ -175,7 +168,8 @@ class PropertiesController extends Controller
             ],
             'images' => $images,
             'related' => $related,
-            'mapEmbedUrl' => Setting::get('google_maps_embed_url', ''),
+            // Per-project map wins over the site-wide default when set.
+            'mapEmbedUrl' => $project->map_embed_url ?: Setting::get('google_maps_embed_url', ''),
         ]);
     }
 

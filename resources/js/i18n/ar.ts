@@ -152,6 +152,8 @@ const ar = {
         detail: {
             details: 'التفاصيل',
             livingSpace: 'المساحة',
+            builtUpArea: 'مساحة البناء',
+            landArea: 'مساحة الأرض',
             completionYear: 'سنة الإنجاز',
             floors: 'الطوابق',
             bedrooms: 'غرف النوم',
@@ -179,6 +181,7 @@ const ar = {
     selfBuild: {
         hero: {
             title: 'ابنِ عقارك، حقّق رؤيتك',
+            subtitle: 'تحت إشراف سكاي عمّان',
         },
         process: {
             title: 'مراحل العمل',
@@ -284,23 +287,16 @@ const ar = {
         },
         sections: {
             mainPages: 'الصفحات الرئيسية',
-            otherPages: 'صفحات أخرى',
             followUs: 'تابعنا',
             contact: 'التواصل',
         },
         mainPages: {
             home: 'الرئيسية',
             listings: 'العقارات',
-            blog: 'المدونة',
+            selfBuild: 'البناء الذاتي',
+            security: 'الأمان',
             about: 'من نحن',
             contact: 'اتصل بنا',
-        },
-        otherPages: {
-            listing: 'عقار',
-            blog: 'المدونة',
-            agent: 'الوكلاء',
-            privacy: 'سياسة الخصوصية',
-            notFound: '404',
         },
         socials: {
             linkedin: 'لينكدإن',

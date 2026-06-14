@@ -34,22 +34,27 @@ class HomeController extends Controller
         $featured = Project::active()
             ->featured()
             ->ordered()
+            ->with(['images.media:id,path,mime_type', 'featuredImage:id', 'ogImage:id'])
             ->take(24)
-            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'location_en', 'location_ar', 'area_sqm'])
-            ->map(fn (Project $p) => [
-                'id' => $p->id,
-                'slug' => $p->slug,
-                'title_en' => $p->title_en,
-                'title_ar' => $p->title_ar,
-                'category' => $p->category,
-                'listing_status' => $p->listing_status,
-                'location_en' => $p->location_en,
-                'location_ar' => $p->location_ar,
-                'area_sqm' => $p->area_sqm,
-                // Placeholder image path — falls back to /images/projects/{slug}.svg
-                // until the Media Library is live and admin can attach real renders.
-                'image_url' => "/images/projects/{$p->slug}.svg",
-            ]);
+            ->get(['id', 'slug', 'title_en', 'title_ar', 'category', 'listing_status', 'location_en', 'location_ar', 'area_sqm', 'land_area_sqm', 'featured_image_id', 'og_image_id'])
+            ->map(function (Project $p) {
+                $images = $p->displayImageUrls();
+
+                return [
+                    'id' => $p->id,
+                    'slug' => $p->slug,
+                    'title_en' => $p->title_en,
+                    'title_ar' => $p->title_ar,
+                    'category' => $p->category,
+                    'listing_status' => $p->listing_status,
+                    'location_en' => $p->location_en,
+                    'location_ar' => $p->location_ar,
+                    'area_sqm' => $p->area_sqm,            // built-up area
+                    'land_area_sqm' => $p->land_area_sqm,
+                    'images' => $images,
+                    'image_url' => $images[0],
+                ];
+            });
 
         // Split featured listings by status so each homepage carousel pulls from
         // its own slice of the unified projects table.

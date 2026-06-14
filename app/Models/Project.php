@@ -135,7 +135,9 @@ class Project extends Model
         'location_ar',
         'address_en',
         'address_ar',
-        'area_sqm',
+        'map_embed_url',     // per-project Google Maps embed (overrides the site default)
+        'area_sqm',          // built-up area (m²) — labelled "Built-up Area" in the UI
+        'land_area_sqm',     // land/plot area (m²)
         'completion_year',
         'floors',
         'bedrooms',
@@ -160,6 +162,7 @@ class Project extends Model
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'area_sqm' => 'integer',
+            'land_area_sqm' => 'integer',
             'completion_year' => 'integer',
             'floors' => 'integer',
             'bedrooms' => 'integer',
@@ -214,6 +217,39 @@ class Project extends Model
         }
 
         return $urls;
+    }
+
+    /**
+     * Image URLs for display, with a committed-file fallback so a project always
+     * shows something. Order of preference:
+     *  1. uploaded gallery Media (admin), featured/OG first;
+     *  2. a committed gallery folder /images/projects/{slug}/NN.webp (seeded renders);
+     *  3. a single committed render /images/projects/{slug}.(webp|svg);
+     *  4. a generic placeholder.
+     */
+    public function displayImageUrls(): array
+    {
+        $urls = $this->cardImageUrls();
+        if (! empty($urls)) {
+            return $urls;
+        }
+
+        $dir = public_path("images/projects/{$this->slug}");
+        if (is_dir($dir)) {
+            $files = glob($dir . '/*.webp') ?: [];
+            sort($files);
+            if (! empty($files)) {
+                return array_map(fn (string $f) => "/images/projects/{$this->slug}/" . basename($f), $files);
+            }
+        }
+
+        foreach (["images/projects/{$this->slug}.webp", "images/projects/{$this->slug}.svg"] as $rel) {
+            if (is_file(public_path($rel))) {
+                return ["/{$rel}"];
+            }
+        }
+
+        return ['/images/projects/placeholder.svg'];
     }
 
     public function inquiries(): HasMany

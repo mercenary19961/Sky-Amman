@@ -146,6 +146,7 @@ function initialData(item: ProjectFormItem | null): FormData {
         address_en:           item?.address_en           ?? '',
         address_ar:           item?.address_ar           ?? '',
         area_sqm:             item?.area_sqm             ?? null,
+        land_area_sqm:        item?.land_area_sqm        ?? null,
         completion_year:      item?.completion_year      ?? null,
         floors:               item?.floors               ?? null,
         bedrooms:             item?.bedrooms             ?? null,
@@ -233,6 +234,7 @@ export default function ProjectForm() {
             ...data,
             // Send nulls for empty numeric fields so Laravel casts correctly.
             area_sqm:        data.area_sqm        || null,
+            land_area_sqm:   data.land_area_sqm   || null,
             completion_year: data.completion_year || null,
             floors:          data.floors          || null,
             bedrooms:        data.bedrooms        || null,
@@ -406,9 +408,12 @@ export default function ProjectForm() {
                 {/* ── Property Specs ── */}
                 <Section>
                     <SectionHeader title="Property Specs" icon={SlidersHorizontal} description="Leave blank for investment opportunities or land plots. Use the eye on each spec to hide it on the property page while keeping the value." />
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                        <SpecField label="Area (m²)" error={errors.area_sqm} hidden={hiddenSpecs.includes('area_sqm')} onToggle={() => toggleSpec('area_sqm')}>
-                            <Input type="number" value={data.area_sqm} onChange={v => set('area_sqm', v ? parseInt(v, 10) : null)} placeholder="850" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <SpecField label="Built-up Area (m²)" error={errors.area_sqm} hidden={hiddenSpecs.includes('area_sqm')} onToggle={() => toggleSpec('area_sqm')}>
+                            <Input type="number" value={data.area_sqm} onChange={v => set('area_sqm', v ? parseInt(v, 10) : null)} placeholder="460" />
+                        </SpecField>
+                        <SpecField label="Land Area (m²)" error={errors.land_area_sqm} hidden={hiddenSpecs.includes('land_area_sqm')} onToggle={() => toggleSpec('land_area_sqm')}>
+                            <Input type="number" value={data.land_area_sqm} onChange={v => set('land_area_sqm', v ? parseInt(v, 10) : null)} placeholder="657" />
                         </SpecField>
                         <SpecField label="Floors" error={errors.floors} hidden={hiddenSpecs.includes('floors')} onToggle={() => toggleSpec('floors')}>
                             <Input type="number" value={data.floors} onChange={v => set('floors', v ? parseInt(v, 10) : null)} placeholder="3" />
