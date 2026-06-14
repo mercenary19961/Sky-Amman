@@ -110,6 +110,7 @@ class SiteContentSeeder extends Seeder
 
             // ---------------- SELF BUILD ----------------
             ['self_build', 'hero', 'title', 'BUILD YOUR PROPERTY, YOUR VISION', 'ابنِ عقارك، حقّق رؤيتك'],
+            ['self_build', 'hero', 'subtitle', 'UNDER SKYAMMAN SUPERVISION', 'تحت إشراف سكاي عمّان'],
             ['self_build', 'process', 'title', 'Process Flow', 'مراحل العمل'],
             ['self_build', 'process', 'step_1', 'Land Selection', 'اختيار الأرض'],
             ['self_build', 'process', 'step_2', 'Legal Verification', 'التحقق القانوني'],

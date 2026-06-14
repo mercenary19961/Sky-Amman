@@ -181,6 +181,7 @@ const ar = {
     selfBuild: {
         hero: {
             title: 'ابنِ عقارك، حقّق رؤيتك',
+            subtitle: 'تحت إشراف سكاي عمّان',
         },
         process: {
             title: 'مراحل العمل',

@@ -185,6 +185,7 @@ const en = {
     selfBuild: {
         hero: {
             title: 'BUILD YOUR PROPERTY, YOUR VISION',
+            subtitle: 'UNDER SKYAMMAN SUPERVISION',
         },
         process: {
             title: 'Process Flow',
