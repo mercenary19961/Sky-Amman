@@ -85,6 +85,7 @@ export default function Security() {
                 <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={props.url} />
+                {props.siteSettings?.og_image_url && <meta property="og:image" content={props.siteSettings.og_image_url} />}
                 {/* Same URL serves both locales (session-driven), so all hreflang
                     variants point at the canonical URL. */}
                 <link rel="alternate" hrefLang="en" href={props.url} />

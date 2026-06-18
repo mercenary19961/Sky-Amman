@@ -41,6 +41,29 @@ export default function Home() {
     const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || props.siteSettings?.seo_title || 'SkyAmman';
     const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || props.siteSettings?.seo_description || '';
 
+    // Organization JSON-LD. Social URLs are only included when set by the admin.
+    const sameAs = ([
+        props.siteSettings?.linkedin_url,
+        props.siteSettings?.facebook_url,
+        props.siteSettings?.twitter_url,
+        props.siteSettings?.instagram_url,
+        props.siteSettings?.youtube_url,
+        props.siteSettings?.tiktok_url,
+    ] as string[]).filter(Boolean);
+    const orgJsonLd: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': 'RealEstateAgent',
+        name: 'SkyAmman',
+        url: props.url,
+        address: { '@type': 'PostalAddress', addressLocality: 'Amman', addressCountry: 'JO' },
+    };
+    if (seoDescription) orgJsonLd.description = seoDescription;
+    if (props.siteSettings?.phone) orgJsonLd.telephone = props.siteSettings.phone;
+    if (props.siteSettings?.email) orgJsonLd.email = props.siteSettings.email;
+    if (props.siteSettings?.og_image_url) orgJsonLd.logo = { '@type': 'ImageObject', url: props.siteSettings.og_image_url };
+    if (sameAs.length) orgJsonLd.sameAs = sameAs;
+    const orgJsonLdHtml = JSON.stringify(orgJsonLd).replace(/</g, '\\u003c');
+
     return (
         <PublicLayout>
             <Head title={seoTitle}>
@@ -50,10 +73,13 @@ export default function Home() {
                 <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={props.url} />
+                {props.siteSettings?.og_image_url && <meta property="og:image" content={props.siteSettings.og_image_url} />}
                 <link rel="alternate" hrefLang="en" href={props.url} />
                 <link rel="alternate" hrefLang="ar" href={props.url} />
                 <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
+
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: orgJsonLdHtml }} />
 
             {sectionVisible(content.hero) && <HomeHero content={content} />}
             {sectionVisible(content.investment_banner) && <InvestmentBanner content={content} />}
