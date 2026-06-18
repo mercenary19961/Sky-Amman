@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\PropertiesController;
 // Investment page parked — route + import disabled for now (see CLAUDE.md). Re-enable both to relist.
 // use App\Http\Controllers\InvestmentController;
@@ -30,6 +31,10 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\MediaServeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// Crawlers — no throttle, no session, no Inertia.
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // Public pages get a generous per-IP ceiling (defense-in-depth for the dynamic
 // DB/Instagram-backed routes if the origin is hit directly, bypassing Cloudflare).
