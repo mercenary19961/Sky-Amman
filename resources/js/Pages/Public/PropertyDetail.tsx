@@ -87,6 +87,9 @@ export default function PropertyDetail() {
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={p.url} />
                 {p.og_image && <meta property="og:image" content={p.og_image} />}
+                <link rel="alternate" hrefLang="en" href={p.url} />
+                <link rel="alternate" hrefLang="ar" href={p.url} />
+                <link rel="alternate" hrefLang="x-default" href={p.url} />
             </Head>
 
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml }} />

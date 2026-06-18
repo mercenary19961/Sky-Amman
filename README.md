@@ -1,59 +1,140 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sky Amman
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Corporate website and content management system for **Sky Amman**, a real estate consultancy based in Amman, Jordan. The site covers property listings, investment opportunities, self-build services, and lead capture — all managed through a bilingual (English / Arabic) admin panel.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 12 (PHP 8.2) |
+| Frontend | React 19 + TypeScript via Inertia.js |
+| Styling | TailwindCSS v4 |
+| Database | MySQL (production) · SQLite (local dev) |
+| Rendering | SSR via FrankenPHP |
+| Hosting | Railway |
+| CDN / DNS | Cloudflare |
+| Mail | Resend |
+| Bot protection | Cloudflare Turnstile |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Local Development
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Requirements
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+
+- Composer
+- Node.js 22+
+- npm
 
-## Laravel Sponsors
+### Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+# Install dependencies
+composer install
+npm install
 
-### Premium Partners
+# Environment
+cp .env.example .env
+php artisan key:generate
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Database (SQLite for local dev)
+touch database/database.sqlite
+php artisan migrate --seed
 
-## Contributing
+# Start servers (two terminals)
+php artisan serve
+npm run dev
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+App runs at `http://localhost:8000`.
 
-## Code of Conduct
+Admin panel: `http://localhost:8000/admin/login`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+> Default admin credentials are created by `AdminUserSeeder`. Change them before any non-local deployment.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Environment Variables
+
+Copy `.env.example` and fill in the values below. Never commit `.env` to version control.
+
+| Variable | Description |
+|---|---|
+| `APP_KEY` | Generated by `php artisan key:generate` |
+| `APP_URL` | Full URL of the app (e.g. `https://skyamman.com`) |
+| `DB_CONNECTION` | `sqlite` for local, `mysql` for production |
+| `SESSION_DRIVER` | `database` — required in production (Railway FS is ephemeral) |
+| `MAIL_MAILER` | `resend` in production, `log` in local dev |
+| `RESEND_API_KEY` | From the Resend dashboard |
+| `MAIL_FROM_ADDRESS` | Verified sending address on your Resend domain |
+| `TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key (leave empty in local dev to disable) |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
+| `INERTIA_SSR_ENABLED` | `true` in production, omit or `false` in local dev |
+
+---
+
+## Key Features
+
+- **Bilingual** — English and Arabic, toggled per session (no auto-detect). RTL layout handled via CSS logical properties.
+- **Public pages** — Homepage, Properties listings + detail pages, Self Build, Security with Sky Amman, About Us, Contact Us.
+- **Admin CMS** — bilingual site content editor, project CRUD with gallery, settings, contact submissions inbox, change log with per-entry revert + undo toast.
+- **Project catalogue** — unified listings table with category (`under_development / ready / investment_opportunity`) and listing status (`for_sale / for_rent / sold / reserved`).
+- **SEO** — per-page and per-project SEO fields, dynamic sitemap, structured data (JSON-LD), hreflang, OG tags.
+- **Security** — Cloudflare Turnstile on all public forms, rate limiting, CSP headers, session-based auth with per-email throttle.
+
+---
+
+## Database
+
+```bash
+# Fresh reset with seed data
+php artisan migrate:fresh --seed
+
+# Production (Railway runs this automatically on deploy)
+php artisan migrate --force
+```
+
+Data migrations (`database/migrations/2026_06_18_*`) bootstrap essential seed data (admin user, settings, pages, content, project catalogue) on first deploy. Subsequent deploys skip them.
+
+---
+
+## Build
+
+```bash
+# Production build (client + SSR)
+npm run build
+```
+
+Output: `public/build/` (client) and `bootstrap/ssr/` (SSR bundle).
+
+---
+
+## Deployment
+
+Hosted on **Railway** with the Railpack builder. On each deploy Railway automatically runs:
+
+```
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize:clear
+php artisan optimize
+```
+
+Static assets are served behind **Cloudflare** (DNS + proxy). Cache purge may be required after deploying new assets.
+
+---
+
+## Mail
+
+Transactional email (contact form leads, password resets) is sent via **Resend**. The sending domain must be verified in the Resend dashboard (DKIM, SPF, DMARC records added in Cloudflare DNS) before emails will be delivered.
+
+In local development, set `MAIL_MAILER=log` — emails are written to `storage/logs/laravel.log` instead of being sent.
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Private — all rights reserved. Not open source.
