@@ -50,6 +50,7 @@ export default function Home() {
                 <meta property="og:description" content={seoDescription} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={props.url} />
+                {props.siteSettings?.og_image_url && <meta property="og:image" content={props.siteSettings.og_image_url} />}
                 <link rel="alternate" hrefLang="en" href={props.url} />
                 <link rel="alternate" hrefLang="ar" href={props.url} />
                 <link rel="alternate" hrefLang="x-default" href={props.url} />
