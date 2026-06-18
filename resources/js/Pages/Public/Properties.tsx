@@ -95,6 +95,16 @@ export default function Properties() {
     const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || props.siteSettings?.seo_title || 'Properties · SkyAmman';
     const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || props.siteSettings?.seo_description || '';
 
+    const homeUrl = new URL(props.url).origin + '/';
+    const jsonLdHtml = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: t('nav.home'), item: homeUrl },
+            { '@type': 'ListItem', position: 2, name: t('nav.properties'), item: props.url },
+        ],
+    }).replace(/</g, '\\u003c');
+
     return (
         <PublicLayout>
             <Head title={seoTitle}>
@@ -109,6 +119,8 @@ export default function Properties() {
                 <link rel="alternate" hrefLang="ar" href={props.url} />
                 <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
+
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml }} />
 
             {/* ---------------- HERO ---------------- */}
             <section data-nav-bg="light" className="bg-surface">

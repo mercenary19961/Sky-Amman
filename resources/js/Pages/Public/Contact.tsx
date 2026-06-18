@@ -64,6 +64,16 @@ export default function Contact() {
     const seoTitle = (ar ? props.seo.title_ar : props.seo.title_en) || settings?.seo_title || `${heroTitle} · SkyAmman`;
     const seoDescription = (ar ? props.seo.description_ar : props.seo.description_en) || settings?.seo_description || heroSubtitle;
 
+    const homeUrl = new URL(props.url).origin + '/';
+    const jsonLdHtml = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: t('nav.home'), item: homeUrl },
+            { '@type': 'ListItem', position: 2, name: t('nav.contact'), item: props.url },
+        ],
+    }).replace(/</g, '\\u003c');
+
     const inputClass =
         'mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-ink transition-colors focus:outline-none focus:border-primary';
 
@@ -81,6 +91,8 @@ export default function Contact() {
                 <link rel="alternate" hrefLang="ar" href={props.url} />
                 <link rel="alternate" hrefLang="x-default" href={props.url} />
             </Head>
+
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml }} />
 
             <section data-nav-bg="light" className="bg-surface">
                 <div className="section-x pt-28 pb-16 sm:pt-32 sm:pb-24 lg:pt-36">
