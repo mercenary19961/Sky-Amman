@@ -1,5 +1,7 @@
 # Sky Amman
 
+![Sky Amman Homepage](docs/preview.png)
+
 Corporate website and content management system for **Sky Amman**, a real estate consultancy based in Amman, Jordan. The site covers property listings, investment opportunities, self-build services, and lead capture — all managed through a bilingual (English / Arabic) admin panel.
 
 ---
