@@ -257,7 +257,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
 
 function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
     return (
-        <div className="grid grid-cols-2 gap-8 sm:gap-12 lg:flex lg:items-start lg:gap-32">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-12 lg:flex lg:items-start lg:gap-32">
             {/* Column 1 — Newsletter sign-up. lg:flex-1 lets it absorb the slack so
                 the other 3 columns bunch on the right. */}
             <NewsletterSignup t={t} ft={ft} siteSettings={siteSettings} />
