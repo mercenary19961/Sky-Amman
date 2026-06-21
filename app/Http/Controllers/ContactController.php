@@ -72,11 +72,11 @@ class ContactController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email:rfc', 'max:255'],
+            'email' => ['nullable', 'email:rfc', 'max:255'],
             // Jordan mobile: "+962 7XXXXXXXX" or "07XXXXXXXX" (962/no-+ also ok).
             'phone' => ['required', 'string', 'regex:/^(?:\+962|962|0)7\d{8}$/'],
             'request_type' => ['required', Rule::in(ContactSubmission::REQUEST_TYPES)],
-            'message' => ['required', 'string', 'max:5000'],
+            'message' => ['nullable', 'string', 'max:5000'],
             'property' => ['nullable', 'string', 'max:255'],
         ], [
             'phone.regex' => 'Enter a valid Jordan mobile, e.g. +962 7XXXXXXXX or 07XXXXXXXX.',
@@ -92,11 +92,11 @@ class ContactController extends Controller
 
         $submission = ContactSubmission::create([
             'name' => strip_tags($validated['name']),
-            'email' => $validated['email'],
+            'email' => isset($validated['email']) ? $validated['email'] : null,
             // Stored canonically as "+9627XXXXXXXX" regardless of entered form.
             'phone' => $this->normalizeJordanPhone($validated['phone']),
             'request_type' => $validated['request_type'],
-            'message' => strip_tags($validated['message']),
+            'message' => isset($validated['message']) ? strip_tags($validated['message']) : null,
             'project_id' => $projectId,
             'ip_address' => $request->ip(),
         ]);
