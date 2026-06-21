@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SiteContentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DepartmentMemberController;
 use App\Http\Controllers\Admin\GalleryImageController;
+use App\Http\Controllers\Admin\NewsletterSubscriberController;
 use App\Http\Controllers\Admin\ManagedImageController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TestimonialVideoController;
@@ -157,6 +158,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Image upload needs multipart, so update is POST + _method spoofing from the client.
     Route::put('/testimonials/{id}', [TestimonialController::class, 'update'])->name('testimonials.update')->where('id', '[0-9]+');
     Route::delete('/testimonials/{id}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy')->where('id', '[0-9]+');
+
+    // Newsletter Subscribers — capture-only list (editors + admins).
+    Route::get('/newsletter', [NewsletterSubscriberController::class, 'index'])->name('newsletter.index');
+    Route::get('/newsletter/export', [NewsletterSubscriberController::class, 'export'])->name('newsletter.export');
+    Route::delete('/newsletter/{id}', [NewsletterSubscriberController::class, 'destroy'])->name('newsletter.destroy')->where('id', '[0-9]+');
 
     // Contact Submissions — single inbox for all public forms (editors + admins).
     // Literal `trash` must precede the {id} wildcard.
