@@ -163,6 +163,40 @@ class ContactSubmissionController extends Controller
             ->with('success', 'Submission permanently deleted.');
     }
 
+    public function export(): \Illuminate\Http\Response
+    {
+        $submissions = ContactSubmission::with('project:id,title_en')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $headers = ['ID', 'Name', 'Email', 'Phone', 'Request Type', 'Message', 'Project', 'IP Address', 'Read', 'Archived', 'Submitted At'];
+
+        $rows = $submissions->map(fn (ContactSubmission $s) => [
+            $s->id,
+            $s->name,
+            $s->email ?? '',
+            $s->phone ?? '',
+            $s->request_type,
+            $s->message ?? '',
+            $s->project?->title_en ?? '',
+            $s->ip_address ?? '',
+            $s->is_read ? 'Yes' : 'No',
+            $s->is_archived ? 'Yes' : 'No',
+            $s->created_at->toDateTimeString(),
+        ]);
+
+        $csv = collect([$headers])->concat($rows)
+            ->map(fn (array $row) => implode(',', array_map(fn ($v) => '"' . str_replace('"', '""', (string) $v) . '"', $row)))
+            ->implode("\n");
+
+        $filename = 'contact-submissions-' . now()->format('Y-m-d') . '.csv';
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     /** Shared row shape for the inbox / archive / trash tables. */
     private function toListItem(ContactSubmission $s): array
     {

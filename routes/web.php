@@ -165,8 +165,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/newsletter/{id}', [NewsletterSubscriberController::class, 'destroy'])->name('newsletter.destroy')->where('id', '[0-9]+');
 
     // Contact Submissions — single inbox for all public forms (editors + admins).
-    // Literal `trash` must precede the {id} wildcard.
+    // Literal segments (`trash`, `export`) must precede the {id} wildcard.
     Route::get('/contacts', [ContactSubmissionController::class, 'index'])->name('contacts.index');
+    Route::get('/contacts/export', [ContactSubmissionController::class, 'export'])->name('contacts.export');
     Route::get('/contacts/trash', [ContactSubmissionController::class, 'trash'])->name('contacts.trash');
     Route::get('/contacts/{id}', [ContactSubmissionController::class, 'show'])->name('contacts.show')->where('id', '[0-9]+');
     Route::post('/contacts/{id}/read', [ContactSubmissionController::class, 'toggleRead'])->name('contacts.read')->where('id', '[0-9]+');
