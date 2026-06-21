@@ -193,7 +193,7 @@ export function AssurancePillars({ content }: AssurancePillarsProps) {
 
                                 {/* Panel grows to fit the bullets — no fade clipping. */}
                                 <div className="-mt-14 w-full rounded-4xl bg-primary px-6 pb-8 pt-20">
-                                    <ul className="space-y-3 text-center text-sm text-white">
+                                    <ul className="space-y-3 text-center text-base text-white">
                                         {active.bullets.map((b, i) => (
                                             <li key={i}>{b}</li>
                                         ))}
@@ -390,7 +390,7 @@ function PillarStage({ active, activeIndex, direction, transitionSign, compact =
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.5, ease: 'easeInOut' }}
-                            className="space-y-1.5 text-white text-center text-sm sm:text-base lg:text-lg max-w-2xl"
+                            className="space-y-1.5 text-white text-center text-base sm:text-lg lg:text-xl max-w-2xl"
                         >
                             {active.bullets.map((b, i) => (
                                 <li key={i}>{b}</li>
@@ -426,7 +426,7 @@ function PillarStage({ active, activeIndex, direction, transitionSign, compact =
                             <span className="text-2xl sm:text-3xl font-bold text-primary">
                                 {active.number}
                             </span>
-                            <span className="mt-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-ink leading-tight">
+                            <span className="mt-2 text-sm sm:text-base font-semibold uppercase tracking-wider text-ink leading-tight">
                                 {active.title}
                             </span>
                         </div>
