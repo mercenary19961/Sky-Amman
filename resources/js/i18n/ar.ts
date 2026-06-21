@@ -302,7 +302,7 @@ const ar = {
             linkedin: 'لينكدإن',
             youtube: 'يوتيوب',
             x: 'إكس',
-            meta: 'ميتا',
+            meta: 'فيسبوك',
             tiktok: 'تيك توك',
         },
         copyright: 'جميع الحقوق محفوظة',
