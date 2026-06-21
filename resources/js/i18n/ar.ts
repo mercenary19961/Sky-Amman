@@ -301,9 +301,8 @@ const ar = {
         socials: {
             linkedin: 'لينكدإن',
             youtube: 'يوتيوب',
-            x: 'إكس',
             meta: 'فيسبوك',
-            tiktok: 'تيك توك',
+            instagram: 'إنستغرام',
         },
         copyright: 'جميع الحقوق محفوظة',
         privacyPolicy: 'سياسة الخصوصية',

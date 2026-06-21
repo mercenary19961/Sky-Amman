@@ -19,13 +19,12 @@ const MAIN_PAGES = [
     { key: 'contact', href: '/contact' },
 ] as const;
 
-const SOCIAL_KEYS = [
+const SOCIAL_KEYS: { key: string; settingKey: string; comingSoon?: true }[] = [
     { key: 'linkedin', settingKey: 'linkedin_url' },
-    { key: 'youtube', settingKey: 'youtube_url' },
-    { key: 'x', settingKey: 'twitter_url' },
     { key: 'meta', settingKey: 'facebook_url' },
-    { key: 'tiktok', settingKey: 'tiktok_url' },
-] as const;
+    { key: 'instagram', settingKey: 'instagram_url' },
+    { key: 'youtube', settingKey: 'youtube_url', comingSoon: true },
+];
 
 /**
  * Resolve a footer string from the CMS bundle (Site Content editor → "footer"
@@ -181,23 +180,23 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                 aria-expanded={expanded}
                 className="group flex items-center gap-3 text-start cursor-pointer"
             >
-                <span className="relative grid place-items-center w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-110">
+                <span className="relative grid place-items-center w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110">
                     <img
                         src="/images/home/checkbox-outline.svg"
                         alt=""
                         aria-hidden="true"
-                        className="w-7 h-7 select-none"
+                        className="w-5 h-5 select-none"
                     />
                     {/* Filled check when open; a faint preview check on hover while closed. */}
                     <Check
-                        className={`absolute w-4 h-4 text-white transition-opacity duration-200 ${
+                        className={`absolute w-3 h-3 text-white transition-opacity duration-200 ${
                             expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
                         }`}
                         strokeWidth={3}
                         aria-hidden="true"
                     />
                 </span>
-                <span className="text-lg sm:text-xl font-semibold transition-opacity duration-200 group-hover:opacity-80">
+                <span className="text-sm sm:text-base font-semibold transition-opacity duration-200 group-hover:opacity-80">
                     {ft('subscribe', 'label', 'footer.subscribe.label')}
                 </span>
             </button>
@@ -219,13 +218,13 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder={t('footer.subscribe.placeholder')}
-                                className="rounded-full bg-white/95 text-ink px-5 py-2.5 text-sm placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-white"
+                                className="rounded-full bg-white/95 text-ink px-4 py-2 text-xs placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-white"
                             />
                             <Turnstile ref={turnstileRef} onVerify={setToken} onExpire={() => setToken('')} />
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-60"
+                                className="inline-flex items-center justify-center rounded-full bg-white text-primary px-5 py-1.5 text-xs font-medium hover:bg-surface-muted transition-colors disabled:opacity-60"
                             >
                                 {processing ? t('footer.subscribe.submitting') : t('footer.subscribe.submit')}
                             </button>
@@ -236,7 +235,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
 
             <Link
                 href="/contact"
-                className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-primary px-8 py-2.5 text-sm font-medium hover:bg-surface-muted transition-colors"
+                className="mt-4 inline-flex items-center justify-center rounded-full bg-white text-primary px-5 py-1.5 text-xs font-medium hover:bg-surface-muted transition-colors"
             >
                 {ft('subscribe', 'cta', 'footer.subscribe.cta')}
             </Link>
@@ -257,7 +256,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
 
 function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; siteSettings?: SiteSettings }) {
     return (
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-12 lg:flex lg:items-start lg:gap-32">
+        <div className="grid grid-cols-3 gap-4 sm:gap-8 lg:flex lg:items-start lg:gap-32">
             {/* Column 1 — Newsletter sign-up. lg:flex-1 lets it absorb the slack so
                 the other 3 columns bunch on the right. */}
             <NewsletterSignup t={t} ft={ft} siteSettings={siteSettings} />
@@ -284,10 +283,10 @@ function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; 
                     {ft('sections', 'follow_us', 'footer.sections.followUs')}
                 </h3>
                 <ul className="space-y-2 text-sm text-white/85">
-                    {SOCIAL_KEYS.map(({ key, settingKey }) => {
-                        const url = (siteSettings as Record<string, string | undefined>)?.[settingKey];
+                    {SOCIAL_KEYS.map(({ key, settingKey, comingSoon }) => {
+                        const url = !comingSoon && (siteSettings as Record<string, string | undefined>)?.[settingKey];
                         return (
-                            <li key={key}>
+                            <li key={key} className={comingSoon ? 'group/cs' : undefined}>
                                 {url ? (
                                     <a
                                         href={url}
@@ -298,8 +297,13 @@ function FooterColumns({ t, ft, siteSettings }: { t: TFunction; ft: FooterText; 
                                         {t(`footer.socials.${key}`)}
                                     </a>
                                 ) : (
-                                    <span className="text-white/55">
-                                        {t(`footer.socials.${key}`)}
+                                    <span className={`inline-flex items-center gap-2 ${comingSoon ? 'cursor-default' : ''}`}>
+                                        <span className="text-white/55">{t(`footer.socials.${key}`)}</span>
+                                        {comingSoon && (
+                                            <span className="opacity-0 group-hover/cs:opacity-100 transition-opacity duration-200 text-[11px] bg-white/20 text-white/70 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                                Coming soon
+                                            </span>
+                                        )}
                                     </span>
                                 )}
                             </li>
