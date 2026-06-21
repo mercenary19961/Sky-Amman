@@ -305,9 +305,8 @@ const en = {
         socials: {
             linkedin: 'Linkedin',
             youtube: 'Youtube',
-            x: 'X',
             meta: 'Facebook',
-            tiktok: 'Tiktok',
+            instagram: 'Instagram',
         },
         copyright: 'All rights reserved',
         privacyPolicy: 'Privacy policy',
