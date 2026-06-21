@@ -16,10 +16,9 @@ class DefaultSettingsSeeder extends Seeder
             ['key' => 'company_address_en', 'value' => 'Amman, Jordan', 'type' => 'text', 'group' => 'contact'],
             ['key' => 'company_address_ar', 'value' => 'عمّان، الأردن', 'type' => 'text', 'group' => 'contact'],
 
-            // Social — leave empty so the footer renders only configured icons.
-            ['key' => 'linkedin_url', 'value' => '', 'type' => 'url', 'group' => 'social'],
-            ['key' => 'instagram_url', 'value' => '', 'type' => 'url', 'group' => 'social'],
-            ['key' => 'facebook_url', 'value' => '', 'type' => 'url', 'group' => 'social'],
+            ['key' => 'linkedin_url', 'value' => 'https://www.linkedin.com/company/sky-amman/', 'type' => 'url', 'group' => 'social'],
+            ['key' => 'instagram_url', 'value' => 'https://www.instagram.com/skyammanjo/', 'type' => 'url', 'group' => 'social'],
+            ['key' => 'facebook_url', 'value' => 'https://web.facebook.com/profile.php?id=61590672187044', 'type' => 'url', 'group' => 'social'],
             ['key' => 'twitter_url', 'value' => '', 'type' => 'url', 'group' => 'social'],
             ['key' => 'youtube_url', 'value' => '', 'type' => 'url', 'group' => 'social'],
             ['key' => 'tiktok_url', 'value' => '', 'type' => 'url', 'group' => 'social'],

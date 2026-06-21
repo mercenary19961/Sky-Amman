@@ -306,7 +306,7 @@ const en = {
             linkedin: 'Linkedin',
             youtube: 'Youtube',
             x: 'X',
-            meta: 'Meta',
+            meta: 'Facebook',
             tiktok: 'Tiktok',
         },
         copyright: 'All rights reserved',
