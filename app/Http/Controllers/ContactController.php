@@ -11,6 +11,7 @@ use App\Models\SiteContent;
 use App\Services\TurnstileVerifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -147,6 +148,13 @@ class ContactController extends Controller
             return;
         }
 
-        Mail::to($recipients->all())->send(new ContactSubmissionReceived($submission));
+        try {
+            Mail::to($recipients->all())->send(new ContactSubmissionReceived($submission));
+        } catch (\Throwable $e) {
+            Log::error('Contact notification mail failed', [
+                'submission_id' => $submission->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
