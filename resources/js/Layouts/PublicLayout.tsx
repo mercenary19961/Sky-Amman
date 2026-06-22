@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Header } from '@/Components/Layout/Header';
 import { Footer } from '@/Components/Layout/Footer';
 import { WhatsAppButton } from '@/Components/Public/WhatsAppButton';
+import { PhoneCloud } from '@/Components/Public/PhoneCloud';
 
 interface PublicLayoutProps {
     children: ReactNode;
@@ -14,6 +15,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
             <main className="flex-1">{children}</main>
             <Footer />
             <WhatsAppButton />
+            <PhoneCloud />
         </div>
     );
 }

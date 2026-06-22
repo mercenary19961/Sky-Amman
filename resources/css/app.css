@@ -104,6 +104,53 @@ html[dir="rtl"] body {
     transform: translateX(100px);
 }
 
+/* Floating phone-number badge — slides in from the left (with a small overshoot),
+   holds ~5s, then slides back out to the left the way it came in. Long loop so it
+   re-appears occasionally without nagging. pointer-events are gated to the visible
+   window so the (invisible) badge never blocks clicks the rest of the cycle.
+   Hold = 6%→28% of 22s ≈ 5s; exit = 28%→44% ≈ 3.5s. */
+@keyframes phone-cloud {
+    0%   { opacity: 0; transform: translateX(-120px) scale(0.95); pointer-events: none; }
+    3%   { opacity: 1; transform: translateX(8px)    scale(1.02); pointer-events: auto; }
+    6%   { opacity: 1; transform: translateX(0)      scale(1);    pointer-events: auto; }
+    28%  { opacity: 1; transform: translateX(0)      scale(1);    pointer-events: auto; }
+    44%  { opacity: 0; transform: translateX(-120px) scale(0.96); pointer-events: none; }
+    100% { opacity: 0; transform: translateX(-120px) scale(0.95); pointer-events: none; }
+}
+
+.animate-phone-cloud {
+    animation: phone-cloud 22s ease-in-out infinite;
+    /* Shorter delay than the WhatsApp button (5s) so this appears first. */
+    animation-delay: 1s;
+    opacity: 0;
+    transform: translateX(-120px) scale(0.95);
+    pointer-events: none;
+}
+
+/* Gentle idle float for the cloud's inner body — composes with the show/hide
+   transform on the wrapper so the cloud bobs softly while it rests. */
+@keyframes cloud-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+.animate-cloud-bob {
+    animation: cloud-bob 4.5s ease-in-out infinite;
+}
+
+/* Honour reduced-motion: show the cloud statically instead of animating it. */
+@media (prefers-reduced-motion: reduce) {
+    .animate-phone-cloud {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+    }
+    .animate-cloud-bob {
+        animation: none;
+    }
+}
+
 /* Slow horizontal drift for the footer cloud layers. We render two copies of
    the cloud strip side-by-side inside an overflow-hidden window and translate
    the whole pair by -50% (= one image width) so the loop is seamless without

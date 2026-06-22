@@ -256,6 +256,11 @@ export default function Properties() {
                         </p>
                     </div>
 
+                    {/* Top pagination — mobile only. On phones the single-column
+                        grid pushes the bottom controls far down, so mirror them
+                        above the grid for quick page switching without scrolling. */}
+                    <Pagination page={page} totalPages={totalPages} setPage={setPage} className="mt-8 sm:hidden" />
+
                     {/* Grid */}
                     {pageItems.length > 0 ? (
                         <motion.div layout className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
@@ -282,47 +287,7 @@ export default function Properties() {
                     )}
 
                     {/* Pagination — 6 per page. */}
-                    {totalPages > 1 && (
-                        <div className="mt-12 flex items-center justify-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                                aria-label="Previous page"
-                                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
-                            >
-                                <ChevronLeft size={20} className="rtl:rotate-180" />
-                            </button>
-
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                                <button
-                                    key={n}
-                                    type="button"
-                                    onClick={() => setPage(n)}
-                                    aria-label={`Page ${n}`}
-                                    aria-current={n === page ? 'page' : undefined}
-                                    className={cn(
-                                        'h-10 w-10 rounded-full text-sm font-medium transition-colors cursor-pointer',
-                                        n === page
-                                            ? 'bg-primary text-white'
-                                            : 'text-ink-muted hover:bg-primary/10 hover:text-primary',
-                                    )}
-                                >
-                                    {n}
-                                </button>
-                            ))}
-
-                            <button
-                                type="button"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages}
-                                aria-label="Next page"
-                                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
-                            >
-                                <ChevronRight size={20} className="rtl:rotate-180" />
-                            </button>
-                        </div>
-                    )}
+                    <Pagination page={page} totalPages={totalPages} setPage={setPage} className="mt-12" />
                 </div>
             </section>
 
@@ -471,6 +436,67 @@ function ProjectsGallery({ images, perView }: { images: { id: string; url: strin
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+
+/**
+ * Client-side pagination control (prev · numbered pages · next). Rendered both
+ * above (mobile-only) and below the listings grid; returns nothing for a single
+ * page. The page count stays small (≤3 with 6/page over the catalogue), so all
+ * numbers fit on one row even on mobile.
+ */
+function Pagination({
+    page,
+    totalPages,
+    setPage,
+    className,
+}: {
+    page: number;
+    totalPages: number;
+    setPage: React.Dispatch<React.SetStateAction<number>>;
+    className?: string;
+}) {
+    if (totalPages <= 1) return null;
+    return (
+        <div className={cn('flex items-center justify-center gap-2', className)}>
+            <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                aria-label="Previous page"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
+            >
+                <ChevronLeft size={20} className="rtl:rotate-180" />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                    key={n}
+                    type="button"
+                    onClick={() => setPage(n)}
+                    aria-label={`Page ${n}`}
+                    aria-current={n === page ? 'page' : undefined}
+                    className={cn(
+                        'h-10 w-10 rounded-full text-sm font-medium transition-colors cursor-pointer',
+                        n === page
+                            ? 'bg-primary text-white'
+                            : 'text-ink-muted hover:bg-primary/10 hover:text-primary',
+                    )}
+                >
+                    {n}
+                </button>
+            ))}
+
+            <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                aria-label="Next page"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/40 text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-primary cursor-pointer"
+            >
+                <ChevronRight size={20} className="rtl:rotate-180" />
+            </button>
         </div>
     );
 }

@@ -70,6 +70,7 @@ function DriftingCloud({
     entranceFromX,
     entranceDelay,
     driftDuration,
+    inView,
 }: {
     src: string;
     className: string;
@@ -78,10 +79,13 @@ function DriftingCloud({
     entranceFromX: number;
     entranceDelay: number;
     driftDuration: number;
+    // Whether the footer hero is on screen. Observed on the (untransformed) hero
+    // container, NOT the cloud itself: the cloud's initial position is shifted
+    // ±entranceFromX px off-screen, which on a narrow phone pushes it under an
+    // element-based visibility threshold so it would never animate in.
+    inView: boolean;
 }) {
     const controls = useAnimationControls();
-    const ref = useRef<HTMLImageElement>(null);
-    const inView = useInView(ref, { once: true, amount: 0.2 });
 
     useEffect(() => {
         if (!inView) return;
@@ -125,7 +129,6 @@ function DriftingCloud({
 
     return (
         <motion.img
-            ref={ref}
             src={src}
             alt=""
             aria-hidden="true"
@@ -196,7 +199,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                         aria-hidden="true"
                     />
                 </span>
-                <span className="text-sm sm:text-base font-semibold transition-opacity duration-200 group-hover:opacity-80">
+                <span className="text-xs sm:text-sm font-semibold transition-opacity duration-200 group-hover:opacity-80">
                     {ft('subscribe', 'label', 'footer.subscribe.label')}
                 </span>
             </button>
@@ -244,7 +247,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                 <a
                     href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`}
                     dir="ltr"
-                    className="mt-5 flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors w-fit"
+                    className="mt-5 flex items-center gap-2 text-xs sm:text-sm text-white/90 hover:text-white transition-colors w-fit"
                 >
                     <Phone size={15} className="shrink-0" />
                     {siteSettings.phone}
@@ -323,6 +326,11 @@ export function Footer() {
     const ft = makeFooterText(footerContent, t);
     const year = new Date().getFullYear();
 
+    // Drives the cloud slide-in. Observed on the photo-hero container (never
+    // transformed) so it fires reliably at any viewport width — see DriftingCloud.
+    const heroRef = useRef<HTMLDivElement>(null);
+    const heroInView = useInView(heroRef, { once: true, amount: 0.2 });
+
     return (
         <footer className="relative bg-primary-deep text-white overflow-hidden mt-16">
             {/* Top — columns area on clean sky (no clouds behind text) */}
@@ -351,7 +359,7 @@ export function Footer() {
               which is exactly how the design "places" the villa & logo so only
               their lower portions show.
             */}
-            <div className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
+            <div ref={heroRef} className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
                 {/* z-30 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right.
                     Slides in once, then drifts continuously across the screen. Sits in
                     front of the apartment (z-20), same as the left cluster. */}
@@ -363,6 +371,7 @@ export function Footer() {
                     entranceFromX={220}
                     entranceDelay={0.1}
                     driftDuration={42}
+                    inView={heroInView}
                 />
 
                 {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
@@ -385,6 +394,7 @@ export function Footer() {
                     entranceFromX={-220}
                     entranceDelay={0.25}
                     driftDuration={68}
+                    inView={heroInView}
                 />
 
                 {/* z-40 — SKYAMMAN logo, center-right, overlaps the villa */}
