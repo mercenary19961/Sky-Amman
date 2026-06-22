@@ -123,7 +123,13 @@ export default function SelfBuild() {
             {/* Bottom fades from white into the footer blue (#78AFCE / primary-deep)
                 and -mb-16 cancels the footer's top margin so they connect flush. */}
             {sectionVisible(content.process) && (
-                <section className="-mb-16 bg-linear-to-b from-white from-90% to-primary-deep pb-20 sm:pb-28">                    <div className="section-x">
+                /* overflow-x-clip: the steps slide in from ±64px on whileInView,
+                   and off-fold steps sit at that initial transform — both push
+                   past the viewport edge and would momentarily widen the page on
+                   mobile. Clip horizontally to contain it (overflow-y stays
+                   visible so nothing is cut vertically). */
+                <section className="-mb-16 overflow-x-clip bg-linear-to-b from-white from-90% to-primary-deep pb-20 sm:pb-28">
+                    <div className="section-x">
                         <div className="relative mx-auto max-w-6xl py-6">
                             {/* Central vertical line. */}
                             <div
@@ -165,7 +171,10 @@ export default function SelfBuild() {
                                                     src={`/images/self-build/${step.image}`}
                                                     alt=""
                                                     loading="lazy"
-                                                    className="h-auto w-56 object-contain sm:w-96 lg:w-lg"
+                                                    // Fill the grid half-column (capped per breakpoint) instead
+                                                    // of a fixed width, so the icon never spills past its column
+                                                    // — the old fixed w-56/sm:w-96 overflowed on narrow screens.
+                                                    className="h-auto w-full max-w-56 object-contain sm:max-w-96 lg:max-w-lg"
                                                 />
                                                 <span className="mt-2 text-base font-semibold text-ink sm:text-lg lg:text-xl">
                                                     {label}
