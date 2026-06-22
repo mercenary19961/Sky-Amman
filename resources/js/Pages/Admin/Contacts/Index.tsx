@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    Search, Archive, Trash2, ArchiveRestore, Inbox, Mail, MailOpen, Building2, ChevronRight,
+    Search, Archive, Trash2, ArchiveRestore, Inbox, Mail, MailOpen, Building2, ChevronRight, Download,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/ConfirmDeleteButton';
@@ -146,15 +146,24 @@ export default function ContactsIndex() {
                     ]}
                 />
 
-                {trashedCount > 0 && (
-                    <Link
-                        href="/admin/contacts/trash"
-                        className="ms-auto inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
+                <div className="ms-auto flex items-center gap-3">
+                    <a
+                        href="/admin/contacts/export"
+                        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
                     >
-                        <Trash2 size={15} />
-                        Trash ({trashedCount})
-                    </Link>
-                )}
+                        <Download size={15} />
+                        Export CSV
+                    </a>
+                    {trashedCount > 0 && (
+                        <Link
+                            href="/admin/contacts/trash"
+                            className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
+                        >
+                            <Trash2 size={15} />
+                            Trash ({trashedCount})
+                        </Link>
+                    )}
+                </div>
             </div>
 
             {/* Table */}

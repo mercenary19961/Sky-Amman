@@ -33,6 +33,8 @@ class GalleryImageController extends Controller
             'label'      => $img['label'],
             'gallery_id' => $img['gallery_id'] ?? null,
             'hidden'     => in_array($img['id'], $hidden, true),
+            'size_bytes'  => $img['size_bytes'] ?? null,
+            'mime_type'   => $img['mime_type'] ?? null,
         ])->all();
 
         return Inertia::render('Admin/Gallery/Index', [
@@ -40,7 +42,7 @@ class GalleryImageController extends Controller
             'soldCount' => Project::active()->where('listing_status', 'sold')->count(),
             'settings'  => [
                 'enabled' => (bool) Setting::get('gallery_enabled', true),
-                'count'   => max(1, (int) Setting::get('gallery_count', 6)),
+                'count'   => min(6, max(4, (int) Setting::get('gallery_count', 6))),
             ],
         ]);
     }
@@ -64,7 +66,7 @@ class GalleryImageController extends Controller
     public function updateSettings(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'count'   => ['required', 'integer', 'min:1', 'max:24'],
+            'count'   => ['required', 'integer', 'min:4', 'max:6'],
             'enabled' => ['boolean'],
         ]);
 

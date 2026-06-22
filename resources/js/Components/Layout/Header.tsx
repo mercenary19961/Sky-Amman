@@ -145,7 +145,7 @@ export function Header() {
                 {/* Nav + language button grouped on the right; justify-between
                     on the parent keeps the logo pinned left. */}
                 <div className="flex items-center gap-6">
-                    <nav className="hidden lg:flex items-center gap-6 text-sm">
+                    <nav className="hidden lg:flex items-center gap-1 text-base">
                         {NAV_ITEMS.map((item) => {
                             const active = url === item.href;
                             return (
@@ -153,14 +153,10 @@ export function Header() {
                                     key={item.key}
                                     href={item.href}
                                     className={cn(
-                                        'transition-colors duration-200',
-                                        isDark
-                                            ? active
-                                                ? 'text-white font-medium'
-                                                : 'text-white/80 hover:text-white'
-                                            : active
-                                                ? 'text-white font-semibold'
-                                                : 'text-white hover:text-white/80',
+                                        'px-3 py-1 rounded-full text-white font-medium transition-all duration-200',
+                                        active
+                                            ? 'bg-white/25 font-semibold'
+                                            : 'text-white/85 hover:text-white hover:bg-white/10',
                                     )}
                                 >
                                     {t(`nav.${item.key}`)}
