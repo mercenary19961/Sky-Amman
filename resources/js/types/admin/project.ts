@@ -25,7 +25,15 @@ export interface ProjectImageItem {
         original_filename: string;
         alt_text_en: string | null;
         alt_text_ar: string | null;
+        mime_type: string | null;
+        size_bytes: number | null;
     };
+}
+
+export interface CommittedImageItem {
+    url: string;
+    size_bytes: number | null;
+    mime_type: string | null;
 }
 
 export interface ProjectFormItem {
@@ -137,4 +145,5 @@ export interface ProjectShowProps extends PageProps {
 
 export interface ProjectFormProps extends PageProps {
     item: ProjectFormItem | null;
+    committedImageUrls: CommittedImageItem[];
 }
