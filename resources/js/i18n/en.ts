@@ -297,7 +297,7 @@ const en = {
         },
         mainPages: {
             home: 'Home',
-            listings: 'Listings',
+            listings: 'Properties',
             selfBuild: 'Self Build',
             security: 'Security',
             about: 'About',
