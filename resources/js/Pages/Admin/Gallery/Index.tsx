@@ -312,7 +312,7 @@ function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle
             </div>
 
             {/* Hover metadata overlay */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-black/70 p-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/40 to-transparent p-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 {dims && (
                     <p className="text-[11px] text-white leading-snug">
                         <span className="text-white/60">Dimensions: </span>{dims.w} × {dims.h}
