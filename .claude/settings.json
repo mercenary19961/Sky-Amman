@@ -7,7 +7,10 @@
       "Bash(cp \"C:/Users/sabba/Downloads/investment_hero.webp\" public/images/investment/hero.webp)",
       "Bash(node -e \"const s=require\\('./node_modules/sharp'\\); s\\('public/images/investment/hero.webp'\\).metadata\\(\\).then\\(m=>console.log\\(m.width+'x'+m.height\\)\\)\")",
       "Bash(echo \"copied $\\(node -e \"const s=require\\('./node_modules/sharp'\\); s\\('public/images/investment/hero.webp'\\).metadata\\(\\).then\\(m=>console.log\\(m.width+'x'+m.height\\)\\)\"\\)\")",
-      "Bash(npx -y sharp-cli -i .tmp_home_mobile.png -o .tmp_dept2.png extract 3050 0 390 320)"
+      "Bash(npx -y sharp-cli -i .tmp_home_mobile.png -o .tmp_dept2.png extract 3050 0 390 320)",
+      "Bash(npx -y sharp-cli -i .tmp_home_mobile.png -o .tmp_test.png extract 2480 0 390 480)",
+      "Bash(npx -y sharp-cli -i .tmp_home_mobile.png -o .tmp_test.png extract 4020 0 390 520)",
+      "Bash(curl -s \"http://localhost:5173/resources/css/app.css\" -o .tmp_app.css)"
     ]
   }
 }
