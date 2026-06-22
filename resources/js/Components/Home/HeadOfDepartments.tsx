@@ -57,15 +57,18 @@ export function HeadOfDepartments({ content, members }: HeadOfDepartmentsProps) 
 function DeptCard({ member }: { member: Member }) {
     return (
         // Everything is sized as a % of the card width (pt, circle, text
-        // padding) so the geometry is IDENTICAL at every viewport — the circle
-        // always overhangs the card top by exactly half and the text always
-        // clears it. The card width itself is capped per breakpoint so it can't
-        // balloon on the wide 2-col tablet layout. pt-[37%] = half the 74%-wide circle.
-        <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[37%]">
-            {/* Avatar circle — 74% of the card width, overhanging the card top by
-                half (pt-[37%]). Shows the uploaded photo, or a primary-fill
-                placeholder with a person icon when none is set. */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[74%] aspect-square overflow-hidden rounded-full bg-primary shadow-md z-10">
+        // padding) so the geometry is IDENTICAL at every viewport. The card SVG
+        // has a big top-left corner radius (65/257 ≈ 25% of the width), so the
+        // avatar is sized + nudged toward the supported side so its base rests
+        // on the card's flat top edge instead of floating over the rounded-away
+        // corner. pt = half the circle width (overhang by half).
+        <div className="relative mx-auto w-full max-w-72 lg:max-w-80 pt-[30%]">
+            {/* Avatar circle — 60% of the card width, centered. At this size it
+                rests on the card's flat top edge and aligns above the centered
+                name (it no longer floats over the rounded top-left corner the
+                way the old 74% circle did). Shows the uploaded photo, or a
+                primary-fill placeholder with a person icon when none is set. */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] aspect-square overflow-hidden rounded-full bg-primary shadow-md z-10">
                 {member.image ? (
                     <img src={member.image} alt={member.name} loading="lazy" className="h-full w-full object-cover" />
                 ) : (
