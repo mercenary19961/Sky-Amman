@@ -359,13 +359,117 @@ function useGalleryVisible(perView: number): number {
     return count;
 }
 
+type GalleryImg = { id: string; url: string; alt: string };
+
+/** True below the `sm` (640px) breakpoint. Defaults to false (desktop) for SSR,
+ *  corrected on mount — same pattern as useGalleryVisible. */
+function useIsMobile(): boolean {
+    const [mobile, setMobile] = useState(false);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const update = () => setMobile(window.innerWidth < 640);
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+    return mobile;
+}
+
 /**
- * Projects Gallery carousel — a hover-expand row (desktop) / grid (mobile) that
- * shows a window of `visible` tiles and pages through the full shuffled pool with
+ * Projects Gallery. On mobile it's a single-image "spotlight" carousel with a
+ * slow Ken Burns zoom (see GallerySpotlight); from sm up it's the hover-expand
+ * row / grid (GalleryRow). Renders nothing when the pool is empty.
+ */
+function ProjectsGallery({ images, perView }: { images: GalleryImg[]; perView: number }) {
+    const isMobile = useIsMobile();
+    if (images.length === 0) return null;
+    return isMobile ? <GallerySpotlight images={images} /> : <GalleryRow images={images} perView={perView} />;
+}
+
+/**
+ * Mobile spotlight carousel — one large render at a time with a slow Ken Burns
+ * zoom, crossfading between images, swipeable (drag), auto-advancing every 5s,
+ * with dots. Mobile only; sm+ uses GalleryRow.
+ */
+function GallerySpotlight({ images }: { images: GalleryImg[] }) {
+    const [active, setActive] = useState(0);
+    const N = images.length;
+    const multi = N > 1;
+    const wrap = (i: number) => ((i % N) + N) % N;
+    const go = (dir: number) => setActive((i) => wrap(i + dir));
+
+    // Auto-advance; the timer resets whenever `active` changes, so a manual swipe
+    // or dot tap restarts the countdown instead of firing right after.
+    useEffect(() => {
+        if (!multi) return;
+        const id = setTimeout(() => setActive((i) => wrap(i + 1)), 5000);
+        return () => clearTimeout(id);
+    }, [active, multi, N]);
+
+    return (
+        <div className="relative mt-10">
+            <motion.div
+                className="relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-primary-light/30"
+                drag={multi ? 'x' : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.18}
+                onDragEnd={(_, info) => {
+                    if (!multi) return;
+                    const swipe = info.offset.x + info.velocity.x * 0.2;
+                    if (swipe < -60) go(1);
+                    else if (swipe > 60) go(-1);
+                }}
+            >
+                <AnimatePresence initial={false}>
+                    <motion.div
+                        key={active}
+                        className="absolute inset-0"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.7, ease: 'easeOut' }}
+                    >
+                        {/* Ken Burns — slow continuous zoom on the active render. */}
+                        <motion.img
+                            src={images[active].url}
+                            alt={images[active].alt}
+                            draggable={false}
+                            className="h-full w-full select-none object-cover object-center"
+                            initial={{ scale: 1.06 }}
+                            animate={{ scale: 1.2 }}
+                            transition={{ duration: 6, ease: 'linear' }}
+                        />
+                    </motion.div>
+                </AnimatePresence>
+            </motion.div>
+
+            {multi && (
+                <div className="mt-6 flex items-center justify-center gap-2.5">
+                    {images.map((_, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => setActive(i)}
+                            aria-label={`Go to image ${i + 1}`}
+                            className={cn(
+                                'rounded-full transition-all cursor-pointer',
+                                i === active ? 'w-3 h-3 bg-primary' : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
+                            )}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+/**
+ * Desktop/tablet gallery — a hover-expand row (lg) / grid (sm) that shows a
+ * window of `visible` tiles and pages through the full shuffled pool with
  * prev/next arrows + dots. When the pool fits in one view, it renders statically
  * with no controls.
  */
-function ProjectsGallery({ images, perView }: { images: { id: string; url: string; alt: string }[]; perView: number }) {
+function GalleryRow({ images, perView }: { images: GalleryImg[]; perView: number }) {
     const visible = useGalleryVisible(perView);
     const [active, setActive] = useState(0);
     const N = images.length;
