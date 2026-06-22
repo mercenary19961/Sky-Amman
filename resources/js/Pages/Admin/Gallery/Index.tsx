@@ -13,6 +13,25 @@ interface GalleryItem {
     label: string;
     gallery_id: number | null;     // only editor uploads can be deleted
     hidden: boolean;
+    size_bytes: number | null;
+    mime_type: string | null;
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mimeLabel(mime: string): string {
+    const map: Record<string, string> = {
+        'image/jpeg': 'JPEG',
+        'image/png': 'PNG',
+        'image/webp': 'WebP',
+        'image/gif': 'GIF',
+        'image/svg+xml': 'SVG',
+    };
+    return map[mime] ?? mime.split('/')[1]?.toUpperCase() ?? 'Image';
 }
 
 interface GalleryProps {
@@ -237,6 +256,8 @@ function GallerySection({
 }
 
 function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle: () => void; onDelete?: () => void }) {
+    const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+
     return (
         <div
             className={cn(
@@ -244,7 +265,15 @@ function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle
                 item.hidden && 'opacity-50',
             )}
         >
-            <img src={item.url} alt="" className="h-full w-full object-cover" />
+            <img
+                src={item.url}
+                alt=""
+                className="h-full w-full object-cover"
+                onLoad={(e) => {
+                    const img = e.currentTarget;
+                    setDims({ w: img.naturalWidth, h: img.naturalHeight });
+                }}
+            />
 
             {/* Source / project label */}
             {item.source === 'project' && (
@@ -279,6 +308,25 @@ function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle
                     >
                         <Trash2 size={14} />
                     </ConfirmDeleteButton>
+                )}
+            </div>
+
+            {/* Hover metadata overlay */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-black/70 p-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {dims && (
+                    <p className="text-[11px] font-medium text-white leading-tight">
+                        {dims.w} × {dims.h}
+                    </p>
+                )}
+                {item.size_bytes != null && (
+                    <p className="text-[11px] text-white/80 leading-tight">
+                        {formatBytes(item.size_bytes)}
+                    </p>
+                )}
+                {item.mime_type && (
+                    <p className="text-[11px] text-white/60 leading-tight">
+                        {mimeLabel(item.mime_type)}
+                    </p>
                 )}
             </div>
         </div>

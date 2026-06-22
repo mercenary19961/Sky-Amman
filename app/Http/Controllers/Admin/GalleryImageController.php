@@ -33,6 +33,8 @@ class GalleryImageController extends Controller
             'label'      => $img['label'],
             'gallery_id' => $img['gallery_id'] ?? null,
             'hidden'     => in_array($img['id'], $hidden, true),
+            'size_bytes'  => $img['size_bytes'] ?? null,
+            'mime_type'   => $img['mime_type'] ?? null,
         ])->all();
 
         return Inertia::render('Admin/Gallery/Index', [

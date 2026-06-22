@@ -59,11 +59,13 @@ class GalleryImage extends Model
                 $mediaImages = $p->images
                     ->filter(fn (ProjectImage $img) => $img->media !== null)
                     ->map(fn (ProjectImage $img) => [
-                        'id'     => "img-{$img->id}",
-                        'url'    => route('media.serve', $img->media_id, false),
-                        'alt'    => $p->title_en,
-                        'source' => 'project',
-                        'label'  => $p->title_en,
+                        'id'        => "img-{$img->id}",
+                        'url'       => route('media.serve', $img->media_id, false),
+                        'alt'       => $p->title_en,
+                        'source'    => 'project',
+                        'label'     => $p->title_en,
+                        'size_bytes' => $img->media->size,
+                        'mime_type'  => $img->media->mime_type,
                     ]);
 
                 if ($mediaImages->isNotEmpty()) {
@@ -92,6 +94,8 @@ class GalleryImage extends Model
                 'source'     => 'editor',
                 'label'      => 'Uploaded',
                 'gallery_id' => $g->id,
+                'size_bytes'  => $g->media->size,
+                'mime_type'   => $g->media->mime_type,
             ]);
 
         return $sold->concat($editor)->values();
