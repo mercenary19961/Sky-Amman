@@ -111,10 +111,10 @@ export default function GalleryIndex() {
                                 <label className="block text-xs font-medium text-ink-muted mb-1">Tiles per view</label>
                                 <input
                                     type="number"
-                                    min={1}
-                                    max={24}
+                                    min={4}
+                                    max={6}
                                     value={count}
-                                    onChange={(e) => setCount(Math.min(24, Math.max(1, parseInt(e.target.value || '1', 10))))}
+                                    onChange={(e) => setCount(Math.min(6, Math.max(4, parseInt(e.target.value || '4', 10))))}
                                     className="w-24 rounded-md border border-ink/15 dark:border-white/15 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 />
                             </div>
@@ -134,7 +134,7 @@ export default function GalleryIndex() {
                         </div>
                         <p className="mt-2 text-[11px] text-ink-muted">
                             On desktop up to this many tiles show at once; smaller screens auto-reduce. Extra images page
-                            in with the arrows.
+                            in with the arrows. Min 4, max 6.
                         </p>
                     </div>
 
