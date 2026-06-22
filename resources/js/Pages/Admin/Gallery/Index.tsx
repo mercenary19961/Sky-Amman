@@ -13,6 +13,25 @@ interface GalleryItem {
     label: string;
     gallery_id: number | null;     // only editor uploads can be deleted
     hidden: boolean;
+    size_bytes: number | null;
+    mime_type: string | null;
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mimeLabel(mime: string): string {
+    const map: Record<string, string> = {
+        'image/jpeg': 'JPEG',
+        'image/png': 'PNG',
+        'image/webp': 'WebP',
+        'image/gif': 'GIF',
+        'image/svg+xml': 'SVG',
+    };
+    return map[mime] ?? mime.split('/')[1]?.toUpperCase() ?? 'Image';
 }
 
 interface GalleryProps {
@@ -92,10 +111,10 @@ export default function GalleryIndex() {
                                 <label className="block text-xs font-medium text-ink-muted mb-1">Tiles per view</label>
                                 <input
                                     type="number"
-                                    min={1}
-                                    max={24}
+                                    min={4}
+                                    max={6}
                                     value={count}
-                                    onChange={(e) => setCount(Math.min(24, Math.max(1, parseInt(e.target.value || '1', 10))))}
+                                    onChange={(e) => setCount(Math.min(6, Math.max(4, parseInt(e.target.value || '4', 10))))}
                                     className="w-24 rounded-md border border-ink/15 dark:border-white/15 bg-white dark:bg-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 />
                             </div>
@@ -115,7 +134,7 @@ export default function GalleryIndex() {
                         </div>
                         <p className="mt-2 text-[11px] text-ink-muted">
                             On desktop up to this many tiles show at once; smaller screens auto-reduce. Extra images page
-                            in with the arrows.
+                            in with the arrows. Min 4, max 6.
                         </p>
                     </div>
 
@@ -237,6 +256,8 @@ function GallerySection({
 }
 
 function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle: () => void; onDelete?: () => void }) {
+    const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+
     return (
         <div
             className={cn(
@@ -244,7 +265,15 @@ function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle
                 item.hidden && 'opacity-50',
             )}
         >
-            <img src={item.url} alt="" className="h-full w-full object-cover" />
+            <img
+                src={item.url}
+                alt=""
+                className="h-full w-full object-cover"
+                onLoad={(e) => {
+                    const img = e.currentTarget;
+                    setDims({ w: img.naturalWidth, h: img.naturalHeight });
+                }}
+            />
 
             {/* Source / project label */}
             {item.source === 'project' && (
@@ -279,6 +308,25 @@ function GalleryCard({ item, onToggle, onDelete }: { item: GalleryItem; onToggle
                     >
                         <Trash2 size={14} />
                     </ConfirmDeleteButton>
+                )}
+            </div>
+
+            {/* Hover metadata overlay */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/40 to-transparent p-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {dims && (
+                    <p className="text-[11px] text-white leading-snug">
+                        <span className="text-white/60">Dimensions: </span>{dims.w} × {dims.h}
+                    </p>
+                )}
+                {item.size_bytes != null && (
+                    <p className="text-[11px] text-white leading-snug">
+                        <span className="text-white/60">Size: </span>{formatBytes(item.size_bytes)}
+                    </p>
+                )}
+                {item.mime_type && (
+                    <p className="text-[11px] text-white leading-snug">
+                        <span className="text-white/60">Type: </span>{mimeLabel(item.mime_type)}
+                    </p>
                 )}
             </div>
         </div>

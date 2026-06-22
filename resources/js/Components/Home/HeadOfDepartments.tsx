@@ -81,10 +81,10 @@ function DeptCard({ member }: { member: Member }) {
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
                 <div className="absolute inset-0 flex flex-col items-center justify-end pb-[12%] px-[8%] text-center">
-                    <div className="font-bold text-xs sm:text-sm lg:text-base text-ink">
+                    <div className="font-bold text-sm sm:text-base lg:text-lg text-ink">
                         {member.name}
                     </div>
-                    <div className="mt-1 text-[10px] sm:text-xs lg:text-sm text-primary">
+                    <div className="mt-1 text-xs sm:text-sm lg:text-base text-primary">
                         {member.role}
                     </div>
                 </div>

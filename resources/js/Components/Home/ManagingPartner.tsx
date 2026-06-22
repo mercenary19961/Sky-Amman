@@ -41,7 +41,7 @@ export function ManagingPartner({ content }: ManagingPartnerProps) {
                             className="absolute -top-8 -left-3 sm:-top-10 sm:left-0 w-16 sm:w-24 h-auto select-none pointer-events-none"
                         />
 
-                        <div className="space-y-5 text-center text-sm sm:text-base lg:text-lg text-ink leading-relaxed max-w-4xl mx-auto">
+                        <div className="space-y-5 text-center text-base sm:text-lg lg:text-xl text-ink leading-relaxed max-w-4xl mx-auto">
                             {body1 && <p>{body1}</p>}
                             {body2 && <p>{body2}</p>}
                             {body3 && <p>{body3}</p>}

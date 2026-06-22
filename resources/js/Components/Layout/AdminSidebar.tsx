@@ -4,6 +4,7 @@ import {
     FileText,
     Building2,
     MessageSquare,
+    Newspaper,
     Settings as SettingsIcon,
     Users as UsersIcon,
     History,
@@ -66,6 +67,7 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Communication',
         items: [
             { label: 'Contact Submissions', path: '/admin/contacts', icon: <MessageSquare size={18} />, built: true },
+            { label: 'Newsletter Subscribers', path: '/admin/newsletter', icon: <Newspaper size={18} />, built: true },
         ],
     },
     {

@@ -259,6 +259,7 @@ const ar = {
             email: 'البريد الإلكتروني',
             phone: 'الهاتف',
             phoneHint: 'أدخل رقم موبايل أردني، مثال: ‎+962 7XXXXXXXX أو 07XXXXXXXX.',
+            optional: 'اختياري',
             requestType: 'نوع الطلب',
             subject: 'الموضوع',
             message: 'الرسالة',

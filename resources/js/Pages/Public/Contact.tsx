@@ -178,7 +178,9 @@ export default function Contact() {
                         {/* Right: form */}
                         <form onSubmit={submit} className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-ink">{t('contact.form.name')}</label>
+                                <label className="block text-sm font-medium text-ink">
+                                    {t('contact.form.name')} <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     value={form.data.name}
@@ -191,19 +193,23 @@ export default function Contact() {
 
                             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <div>
-                                    <label className="block text-sm font-medium text-ink">{t('contact.form.email')}</label>
+                                    <label className="block text-sm font-medium text-ink">
+                                        {t('contact.form.email')}
+                                        <span className="ms-1.5 text-xs font-normal text-ink-muted">({t('contact.form.optional')})</span>
+                                    </label>
                                     <input
                                         type="email"
                                         value={form.data.email}
                                         onChange={(e) => form.setData('email', e.target.value)}
-                                        required
                                         className={inputClass}
                                         dir="ltr"
                                     />
                                     {form.errors.email && <p className="mt-1 text-sm text-red-600">{form.errors.email}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-ink">{t('contact.form.phone')}</label>
+                                    <label className="block text-sm font-medium text-ink">
+                                        {t('contact.form.phone')} <span className="text-red-500">*</span>
+                                    </label>
                                     <input
                                         type="tel"
                                         value={form.data.phone}
@@ -220,7 +226,9 @@ export default function Contact() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-ink">{t('contact.form.requestType')}</label>
+                                <label className="block text-sm font-medium text-ink">
+                                    {t('contact.form.requestType')}
+                                </label>
                                 <Select
                                     value={form.data.request_type}
                                     onChange={(v) => form.setData('request_type', v)}
@@ -235,11 +243,13 @@ export default function Contact() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-ink">{t('contact.form.message')}</label>
+                                <label className="block text-sm font-medium text-ink">
+                                    {t('contact.form.message')}
+                                    <span className="ms-1.5 text-xs font-normal text-ink-muted">({t('contact.form.optional')})</span>
+                                </label>
                                 <textarea
                                     value={form.data.message}
                                     onChange={(e) => form.setData('message', e.target.value)}
-                                    required
                                     rows={6}
                                     className={cn(inputClass, 'resize-none')}
                                 />
