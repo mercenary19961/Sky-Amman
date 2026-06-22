@@ -388,8 +388,8 @@ function ProjectsGallery({ images, perView }: { images: GalleryImg[]; perView: n
 
 /**
  * Mobile spotlight carousel — one large render at a time with a slow Ken Burns
- * zoom, crossfading between images, swipeable (drag), auto-advancing every 5s,
- * with dots. Mobile only; sm+ uses GalleryRow.
+ * zoom, crossfading between images. Advance by tapping the image, swiping, or the
+ * dots; also auto-advances every 5s. Mobile only; sm+ uses GalleryRow.
  */
 function GallerySpotlight({ images }: { images: GalleryImg[] }) {
     const [active, setActive] = useState(0);
@@ -409,7 +409,10 @@ function GallerySpotlight({ images }: { images: GalleryImg[] }) {
     return (
         <div className="relative mt-10">
             <motion.div
-                className="relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-primary-light/30"
+                className={cn(
+                    'relative aspect-4/3 w-full overflow-hidden rounded-3xl bg-primary-light/30',
+                    multi && 'cursor-pointer',
+                )}
                 drag={multi ? 'x' : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.18}
@@ -419,6 +422,9 @@ function GallerySpotlight({ images }: { images: GalleryImg[] }) {
                     if (swipe < -60) go(1);
                     else if (swipe > 60) go(-1);
                 }}
+                // Tap to advance. Framer suppresses onTap after a drag, so a swipe
+                // won't also fire this; onDragEnd ignores zero-movement taps.
+                onTap={() => { if (multi) go(1); }}
             >
                 <AnimatePresence initial={false}>
                     <motion.div
