@@ -11,7 +11,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Pencil, GripVertical, Contact, X, User as UserIcon, ImagePlus } from 'lucide-react';
+import { Pencil, GripVertical, X, User as UserIcon, ImagePlus } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
 
@@ -94,7 +94,7 @@ export default function DepartmentsIndex() {
             <Head title="Head of Departments" />
 
             <div className="max-w-5xl">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div className="mb-6">
                     <p className="text-sm text-ink-muted max-w-xl">
                         The team members shown in the homepage "Head of Departments" section. Each has a photo and a
                         bilingual name + role. Drag the handle to reorder.
@@ -102,24 +102,10 @@ export default function DepartmentsIndex() {
                             {items.length} member{items.length !== 1 ? 's' : ''}
                         </span>
                     </p>
-                    <button
-                        type="button"
-                        onClick={() => setEditing('new')}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary-strong px-4 py-2 text-sm font-medium text-white hover:bg-primary-strong-hover transition-colors shrink-0"
-                    >
-                        <Plus size={16} /> Add member
-                    </button>
                 </div>
 
                 {items.length === 0 ? (
-                    <button
-                        type="button"
-                        onClick={() => setEditing('new')}
-                        className="w-full rounded-lg border-2 border-dashed border-ink/15 dark:border-white/15 p-12 text-center text-ink-muted hover:border-primary/40 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                    >
-                        <Contact size={28} className="mx-auto mb-2 opacity-60" />
-                        <div className="text-sm">No team members yet — add your first one</div>
-                    </button>
+                    <p className="text-sm text-ink-muted">No team members found.</p>
                 ) : (
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={items.map((v) => v.id)} strategy={rectSortingStrategy}>
