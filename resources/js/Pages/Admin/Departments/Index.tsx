@@ -11,9 +11,8 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Trash2, Pencil, GripVertical, Contact, Eye, EyeOff, X, User as UserIcon, ImagePlus } from 'lucide-react';
+import { Plus, Pencil, GripVertical, Contact, X, User as UserIcon, ImagePlus } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
 
 interface MemberItem {
@@ -90,13 +89,6 @@ export default function DepartmentsIndex() {
         );
     };
 
-    const toggle = (m: MemberItem) =>
-        router.post(`/admin/department-members/${m.id}/toggle`, {}, { preserveScroll: true });
-    const remove = (m: MemberItem) =>
-        router.delete(`/admin/department-members/${m.id}`, { preserveScroll: true });
-
-    const activeCount = items.filter((m) => m.is_active).length;
-
     return (
         <AdminLayout title="Head of Departments">
             <Head title="Head of Departments" />
@@ -104,11 +96,10 @@ export default function DepartmentsIndex() {
             <div className="max-w-5xl">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                     <p className="text-sm text-ink-muted max-w-xl">
-                        The team members shown in the homepage “Head of Departments” section. Each has a photo and a
-                        bilingual name + role. Drag the handle to reorder; use the eye toggle to show/hide one without
-                        deleting it.
+                        The team members shown in the homepage "Head of Departments" section. Each has a photo and a
+                        bilingual name + role. Drag the handle to reorder.
                         <span className="block mt-1 text-ink-muted">
-                            {activeCount} showing · {items.length} total
+                            {items.length} member{items.length !== 1 ? 's' : ''}
                         </span>
                     </p>
                     <button
@@ -137,9 +128,7 @@ export default function DepartmentsIndex() {
                                     <SortableCard
                                         key={m.id}
                                         item={m}
-                                        onToggle={() => toggle(m)}
                                         onEdit={() => setEditing(m)}
-                                        onDelete={() => remove(m)}
                                     />
                                 ))}
                             </div>
@@ -166,14 +155,10 @@ function Avatar({ url, name, className }: { url: string | null; name: string; cl
 
 function SortableCard({
     item,
-    onToggle,
     onEdit,
-    onDelete,
 }: {
     item: MemberItem;
-    onToggle: () => void;
     onEdit: () => void;
-    onDelete: () => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
@@ -188,7 +173,6 @@ function SortableCard({
             className={cn(
                 'group relative rounded-lg overflow-hidden border bg-white dark:bg-zinc-800 transition-all',
                 'border-ink/5 dark:border-white/10',
-                !item.is_active && 'opacity-70',
                 isDragging && 'opacity-60 scale-95 z-10',
             )}
         >
@@ -210,45 +194,15 @@ function SortableCard({
                 </button>
             </div>
 
-            <div className="px-4 pb-3 flex items-center justify-between gap-2 border-t border-ink/5 dark:border-white/10 pt-2.5">
-                <span
-                    className={cn(
-                        'inline-flex items-center gap-1.5 text-xs font-medium',
-                        item.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-ink-muted',
-                    )}
+            <div className="px-4 pb-3 flex items-center justify-end border-t border-ink/5 dark:border-white/10 pt-2.5">
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    title="Edit"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-ink-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-primary transition-colors"
                 >
-                    <span className={cn('w-1.5 h-1.5 rounded-full', item.is_active ? 'bg-emerald-500' : 'bg-zinc-400')} />
-                    {item.is_active ? 'Showing' : 'Hidden'}
-                </span>
-
-                <div className="flex items-center gap-0.5">
-                    <button
-                        type="button"
-                        onClick={onToggle}
-                        title={item.is_active ? 'Showing — click to hide' : 'Hidden — click to show'}
-                        className="p-1.5 rounded text-ink-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-ink dark:hover:text-zinc-100 transition-colors"
-                    >
-                        {item.is_active ? <Eye size={15} /> : <EyeOff size={15} />}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onEdit}
-                        title="Edit"
-                        className="p-1.5 rounded text-ink-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-primary transition-colors"
-                    >
-                        <Pencil size={15} />
-                    </button>
-                    <ConfirmDeleteButton
-                        onConfirm={onDelete}
-                        title="Delete"
-                        className="p-1.5 rounded text-ink-muted hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                        heading="Delete this team member?"
-                        itemLabel={name}
-                        description="This member will be removed from the homepage."
-                    >
-                        <Trash2 size={15} />
-                    </ConfirmDeleteButton>
-                </div>
+                    <Pencil size={14} /> Edit
+                </button>
             </div>
         </div>
     );
