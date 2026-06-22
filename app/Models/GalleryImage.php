@@ -74,13 +74,29 @@ class GalleryImage extends Model
 
                 // No uploaded Media → use the committed render gallery
                 // (/images/projects/{slug}/NN.webp), or the placeholder.
-                return collect($p->displayImageUrls())->map(fn (string $url, int $i) => [
-                    'id'     => "proj-{$p->id}-{$i}",
-                    'url'    => $url,
-                    'alt'    => $p->title_en,
-                    'source' => 'project',
-                    'label'  => $p->title_en,
-                ]);
+                return collect($p->displayImageUrls())->map(function (string $url, int $i) use ($p) {
+                    $urlPath = parse_url($url, PHP_URL_PATH) ?? $url;
+                    $fsPath  = public_path(ltrim($urlPath, '/'));
+                    $ext     = strtolower(pathinfo($urlPath, PATHINFO_EXTENSION));
+                    $mime    = match ($ext) {
+                        'webp'         => 'image/webp',
+                        'jpg', 'jpeg'  => 'image/jpeg',
+                        'png'          => 'image/png',
+                        'svg'          => 'image/svg+xml',
+                        'gif'          => 'image/gif',
+                        default        => null,
+                    };
+
+                    return [
+                        'id'         => "proj-{$p->id}-{$i}",
+                        'url'        => $url,
+                        'alt'        => $p->title_en,
+                        'source'     => 'project',
+                        'label'      => $p->title_en,
+                        'size_bytes'  => file_exists($fsPath) ? filesize($fsPath) : null,
+                        'mime_type'   => $mime,
+                    ];
+                });
             });
 
         $editor = self::ordered()
