@@ -45,7 +45,7 @@ export function HeadOfDepartments({ content, members }: HeadOfDepartmentsProps) 
                 {cards.length > 0 && (
                     <div className="mt-10 sm:mt-12 lg:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-y-10 sm:gap-y-12 gap-x-6 lg:gap-x-8 3xl:gap-x-12">
                         {cards.map((member, idx) => (
-                            <DeptCard key={idx} member={member} />
+                            <DeptCard key={idx} member={member} ar={ar} />
                         ))}
                     </div>
                 )}
@@ -54,7 +54,7 @@ export function HeadOfDepartments({ content, members }: HeadOfDepartmentsProps) 
     );
 }
 
-function DeptCard({ member }: { member: Member }) {
+function DeptCard({ member, ar }: { member: Member; ar: boolean }) {
     return (
         // Everything is sized as a % of the card width (pt, circle, text
         // padding) so the geometry is IDENTICAL at every viewport. The card SVG
@@ -84,7 +84,11 @@ function DeptCard({ member }: { member: Member }) {
                 style={{ backgroundImage: 'url(/images/home/dept-card.svg)' }}
             >
                 <div className="absolute inset-0 flex flex-col items-center justify-end pb-[12%] px-[8%] text-center">
-                    <div className="font-bold text-sm sm:text-base lg:text-lg text-ink">
+                    {/* English names run longer and wrapped to two lines on the
+                        narrow 2-col mobile cards, so they get a smaller mobile
+                        size; Arabic stays at text-xs (fits fine). sm/lg are the
+                        same for both. */}
+                    <div className={`font-bold ${ar ? 'text-xs' : 'text-[10px]'} sm:text-base lg:text-lg text-ink`}>
                         {member.name}
                     </div>
                     <div className="mt-1 text-xs sm:text-sm lg:text-base text-primary">
