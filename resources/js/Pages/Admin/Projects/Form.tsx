@@ -6,7 +6,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
 import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
-import type { ProjectFormProps, ProjectFormItem, ProjectImageItem } from '@/types/admin/project';
+import type { ProjectFormProps, ProjectFormItem, ProjectImageItem, CommittedImageItem } from '@/types/admin/project';
 
 type FormData = Omit<ProjectFormItem, 'id' | 'slug' | 'images'>;
 
@@ -165,7 +165,7 @@ function initialData(item: ProjectFormItem | null): FormData {
 }
 
 export default function ProjectForm() {
-    const { item } = usePage<ProjectFormProps>().props;
+    const { item, committedImageUrls } = usePage<ProjectFormProps>().props;
     const isEdit = item !== null;
 
     const [data, setData] = useState<FormData>(() => initialData(item));
@@ -207,7 +207,7 @@ export default function ProjectForm() {
     const missing = useMemo(() => {
         if (!data.is_active) return [];
         const m: { key: string; label: string; Icon: typeof ImageIcon }[] = [];
-        if (images.length === 0) m.push({ key: 'image', label: 'Property image', Icon: ImageIcon });
+        if (images.length === 0 && committedImageUrls.length === 0) m.push({ key: 'image', label: 'Property image', Icon: ImageIcon });
         if (!data.description_en?.trim() && !data.description_ar?.trim()) m.push({ key: 'description', label: 'Description', Icon: FileText });
         if (!data.location_en?.trim() && !data.location_ar?.trim()) m.push({ key: 'location', label: 'Location', Icon: MapPin });
         return m;
@@ -485,11 +485,12 @@ export default function ProjectForm() {
                         title="Gallery"
                         icon={ImageIcon}
                         description="Drag to reorder. First image is the card thumbnail. Set one as OG to use it for social sharing previews."
-                        warning={images.length === 0 ? 'No images uploaded' : undefined}
+                        warning={images.length === 0 && committedImageUrls.length === 0 ? 'No images uploaded' : undefined}
                     />
                     <ProjectGallery
                         projectId={item.id}
                         images={images}
+                        committedImageUrls={committedImageUrls}
                         featuredImageId={data.featured_image_id}
                         ogImageId={data.og_image_id}
                         onImagesChange={setImages}
