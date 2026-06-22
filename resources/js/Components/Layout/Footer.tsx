@@ -196,7 +196,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                         aria-hidden="true"
                     />
                 </span>
-                <span className="text-sm sm:text-base font-semibold transition-opacity duration-200 group-hover:opacity-80">
+                <span className="text-xs sm:text-sm font-semibold transition-opacity duration-200 group-hover:opacity-80">
                     {ft('subscribe', 'label', 'footer.subscribe.label')}
                 </span>
             </button>
@@ -244,7 +244,7 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                 <a
                     href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`}
                     dir="ltr"
-                    className="mt-5 flex items-center gap-2 text-sm text-white/90 hover:text-white transition-colors w-fit"
+                    className="mt-5 flex items-center gap-2 text-xs sm:text-sm text-white/90 hover:text-white transition-colors w-fit"
                 >
                     <Phone size={15} className="shrink-0" />
                     {siteSettings.phone}
