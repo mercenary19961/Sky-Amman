@@ -15,10 +15,10 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Star, ImageIcon, Trash2, Upload } from 'lucide-react';
+import { GripVertical, Star, ImageIcon, Trash2, Upload, FolderOpen } from 'lucide-react';
 import { ConfirmDeleteButton } from '@/Components/Admin/ConfirmDeleteButton';
 import { cn } from '@/lib/cn';
-import type { ProjectImageItem } from '@/types/admin/project';
+import type { ProjectImageItem, CommittedImageItem } from '@/types/admin/project';
 
 interface UploadingFile {
     key: string;
@@ -30,11 +30,29 @@ interface UploadingFile {
 interface ProjectGalleryProps {
     projectId: number;
     images: ProjectImageItem[];
+    committedImageUrls: CommittedImageItem[];
     featuredImageId: number | null;
     ogImageId: number | null;
     onImagesChange: (images: ProjectImageItem[]) => void;
     onFeaturedChange: (id: number | null) => void;
     onOgChange: (id: number | null) => void;
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mimeLabel(mime: string): string {
+    const map: Record<string, string> = {
+        'image/jpeg': 'JPEG',
+        'image/png': 'PNG',
+        'image/webp': 'WebP',
+        'image/gif': 'GIF',
+        'image/svg+xml': 'SVG',
+    };
+    return map[mime] ?? mime.split('/')[1]?.toUpperCase() ?? 'Image';
 }
 
 function SortableImage({
@@ -55,6 +73,7 @@ function SortableImage({
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: image.id,
     });
+    const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -77,6 +96,10 @@ function SortableImage({
                     alt={image.media.alt_text_en ?? image.media.original_filename}
                     className="w-full h-full object-cover"
                     draggable={false}
+                    onLoad={(e) => {
+                        const img = e.currentTarget;
+                        setDims({ w: img.naturalWidth, h: img.naturalHeight });
+                    }}
                 />
             </div>
 
@@ -102,6 +125,25 @@ function SortableImage({
                     <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500 text-white">
                         OG
                     </span>
+                )}
+            </div>
+
+            {/* Hover metadata overlay */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {dims && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Dimensions: </span>{dims.w} × {dims.h}
+                    </p>
+                )}
+                {image.media.size_bytes != null && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Size: </span>{formatBytes(image.media.size_bytes)}
+                    </p>
+                )}
+                {image.media.mime_type && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Type: </span>{mimeLabel(image.media.mime_type)}
+                    </p>
                 )}
             </div>
 
@@ -146,9 +188,51 @@ function SortableImage({
     );
 }
 
+/** Read-only grid for committed render files (no Media record — seeded webp files). */
+function CommittedImageCard({ item }: { item: CommittedImageItem }) {
+    const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+
+    return (
+        <div className="group relative bg-surface-muted rounded-lg overflow-hidden border border-ink/10 dark:border-white/10">
+            <div className="aspect-4/3">
+                <img
+                    src={item.url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    draggable={false}
+                    onLoad={(e) => {
+                        const img = e.currentTarget;
+                        setDims({ w: img.naturalWidth, h: img.naturalHeight });
+                    }}
+                />
+            </div>
+
+            {/* Hover metadata overlay */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {dims && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Dimensions: </span>{dims.w} × {dims.h}
+                    </p>
+                )}
+                {item.size_bytes != null && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Size: </span>{formatBytes(item.size_bytes)}
+                    </p>
+                )}
+                {item.mime_type && (
+                    <p className="text-[10px] text-white leading-snug">
+                        <span className="text-white/60">Type: </span>{mimeLabel(item.mime_type)}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export function ProjectGallery({
     projectId,
     images,
+    committedImageUrls,
     featuredImageId,
     ogImageId,
     onImagesChange,
@@ -215,11 +299,9 @@ export function ProjectGallery({
 
         onImagesChange(reordered);
 
-        // Persist order to backend (fire-and-forget).
         (window as any).axios.post(`/admin/projects/${projectId}/images/reorder`, {
             ids: reordered.map(img => img.id),
         }).catch(() => {
-            // Revert on failure — re-fetch or show toast. For now just log.
             console.error('Reorder failed');
         });
     }
@@ -240,7 +322,27 @@ export function ProjectGallery({
     }
 
     return (
-        <div>
+        <div className="space-y-5">
+            {/* Committed render gallery (read-only) — shown when no uploads exist yet */}
+            {images.length === 0 && committedImageUrls.length > 0 && (
+                <div>
+                    <div className="flex items-center gap-2 mb-2">
+                        <FolderOpen size={14} className="text-ink-muted" />
+                        <span className="text-xs font-medium text-ink-muted">
+                            Committed renders ({committedImageUrls.length}) — hover for details
+                        </span>
+                    </div>
+                    <p className="text-[11px] text-ink-muted mb-3">
+                        These render images are part of the codebase. Upload new images above to replace them — uploaded images always take priority.
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {committedImageUrls.map((item, i) => (
+                            <CommittedImageCard key={i} item={item} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Dropzone */}
             <div
                 {...getRootProps()}
@@ -261,7 +363,7 @@ export function ProjectGallery({
 
             {/* Uploading queue */}
             {uploading.length > 0 && (
-                <div className="mt-3 space-y-2">
+                <div className="space-y-2">
                     {uploading.map(u => (
                         <div key={u.key} className="flex items-center gap-3 text-sm">
                             <span className="truncate text-ink-muted flex-1">{u.filename}</span>
@@ -280,7 +382,7 @@ export function ProjectGallery({
                 </div>
             )}
 
-            {/* Sortable grid */}
+            {/* Sortable uploaded images grid */}
             {images.length > 0 && (
                 <DndContext
                     sensors={sensors}
@@ -288,7 +390,7 @@ export function ProjectGallery({
                     onDragEnd={handleDragEnd}
                 >
                     <SortableContext items={images.map(img => img.id)} strategy={rectSortingStrategy}>
-                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                             {images.map(image => (
                                 <SortableImage
                                     key={image.id}

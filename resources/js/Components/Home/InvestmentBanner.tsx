@@ -29,8 +29,8 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
                     crowds the strip below — give the AR row extra top spacing. */}
                 <div
                     className={cn(
-                        'flex items-center justify-center flex-wrap gap-3 sm:gap-4 text-xl sm:text-2xl lg:text-3xl text-ink font-medium',
-                        ar ? 'mt-10 sm:mt-14 lg:mt-16' : 'mt-4',
+                        'flex items-center justify-center flex-wrap gap-2 sm:gap-4 sm:text-2xl lg:text-3xl text-ink font-medium',
+                        ar ? 'text-xl mt-10 sm:mt-14 lg:mt-16' : 'text-base mt-4',
                     )}
                 >
                     <span>{taglineParts[1] ?? ''}</span>
@@ -38,7 +38,7 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
                         masks a div whose background is the webp, so the photo only
                         shows through the leaf silhouette. */}
                     <span
-                        className="block h-12 sm:h-16 w-40 sm:w-56 select-none pointer-events-none"
+                        className="block h-10 sm:h-16 w-32 sm:w-56 select-none pointer-events-none"
                         style={{
                             backgroundImage: 'url(/images/home/buy-early.webp)',
                             backgroundSize: '100% 100%',
@@ -56,7 +56,7 @@ export function InvestmentBanner({ content }: InvestmentBannerProps) {
 
                 <div className="mt-6 sm:mt-8 flex justify-center">
                     <Link
-                        href="/investment"
+                        href="/contact"
                         className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm sm:text-base font-medium text-white shadow-md hover:bg-primary-deep transition-colors"
                     >
                         {banner.cta?.content ?? ''}

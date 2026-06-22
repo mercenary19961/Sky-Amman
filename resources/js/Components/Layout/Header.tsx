@@ -144,7 +144,7 @@ export function Header() {
 
                 {/* Nav + language button grouped on the right; justify-between
                     on the parent keeps the logo pinned left. */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 self-start mt-5 lg:self-center lg:mt-0">
                     <nav className="hidden lg:flex items-center gap-1 text-base">
                         {NAV_ITEMS.map((item) => {
                             const active = url === item.href;

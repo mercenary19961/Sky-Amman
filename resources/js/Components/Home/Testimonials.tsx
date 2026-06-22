@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, User as UserIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Play, User as UserIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { SiteContentBundle, TestimonialCard } from '@/types/home';
@@ -74,6 +74,24 @@ export function Testimonials({ content, videos, testimonials }: TestimonialsProp
             </div>
         </section>
     );
+}
+
+/**
+ * True below the `sm` (640px) breakpoint. Defaults to false (desktop) so the
+ * SSR/first-hydration markup matches, then corrects on mount — same pattern as
+ * useVisibleCount. Used to drop the YouTube player's in-player fullscreen button
+ * on mobile, where it renders a poor cropped/portrait view.
+ */
+function useIsMobile(): boolean {
+    const [mobile, setMobile] = useState(false);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const update = () => setMobile(window.innerWidth < 640);
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+    }, []);
+    return mobile;
 }
 
 /** Visible card count by viewport: 1 (mobile) / 2 (sm) / 4 (lg+). */
@@ -204,8 +222,8 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     // Empty state: no videos configured yet → a single placeholder frame.
     if (N === 0) {
         return (
-            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9">
-                <div className="absolute left-[18%] top-0 w-[64%] h-full z-20">
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-video sm:aspect-25/9">
+                <div className="absolute left-0 w-full sm:left-[18%] sm:w-[64%] top-0 h-full z-20">
                     <CenterVideo src="" />
                 </div>
             </div>
@@ -235,6 +253,13 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
     const centerIndex = activeIndex;
     const leftIndex = wrap(activeIndex - 1);
     const rightIndex = wrap(activeIndex + 1);
+
+    // A YouTube "watch" URL for the active video, used by the mobile-only link
+    // below the player (mobile drops the embed's broken fullscreen button, so
+    // this is how phone users open the video full-screen natively). Only shown
+    // for YouTube sources — self-hosted files keep their working native controls.
+    const activeYtId = videos[centerIndex] ? youtubeId(videos[centerIndex]) : null;
+    const watchUrl = activeYtId ? `https://www.youtube.com/watch?v=${activeYtId}` : null;
     // Whenever there's more than one video the user can swap: the side previews
     // become clickable (rotate that video into the playable centre) and dots
     // appear. The overlay arrows are reserved for when there are MORE videos
@@ -252,10 +277,12 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                 horizontally contains it; overflow-y stays visible so the centre
                 video's drop-shadow isn't cut off (clip, unlike hidden, allows a
                 visible cross-axis). */}
-            <div className="relative mx-auto mt-10 sm:mt-12 aspect-25/9 overflow-x-clip">
-                {/* Left preview (previous video) — 16:9, peeks out behind the centre. */}
+            {/* Mobile shows ONE full-width video (16:9); from sm up it becomes the
+                wide 3-up composition (centre + two peeking side previews). */}
+            <div className="relative mx-auto mt-10 sm:mt-12 aspect-video sm:aspect-25/9 overflow-x-clip">
+                {/* Left preview (previous video) — sm+ only, peeks behind centre. */}
                 <VideoSlot
-                    className="left-0 top-[11%] w-[50%] h-[78%] z-10"
+                    className="hidden sm:block left-0 top-[11%] w-[50%] h-[78%] z-10"
                     index={leftIndex}
                     src={videos[leftIndex]}
                     variant="side"
@@ -264,9 +291,9 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                     ariaLabel="Previous video"
                 />
 
-                {/* Right preview (next video). */}
+                {/* Right preview (next video) — sm+ only. */}
                 <VideoSlot
-                    className="left-[50%] top-[11%] w-[50%] h-[78%] z-10"
+                    className="hidden sm:block left-[50%] top-[11%] w-[50%] h-[78%] z-10"
                     index={rightIndex}
                     src={videos[rightIndex]}
                     variant="side"
@@ -275,23 +302,26 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                     ariaLabel="Next video"
                 />
 
-                {/* Centre — the active, playable video (16:9, fills edge-to-edge). */}
+                {/* Centre — the active, playable video. Full width on mobile, 64%
+                    centred from sm up (leaving room for the side previews). */}
                 <VideoSlot
-                    className="left-[18%] top-0 w-[64%] h-full z-20"
+                    className="left-0 w-full sm:left-[18%] sm:w-[64%] top-0 h-full z-20"
                     index={centerIndex}
                     src={videos[centerIndex]}
                     variant="center"
                     direction={direction}
                 />
 
-                {/* Arrow controls. */}
+                {/* Overlaid arrow controls — sm+ only (mobile uses the buttons
+                    below). Shown when there are more videos than the three on
+                    screen at once. */}
                 {multi && (
                     <>
                         <button
                             type="button"
                             onClick={prev}
                             aria-label="Previous video"
-                            className="absolute z-30 left-2 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                            className="absolute z-30 left-2 sm:left-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
                         >
                             <ChevronLeft size={22} />
                         </button>
@@ -299,7 +329,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                             type="button"
                             onClick={next}
                             aria-label="Next video"
-                            className="absolute z-30 right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                            className="absolute z-30 right-2 sm:right-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-primary text-primary bg-white/90 shadow-sm hover:bg-primary hover:text-white transition-colors cursor-pointer"
                         >
                             <ChevronRight size={22} />
                         </button>
@@ -307,23 +337,62 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
                 )}
             </div>
 
-            {/* Pagination dots (one per video). */}
+            {/* Mobile-only "Watch on YouTube" link — replaces the embed's
+                fullscreen button (disabled on mobile) with the native YouTube
+                experience. */}
+            {watchUrl && (
+                <div className="sm:hidden mt-4 flex justify-center">
+                    <a
+                        href={watchUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                    >
+                        Watch on YouTube
+                        <ExternalLink size={15} />
+                    </a>
+                </div>
+            )}
+
+            {/* Controls below the video: prev/next buttons (mobile only — sm+ swaps
+                via the clickable side previews / overlaid arrows) flanking the
+                pagination dots (all sizes). */}
             {canSwap && (
-                <div className="mt-6 flex justify-center items-center gap-3">
-                    {videos.map((_, i) => (
-                        <button
-                            key={i}
-                            type="button"
-                            onClick={() => goTo(i)}
-                            aria-label={`Go to video ${i + 1}`}
-                            className={cn(
-                                'rounded-full transition-all cursor-pointer',
-                                i === activeIndex
-                                    ? 'w-3 h-3 bg-primary'
-                                    : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
-                            )}
-                        />
-                    ))}
+                <div className="mt-6 flex justify-center items-center gap-4">
+                    <button
+                        type="button"
+                        onClick={prev}
+                        aria-label="Previous video"
+                        className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-colors cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+
+                    <div className="flex items-center gap-3">
+                        {videos.map((_, i) => (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => goTo(i)}
+                                aria-label={`Go to video ${i + 1}`}
+                                className={cn(
+                                    'rounded-full transition-all cursor-pointer',
+                                    i === activeIndex
+                                        ? 'w-3 h-3 bg-primary'
+                                        : 'w-2.5 h-2.5 bg-primary/25 hover:bg-primary/50',
+                                )}
+                            />
+                        ))}
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={next}
+                        aria-label="Next video"
+                        className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-colors cursor-pointer rtl:rotate-180"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
                 </div>
             )}
         </>
@@ -398,6 +467,7 @@ function VideoSlot({ className, index, src, variant, direction, onClick, ariaLab
 function CenterVideo({ src }: { src: string }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [started, setStarted] = useState(false);
+    const isMobile = useIsMobile();
 
     // Moderate rounding: a heavy radius (the old 56px) cropped the corners
     // exactly where YouTube parks its controls (fullscreen/CC), making them
@@ -440,11 +510,15 @@ function CenterVideo({ src }: { src: string }) {
             <div className={base}>
                 {started ? (
                     <iframe
-                        src={`${youtubeEmbed(ytId)}&autoplay=1`}
+                        // fs=0 + no allowFullScreen on mobile: the YouTube
+                        // in-player fullscreen renders a cropped portrait view on
+                        // phones. Mobile users get a "Watch on YouTube" link
+                        // instead (native fullscreen). Desktop keeps fullscreen.
+                        src={`${youtubeEmbed(ytId)}&autoplay=1${isMobile ? '&fs=0' : ''}`}
                         title="Testimonials video"
                         className="w-full h-full border-0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                        allowFullScreen={!isMobile}
                     />
                 ) : (
                     <>

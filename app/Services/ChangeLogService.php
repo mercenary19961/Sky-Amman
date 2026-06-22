@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Models\ChangeLog;
 use App\Models\ContactSubmission;
 use App\Models\DepartmentMember;
+use App\Models\Media;
 use App\Models\Page;
 use App\Models\Project;
+use App\Models\ProjectImage;
 use App\Models\Setting;
 use App\Models\SiteContent;
 use App\Models\Testimonial;
@@ -29,6 +31,7 @@ class ChangeLogService
         'settings'          => 'Settings',
         'site_content'      => 'Site Content',
         'project'           => 'Projects',
+        'project_image'     => 'Project Gallery',
         'user'              => 'Users',
         'testimonial'       => 'Testimonials',
         'testimonial_video' => 'Testimonial Videos',
@@ -87,6 +90,9 @@ class ChangeLogService
 
         return match ($log->model_type) {
             'settings', 'site_content' => $log->action === ChangeLog::ACTION_UPDATE,
+            // Gallery images: upload (create) and delete are both reversible.
+            // ProjectImage has no softDeletes — revert recreates or hard-deletes the row.
+            'project_image' => in_array($log->action, [ChangeLog::ACTION_CREATE, ChangeLog::ACTION_DELETE], true),
             // Soft-deleted models: every action is reversible (delete ↔ restore).
             'project', 'testimonial', 'testimonial_video', 'department_member' => in_array($log->action, [
                 ChangeLog::ACTION_CREATE, ChangeLog::ACTION_UPDATE,
@@ -116,6 +122,7 @@ class ChangeLogService
             'settings'          => $this->revertSettings($log),
             'site_content'      => $this->revertSiteContent($log),
             'project'           => $this->revertProject($log),
+            'project_image'     => $this->revertProjectImage($log),
             'testimonial'       => $this->revertTestimonial($log),
             'testimonial_video' => $this->revertTestimonialVideo($log),
             'department_member' => $this->revertDepartmentMember($log),
@@ -184,6 +191,45 @@ class ChangeLogService
             ChangeLog::ACTION_RESTORE => (bool) Project::query()->whereKey($log->model_id)->first()?->delete(),
             ChangeLog::ACTION_DELETE => (bool) Project::withTrashed()->whereKey($log->model_id)->first()?->restore(),
             ChangeLog::ACTION_UPDATE => $this->restoreAttributes(Project::query()->whereKey($log->model_id)->first(), $log->old_data),
+            default => false,
+        };
+    }
+
+    private function revertProjectImage(ChangeLog $log): bool
+    {
+        return match ($log->action) {
+            // Revert an upload: remove the ProjectImage row + soft-delete the Media.
+            ChangeLog::ACTION_CREATE => (function () use ($log): bool {
+                $data = $log->new_data ?? [];
+                ProjectImage::where('id', $data['project_image_id'] ?? 0)->delete();
+                $media = Media::find($data['media_id'] ?? null);
+                if ($media && ! $media->trashed()) {
+                    $media->delete();
+                }
+                return true;
+            })(),
+            // Revert a delete: restore the Media + recreate the ProjectImage row.
+            ChangeLog::ACTION_DELETE => (function () use ($log): bool {
+                $data = $log->old_data ?? [];
+                $media = Media::withTrashed()->find($data['media_id'] ?? null);
+                if (! $media) {
+                    return false;
+                }
+                if ($media->trashed()) {
+                    $media->restore();
+                }
+                $exists = ProjectImage::where('project_id', $data['project_id'])
+                    ->where('media_id', $data['media_id'])
+                    ->exists();
+                if (! $exists) {
+                    ProjectImage::create([
+                        'project_id' => $data['project_id'],
+                        'media_id'   => $data['media_id'],
+                        'sort_order' => $data['sort_order'] ?? 0,
+                    ]);
+                }
+                return true;
+            })(),
             default => false,
         };
     }
@@ -270,9 +316,10 @@ class ChangeLogService
     private function buildDiff(string $modelType, array $old, array $new): array
     {
         return match ($modelType) {
-            'site_content' => $this->diffSiteContent($old, $new),
-            'settings'     => $this->diffKeyValue($old, $new),
-            default        => $this->diffAttributes($old, $new),
+            'site_content'  => $this->diffSiteContent($old, $new),
+            'settings'      => $this->diffKeyValue($old, $new),
+            'project_image' => $this->diffProjectImage($old, $new),
+            default         => $this->diffAttributes($old, $new),
         };
     }
 
@@ -334,6 +381,18 @@ class ChangeLogService
         }
 
         return $changes;
+    }
+
+    /** Gallery image upload/delete: just show the filename — the action badge covers the rest. */
+    private function diffProjectImage(array $old, array $new): array
+    {
+        return [
+            [
+                'label' => 'File',
+                'old'   => $old['filename'] ?? '—',
+                'new'   => $new['filename'] ?? '—',
+            ],
+        ];
     }
 
     /** Flat key→value maps (settings). */

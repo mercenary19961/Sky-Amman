@@ -87,7 +87,8 @@ class ProjectController extends Controller
     public function create(): Response
     {
         return Inertia::render('Admin/Projects/Form', [
-            'item' => null,
+            'item'               => null,
+            'committedImageUrls' => [],
         ]);
     }
 
@@ -129,8 +130,10 @@ class ProjectController extends Controller
 
     public function edit(int $id): Response
     {
-        $project = Project::with(['images' => fn ($q) => $q->with('media:id,original_filename,alt_text_en,alt_text_ar,path,mime_type')])
+        $project = Project::with(['images' => fn ($q) => $q->with('media:id,original_filename,alt_text_en,alt_text_ar,path,mime_type,size')])
             ->findOrFail($id);
+
+        $hasUploadedImages = $project->images->isNotEmpty();
 
         return Inertia::render('Admin/Projects/Form', [
             'item' => array_merge($project->toArray(), [
@@ -143,9 +146,35 @@ class ProjectController extends Controller
                         'original_filename' => $img->media->original_filename,
                         'alt_text_en'       => $img->media->alt_text_en,
                         'alt_text_ar'       => $img->media->alt_text_ar,
+                        'mime_type'         => $img->media->mime_type,
+                        'size_bytes'        => $img->media->size,
                     ],
                 ])->values(),
             ]),
+            // Committed render gallery (seeded .webp files with no Media record).
+            // Only passed when there are no uploaded images — once an admin uploads,
+            // displayImageUrls() returns those instead, so this list is irrelevant.
+            'committedImageUrls' => $hasUploadedImages ? [] : collect($project->displayImageUrls())
+                ->filter(fn (string $url) => !str_ends_with($url, 'placeholder.svg'))
+                ->map(function (string $url) {
+                    $urlPath = parse_url($url, PHP_URL_PATH) ?? $url;
+                    $fsPath  = public_path(ltrim($urlPath, '/'));
+                    $ext     = strtolower(pathinfo($urlPath, PATHINFO_EXTENSION));
+                    $mime    = match ($ext) {
+                        'webp'        => 'image/webp',
+                        'jpg', 'jpeg' => 'image/jpeg',
+                        'png'         => 'image/png',
+                        'svg'         => 'image/svg+xml',
+                        default       => null,
+                    };
+                    return [
+                        'url'        => $url,
+                        'size_bytes' => file_exists($fsPath) ? filesize($fsPath) : null,
+                        'mime_type'  => $mime,
+                    ];
+                })
+                ->values()
+                ->all(),
         ]);
     }
 

@@ -284,7 +284,7 @@ export default function Contact() {
  */
 function SocialRow({ href, label, children }: { href?: string; label: string; children: React.ReactNode }) {
     const iconCircle = (
-        <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-primary/30 text-primary">
+        <span className="flex h-9 w-9 sm:h-11 sm:w-11 flex-none items-center justify-center rounded-full border border-primary/30 text-primary">
             {children}
         </span>
     );
@@ -296,32 +296,32 @@ function SocialRow({ href, label, children }: { href?: string; label: string; ch
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 text-ink transition-colors hover:text-primary"
+                    className="flex items-center gap-3 sm:gap-4 text-ink transition-colors hover:text-primary"
                 >
                     {iconCircle}
-                    <span className="text-base">{label}</span>
+                    <span className="text-sm sm:text-base">{label}</span>
                 </a>
             </li>
         );
     }
 
     return (
-        <li className="flex items-center gap-4 text-ink/35">
-            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-ink/10">
+        <li className="flex items-center gap-3 sm:gap-4 text-ink/35">
+            <span className="flex h-9 w-9 sm:h-11 sm:w-11 flex-none items-center justify-center rounded-full border border-ink/10">
                 {children}
             </span>
-            <span className="text-base">{label}</span>
+            <span className="text-sm sm:text-base">{label}</span>
         </li>
     );
 }
 
 function ContactMethod({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
     return (
-        <li className="flex items-center gap-4 text-ink">
-            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-primary/30 text-primary">
+        <li className="flex items-center gap-3 sm:gap-4 text-ink">
+            <span className="flex h-9 w-9 sm:h-11 sm:w-11 flex-none items-center justify-center rounded-full border border-primary/30 text-primary">
                 {icon}
             </span>
-            <div className="text-base">{children}</div>
+            <div className="text-sm sm:text-base">{children}</div>
         </li>
     );
 }
