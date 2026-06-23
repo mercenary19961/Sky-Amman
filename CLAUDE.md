@@ -154,6 +154,19 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 - FK constraint warning: seeders/migrations referencing `created_by => 1` fail if users table is empty. Use `null` for nullable FK columns in data seeds.
 - Cloudflare cache: static assets are keyed WITHOUT query strings, so `?v=X` does NOT bust edge cache — use Cloudflare dashboard's Custom Purge by URL when verifying new content.
 
+### SSR Sidecar (Railway) — production SSR (LIVE 2026-06-23)
+
+SSR is served by a **second Railway service** ("SSR Service", same repo/branch, identical Railpack build) — only its start command differs.
+
+- **Start command (SSR service only):** `node bootstrap/ssr/ssr.js`. ⚠️ The "don't override the Custom Start Command" rule above is for the **main** app; the SSR service *must* override it (it should run only Node, not migrate/FrankenPHP).
+- The sidecar listens on **port 13714** (Inertia default, hardcoded via `createServer` in [resources/js/ssr.tsx](resources/js/ssr.tsx)) and exposes only a **private** domain `skyammanwebsite.railway.internal` (no public domain).
+- **Main `Sky-Amman` service env:** `INERTIA_SSR_ENABLED=true` + `INERTIA_SSR_URL=http://skyammanwebsite.railway.internal:13714`. (These go on the MAIN app, not the sidecar.)
+- **Graceful fallback:** [app/Ssr/TimeoutHttpGateway.php](app/Ssr/TimeoutHttpGateway.php) — bound over Inertia's stock gateway in [AppServiceProvider](app/Providers/AppServiceProvider.php) — adds connect/response timeouts (`INERTIA_SSR_TIMEOUT=3`, `INERTIA_SSR_CONNECT_TIMEOUT=2`) so a hung/unreachable sidecar falls back to client rendering instead of blocking until Railway's ~15s proxy 502s the whole site. `config/inertia.php` is published with `INERTIA_SSR_ENABLED` defaulting to **false** (SSR off locally / opt-in).
+- **⚠️ Gotcha 1 — `node: command not found` at start (Railpack ≥ v0.30.0):** newer Railpack treats Node as a build-only tool and **prunes the `node` binary from the FrankenPHP runtime image** (its deploy merge drops `$packages:mise`). Fix: set **`RAILPACK_DEPLOY_APT_PACKAGES=nodejs`** on the SSR service — installs Debian's Node 18 into the runtime (it provides the `node` command). (Older Railpack kept `$packages:mise` in the merge, which is why HardRock's sidecar ran without this.)
+- **⚠️ Gotcha 2 — hostname match + `config:cache` timing:** `INERTIA_SSR_URL`'s host must equal the SSR service's **private domain** exactly (Railway derives it from the service name — confirm under SSR service → Settings → Networking → Private Networking; ours is `skyammanwebsite`, NOT `sky-amman-ssr`). The value is baked at build time by `php artisan config:cache`, so the **main app must redeploy** after the URL is set/changed. A wrong host fails silently → CSR fallback.
+- **Verify in prod:** `curl -s https://<domain> | wc -w` jumps from ~1.4k (CSR) to ~4.4k (SSR); `<div id="app">` is filled and `<head>` carries the per-page `og:title`/`description`/`canonical`. The SSR service Deploy Logs should show `Inertia SSR server started.`
+- **Local SSR test:** `INERTIA_SSR_ENABLED=true` + `php artisan inertia:start-ssr` in a second terminal (after `npm run build`). Day-to-day dev needs no SSR.
+
 ### Mail (Resend)
 - **⚠️ Outbound email is POSTPONED (2026-06-06) — no mail is actually sent yet.** The app currently runs on `MAIL_MAILER=log` (no `RESEND_API_KEY`, `from=hello@example.com` placeholder), so every email — **password-reset links, contact-form lead notifications** — is written to `storage/logs/laravel.log` instead of being delivered. This is intentional until deployment. The code is provider-agnostic and complete; **nothing in the app needs changing to "turn it on"** — it's purely env + DNS config at go-live:
   1. Set `MAIL_MAILER=resend` + a valid `RESEND_API_KEY` (note: `RESEND_API_KEY`, not `RESEND_KEY`)
@@ -469,6 +482,7 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 
 ### Infrastructure (TODO)
 - [x] SSR setup (build-time + runtime toggle via `INERTIA_SSR_ENABLED`)
+- [x] **SSR sidecar live on Railway (2026-06-23)** — separate "SSR Service" running `node bootstrap/ssr/ssr.js` on private `skyammanwebsite.railway.internal:13714`; main app wired via `INERTIA_SSR_ENABLED`/`INERTIA_SSR_URL`; `TimeoutHttpGateway` for graceful CSR fallback. See **SSR Sidecar (Railway)** under Deployment for the two gotchas (Railpack Node prune → `RAILPACK_DEPLOY_APT_PACKAGES=nodejs`; private-hostname match + `config:cache` timing).
 - [x] Railway deployment (Railpack startup, env vars) — live at `sky-amman-production.up.railway.app`. MySQL service connected via `${{MySQL.*}}` references. Required env vars: `APP_KEY`, `APP_ENV=production`, `APP_URL=https://…`, `SESSION_DRIVER=database`, `DB_*` from MySQL service, `MAIL_MAILER`, `RESEND_API_KEY`, `TURNSTILE_*`. See Railway HTTPS gotcha in Foundation Gotchas.
 - [ ] Cloudflare DNS + proxy + Turnstile site keys
 - [ ] Resend domain DNS verification (DKIM/SPF/DMARC)
@@ -490,6 +504,11 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 - [ ] **Seed page SEO defaults + extend "Reset to Default" to cover SEO.** The admin Site Content **"Reset to Default"** safeguard ([SiteContentController::reset](app/Http/Controllers/Admin/SiteContentController.php), admin-only, type-to-confirm "Reset to Default") restores every `site_content` row to [`SiteContentSeeder::rows()`](database/seeders/SiteContentSeeder.php) — **text + visibility only**. Per-page SEO (`seo_title_*`/`seo_description_*` on the `pages` table) is **intentionally NOT reset** because there are no real SEO defaults seeded yet (PagesSeeder seeds empty SEO). **When the real SEO copy is decided:** (1) seed it in `PagesSeeder`, (2) extend `reset()` to also restore each page's SEO fields from those defaults (snapshot old/new into the same change-log entry so it stays revertable). The reset is logged as a single revertable `site_content` change (`model_id = "all"`).
 - [ ] Final testing & go-live
 
+> **Last updated:** 2026-06-23 — **SSR sidecar live on Railway.**
+> - **Production SSR is on.** Stood up a separate Railway "SSR Service" (same repo, start command `node bootstrap/ssr/ssr.js`, private domain `skyammanwebsite.railway.internal:13714`); main app wired via `INERTIA_SSR_ENABLED=true` + `INERTIA_SSR_URL`. Verified: server-rendered `#app` + per-page `og`/`canonical` in raw HTML (curl word count ~1.4k → ~4.4k).
+> - **New code:** `app/Ssr/TimeoutHttpGateway.php` (connect/response timeouts → graceful CSR fallback, no 502 on a hung sidecar), bound in `AppServiceProvider`; published `config/inertia.php` (env-driven, SSR off by default, timeout knobs); `INERTIA_SSR_*` documented in `.env.example`.
+> - **Two gotchas (documented under Deployment → SSR Sidecar):** (1) Railpack ≥ v0.30.0 prunes Node from the runtime → `node: command not found`; fixed with `RAILPACK_DEPLOY_APT_PACKAGES=nodejs` on the SSR service. (2) `INERTIA_SSR_URL` host must match the sidecar's private domain exactly and is baked at `config:cache` build time, so the main app must redeploy after changing it.
+>
 > **Last updated:** 2026-06-21 — **Railway deployment live; footer social links updated; HTTPS URL scheme fix.**
 > - **Railway deployment live** at `sky-amman-production.up.railway.app`. MySQL service added; session driver set to `database`; all env vars wired. See Infrastructure checklist for the required variable list.
 > - **Footer "Follow us" column** updated: removed X (Twitter) and TikTok, added Instagram. New order: LinkedIn → Meta (Facebook) → Instagram → Youtube. Youtube is marked `comingSoon: true` in `SOCIAL_KEYS` ([Footer.tsx](resources/js/Components/Layout/Footer.tsx)) — renders dimmed with a "Coming soon" hover pill regardless of URL. Mobile grid changed from 2-col to 3-col. Subscribe section made more compact (smaller text/buttons/input on mobile). Dashboard `$socialKeys` updated to match (4 platforms: `linkedin_url`, `facebook_url`, `youtube_url`, `instagram_url`).
