@@ -356,7 +356,7 @@ export function Footer() {
               which is exactly how the design "places" the villa & logo so only
               their lower portions show.
             */}
-            <div ref={heroRef} className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
+            <div ref={heroRef} className="relative w-full aspect-1280/720 max-h-224 overflow-hidden">
                 {/* z-30 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right.
                     Slides in once, then drifts continuously across the screen. Sits in
                     front of the apartment (z-20), same as the left cluster. */}
@@ -371,13 +371,14 @@ export function Footer() {
                     inView={heroInView}
                 />
 
-                {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
-                    bottom; the upper half of the photo (sky) is clipped by the hero. */}
+                {/* z-20 — villa photo. The band is sized (aspect 1280/720 + a matching
+                    max-h) so the FULL villa fits at its original size — bottom-anchored
+                    with a little sky headroom, no top clipping. */}
                 <img
                     src="/images/home/footer-apartment-padded.webp"
                     alt=""
                     aria-hidden="true"
-                    className="absolute right-[19.5%] top-[-48.9%] w-[93.5%] h-[149.6%] z-20 object-contain object-bottom select-none pointer-events-none"
+                    className="absolute right-[19.5%] top-[6.5%] w-[93.5%] h-[93.5%] z-20 object-contain object-bottom select-none pointer-events-none"
                 />
 
                 {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds.webp reused),
