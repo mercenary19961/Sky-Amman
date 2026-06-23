@@ -6,7 +6,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { ProjectGallery } from '@/Components/Admin/ProjectGallery';
 import { Select } from '@/Components/Admin/Select';
 import { cn } from '@/lib/cn';
-import type { ProjectFormProps, ProjectFormItem, ProjectImageItem, CommittedImageItem } from '@/types/admin/project';
+import type { ProjectFormProps, ProjectFormItem, ProjectImageItem } from '@/types/admin/project';
 
 type FormData = Omit<ProjectFormItem, 'id' | 'slug' | 'images'>;
 
