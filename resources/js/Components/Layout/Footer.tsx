@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useAnimationControls, useInView } from 'framer
 import { Check, Phone } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cmsText } from '@/lib/cms';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 
 // The real public pages we ship (mirrors Header NAV_ITEMS). "Listings" in the
@@ -35,11 +36,7 @@ const SOCIAL_KEYS: { key: string; settingKey: string; comingSoon?: true }[] = [
 type FooterText = (section: string, key: string, fallbackKey: string) => string;
 
 function makeFooterText(bundle: SiteContentBundle | undefined, t: TFunction): FooterText {
-    return (section, key, fallbackKey) => {
-        const entry = bundle?.[section]?.[key];
-        if (entry && entry.is_visible && entry.content) return entry.content;
-        return t(fallbackKey);
-    };
+    return (section, key, fallbackKey) => cmsText(bundle?.[section]?.[key], t(fallbackKey));
 }
 
 // Each cloud image spans this fraction of the viewport (matches w-[84.8%] in
