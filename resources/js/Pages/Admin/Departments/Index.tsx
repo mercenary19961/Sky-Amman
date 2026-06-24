@@ -227,13 +227,19 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
 
     const hasName = nameEn.trim() !== '' || nameAr.trim() !== '';
     const hasRole = roleEn.trim() !== '' || roleAr.trim() !== '';
+    const hasPhoto = file !== null || preview !== null;
+    // Photo is optional for new members and for the current photo-less ones, but a
+    // member that ALREADY has a photo must keep one (there's no remove path, so
+    // this is really just signposting the rule).
+    const photoRequired = !isNew && !!item?.image_url;
     // Only enable once something changed since the drawer opened (text edited or a new photo picked).
     const isDirty = file !== null || JSON.stringify([nameEn, nameAr, roleEn, roleAr]) !== baseline.current;
-    const canSubmit = hasName && hasRole && isDirty && !processing;
+    const canSubmit = hasName && hasRole && (!photoRequired || hasPhoto) && isDirty && !processing;
 
     const missing = [
         !hasName && 'a name',
         !hasRole && 'a role',
+        photoRequired && !hasPhoto && 'a photo',
     ].filter(Boolean) as string[];
 
     const submit = (e: FormEvent) => {
@@ -298,9 +304,11 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                         </div>
 
                         <form onSubmit={submit} className="flex-1 overflow-y-auto p-5 space-y-5">
-                            {/* Photo (optional) */}
+                            {/* Photo — optional for new/photo-less members, required once a member has one */}
                             <div>
-                                <label className="block text-xs font-medium text-ink-muted mb-1.5">Photo</label>
+                                <label className="block text-xs font-medium text-ink-muted mb-1.5">
+                                    Photo {photoRequired && <span className="text-red-500">*</span>}
+                                </label>
                                 <div className="flex items-center gap-4">
                                     <Avatar
                                         url={preview}
