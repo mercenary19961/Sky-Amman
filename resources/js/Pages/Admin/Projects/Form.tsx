@@ -286,7 +286,8 @@ export default function ProjectForm() {
                 </button>
             </div>
 
-            <form id="project-form" onSubmit={submit}>
+            <div className="grid grid-cols-1 lg:grid-cols-5 lg:gap-x-6 items-start">
+            <form id="project-form" onSubmit={submit} className="lg:col-span-3">
 
                 {/* ── Basic Info ── */}
                 <Section>
@@ -382,33 +383,10 @@ export default function ProjectForm() {
                     </div>
                 </Section>
 
-                {/* ── Location ── */}
-                <Section>
-                    <SectionHeader title="Location" icon={MapPin} description="Location shows on the project card. Address shows on the detail page." />
-                    <div className="space-y-3">
-                        <BilingualRow>
-                            <Field label="Location (EN)" error={errors.location_en}>
-                                <Input value={data.location_en} onChange={v => set('location_en', v)} placeholder="Jordan - Amman" />
-                            </Field>
-                            <Field label="Location (AR)" error={errors.location_ar}>
-                                <Input value={data.location_ar} onChange={v => set('location_ar', v)} placeholder="الأردن - عمّان" />
-                            </Field>
-                        </BilingualRow>
-                        <BilingualRow>
-                            <Field label="Address (EN)" error={errors.address_en}>
-                                <Input value={data.address_en} onChange={v => set('address_en', v)} placeholder="Amman - Dabouq" />
-                            </Field>
-                            <Field label="Address (AR)" error={errors.address_ar}>
-                                <Input value={data.address_ar} onChange={v => set('address_ar', v)} placeholder="عمّان - دابوق" />
-                            </Field>
-                        </BilingualRow>
-                    </div>
-                </Section>
-
                 {/* ── Property Specs ── */}
                 <Section>
                     <SectionHeader title="Property Specs" icon={SlidersHorizontal} description="Leave blank for investment opportunities or land plots. Use the eye on each spec to hide it on the property page while keeping the value." />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <SpecField label="Built-up Area (m²)" error={errors.area_sqm} hidden={hiddenSpecs.includes('area_sqm')} onToggle={() => toggleSpec('area_sqm')}>
                             <Input type="number" value={data.area_sqm} onChange={v => set('area_sqm', v ? parseInt(v, 10) : null)} placeholder="460" />
                         </SpecField>
@@ -476,7 +454,11 @@ export default function ProjectForm() {
                     </div>
                 </Section>
 
-            </form>{/* form closes before gallery — gallery uses fetch, not form submit */}
+            </form>
+
+            {/* ── Right column — images on top, location below (both use the same
+                form `data`; the gallery uses its own fetch, not the form submit) ── */}
+            <div className="lg:col-span-2">
 
             {/* ── Gallery (edit only) ── */}
             {isEdit && (
@@ -512,6 +494,27 @@ export default function ProjectForm() {
                     )}
                 </Section>
             )}
+
+            {/* ── Location ── */}
+            <Section>
+                <SectionHeader title="Location" icon={MapPin} description="Shows on the project card; the address shows on the detail page." />
+                <div className="space-y-3">
+                    <Field label="Location (EN)" error={errors.location_en}>
+                        <Input value={data.location_en} onChange={v => set('location_en', v)} placeholder="Jordan - Amman" />
+                    </Field>
+                    <Field label="Location (AR)" error={errors.location_ar}>
+                        <Input value={data.location_ar} onChange={v => set('location_ar', v)} placeholder="الأردن - عمّان" />
+                    </Field>
+                    <Field label="Address (EN)" error={errors.address_en}>
+                        <Input value={data.address_en} onChange={v => set('address_en', v)} placeholder="Amman - Dabouq" />
+                    </Field>
+                    <Field label="Address (AR)" error={errors.address_ar}>
+                        <Input value={data.address_ar} onChange={v => set('address_ar', v)} placeholder="عمّان - دابوق" />
+                    </Field>
+                </div>
+            </Section>
+            </div>{/* end right column */}
+            </div>{/* end 2-column grid */}
 
             {/* Bottom save */}
             <div className="flex justify-end mt-2 mb-8">
