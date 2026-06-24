@@ -398,6 +398,30 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 
 ---
 
+## Testing & CI
+
+Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)). Branch protection on `main` requires the CI jobs to pass, so a red check blocks the merge.
+
+### Layers
+
+- **PHPUnit (backend)** — `php artisan test`. PHPUnit 11 (**NOT Pest**), in-memory SQLite ([phpunit.xml](phpunit.xml)), `RefreshDatabase`. Feature tests cover the lead funnel (contact + newsletter validation/sanitization/lead-routing), auth (login throttle, `is_active`, enumeration), admin authz, the change-log **revert** matrix, and public-route smoke; unit/model tests cover `Setting`, `Project::displayImageUrls()` fallback chain, `GalleryImage::pool()`. ~93 tests in [tests/Feature](tests/Feature) + [tests/Unit](tests/Unit).
+- **Vitest (frontend units)** — `npm run test:js` (`test:js:watch` for watch). **Pure TS helpers only** — `node` env, no jsdom ([vitest.config.ts](vitest.config.ts)). Covers the extracted [resources/js/lib](resources/js/lib) helpers: `youtube` (URL→id regex), `carousel` (`wrapIndex`/`shorterDirection` ring math, shared by ProjectShowcase + Testimonials), `phone` (`toWaMeNumber`), `cms` (CMS-first/i18n fallback resolver, used by the Footer), `cn`. Tests co-located as `lib/*.test.ts`. ~20 tests.
+- **Playwright (E2E)** — `npm run test:e2e`. Real Chromium against a `php artisan serve` instance Playwright boots itself (reuses a running one locally) — see [playwright.config.ts](playwright.config.ts). Two specs in [tests/e2e](tests/e2e): **`overflow.spec.ts`** = the **mobile horizontal-overflow guard** (`scrollWidth ≤ innerWidth` on every public route at a phone viewport — the invariant that would have caught the Self Build "dig deep" overflow), and **`smoke.spec.ts`** (desktop: Inertia app renders, home→properties nav, contact form present; selectors are href/role-based so CMS copy changes don't break them). First run needs `npx playwright install chromium`.
+
+### CI jobs ([ci.yml](.github/workflows/ci.yml))
+
+- **Frontend** — `npx tsc --noEmit` → `npm run test:js` → `npm run build` (client + SSR).
+- **Backend** — `composer install` → `cp .env.example .env` + `key:generate` → `php artisan test`. (No asset build — feature tests stub Vite; see gotcha below.)
+- **E2E** — PHP + Node → install deps → `migrate:fresh --seed` on sqlite → `npm run build` → `npx playwright install --with-deps chromium` → `npx playwright test`. Uploads the HTML report as an artifact on failure.
+
+### Testing gotchas (learned the hard way)
+
+- **Feature tests MUST stub Vite** — the base [TestCase](tests/TestCase.php) calls `$this->withoutVite()` in `setUp()`. Without it, any test that renders a full Inertia page hits the `@vite` directive in [app.blade.php](resources/views/app.blade.php), which throws `ViteManifestNotFoundException` (→ HTTP 500, so `assertOk()`/`assertInertia()` fail) when `public/build/manifest.json` is absent. It passes **locally** (leftover manifest from `npm run build`) but failed in CI's Backend job, which skips the asset build for speed. `withoutVite()` decouples backend tests from the frontend build.
+- **Data-seeding migrations no-op under `testing`** — the production-bootstrap migrations (`2026_06_18_000001..000006`) early-return when `app()->environment('testing')`, so they don't dump the 18-villa catalogue into the test DB. Feature tests seed exactly what they use in `setUp()` (e.g. `PublicSmokeTest` seeds Pages + SiteContent + DefaultSettings).
+- **Test env doubles** — Turnstile no-ops (no secret configured), `MAIL_MAILER=array` (assert via `Mail::fake()`), `CACHE_STORE=array` (fresh per test, so the rate-limiter resets between tests). The per-email login throttle is exercised by pre-`RateLimiter::hit`-ing the email key (`login:` + sha1(lower(email))).
+
+---
+
 ## Build Progress
 
 ### Foundation (DONE — 2026-04-26)
@@ -481,6 +505,7 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 - [x] **Rate-limiting** extended to locale, media-serve, video, and public page routes (2026-06-09).
 
 ### Infrastructure (TODO)
+- [x] **Automated test suite + GitHub Actions CI (2026-06-23)** — see the **Testing & CI** section. PHPUnit (~93, feature + unit) + Vitest (~20, JS helpers) + Playwright (E2E + mobile-overflow guard); [ci.yml](.github/workflows/ci.yml) runs all three on every PR (Frontend / Backend / E2E jobs). Branch protection on `main` gates the merge on green.
 - [x] SSR setup (build-time + runtime toggle via `INERTIA_SSR_ENABLED`)
 - [x] **SSR sidecar live on Railway (2026-06-23)** — separate "SSR Service" running `node bootstrap/ssr/ssr.js` on private `skyammanwebsite.railway.internal:13714`; main app wired via `INERTIA_SSR_ENABLED`/`INERTIA_SSR_URL`; `TimeoutHttpGateway` for graceful CSR fallback. See **SSR Sidecar (Railway)** under Deployment for the two gotchas (Railpack Node prune → `RAILPACK_DEPLOY_APT_PACKAGES=nodejs`; private-hostname match + `config:cache` timing).
 - [x] Railway deployment (Railpack startup, env vars) — live at `sky-amman-production.up.railway.app`. MySQL service connected via `${{MySQL.*}}` references. Required env vars: `APP_KEY`, `APP_ENV=production`, `APP_URL=https://…`, `SESSION_DRIVER=database`, `DB_*` from MySQL service, `MAIL_MAILER`, `RESEND_API_KEY`, `TURNSTILE_*`. See Railway HTTPS gotcha in Foundation Gotchas.
@@ -504,6 +529,12 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 - [ ] **Seed page SEO defaults + extend "Reset to Default" to cover SEO.** The admin Site Content **"Reset to Default"** safeguard ([SiteContentController::reset](app/Http/Controllers/Admin/SiteContentController.php), admin-only, type-to-confirm "Reset to Default") restores every `site_content` row to [`SiteContentSeeder::rows()`](database/seeders/SiteContentSeeder.php) — **text + visibility only**. Per-page SEO (`seo_title_*`/`seo_description_*` on the `pages` table) is **intentionally NOT reset** because there are no real SEO defaults seeded yet (PagesSeeder seeds empty SEO). **When the real SEO copy is decided:** (1) seed it in `PagesSeeder`, (2) extend `reset()` to also restore each page's SEO fields from those defaults (snapshot old/new into the same change-log entry so it stays revertable). The reset is logged as a single revertable `site_content` change (`model_id = "all"`).
 - [ ] Final testing & go-live
 
+> **Last updated:** 2026-06-23 — **Automated test suite + GitHub Actions CI.**
+> - **Three test layers** added (see the new **Testing & CI** section): **PHPUnit** ~93 feature/unit tests (lead funnel, auth throttle, admin authz, change-log revert, model methods, public smoke), **Vitest** ~20 unit tests over pure helpers extracted into `resources/js/lib` (`youtube`, `carousel`, `phone`, `cms`, `cn`), and **Playwright** E2E (the **mobile horizontal-overflow guard** across all public routes + desktop smoke journeys).
+> - **GitHub Actions CI** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) — 3 jobs (Frontend: tsc + Vitest + build; Backend: PHPUnit; E2E: Playwright) on every PR + pushes to `main`. Branch protection requires them green to merge.
+> - **Refactor:** extracted the inline `youtubeId`/carousel-`wrap`/`toWaMeNumber`/footer CMS-fallback logic into `resources/js/lib` modules (also de-dups the carousel math shared by ProjectShowcase + Testimonials) so they're unit-testable.
+> - **CI gotchas baked in:** base [TestCase](tests/TestCase.php) now `withoutVite()` (feature tests rendering a full page 500 on a missing Vite manifest in CI — the Backend job skips the asset build); data-seeding migrations already no-op under the `testing` env.
+>
 > **Last updated:** 2026-06-23 — **SSR sidecar live on Railway.**
 > - **Production SSR is on.** Stood up a separate Railway "SSR Service" (same repo, start command `node bootstrap/ssr/ssr.js`, private domain `skyammanwebsite.railway.internal:13714`); main app wired via `INERTIA_SSR_ENABLED=true` + `INERTIA_SSR_URL`. Verified: server-rendered `#app` + per-page `og`/`canonical` in raw HTML (curl word count ~1.4k → ~4.4k).
 > - **New code:** `app/Ssr/TimeoutHttpGateway.php` (connect/response timeouts → graceful CSR fallback, no 502 on a hung sidecar), bound in `AppServiceProvider`; published `config/inertia.php` (env-driven, SSR off by default, timeout knobs); `INERTIA_SSR_*` documented in `.env.example`.
@@ -602,6 +633,9 @@ After completing any task that touches code, end the reply with a one-line sugge
 - **Default admin**: `admin@skyamman.com` / `password` (created by `AdminUserSeeder`)
 - **Admin dashboard**: `http://localhost:8000/admin/login`
 - **Build**: `npm run build` (outputs client to `public/build/` + SSR to `bootstrap/ssr/`)
+- **Backend tests**: `php artisan test` (PHPUnit, in-memory SQLite — no build or running server needed)
+- **JS unit tests**: `npm run test:js` (Vitest; `npm run test:js:watch` for watch mode)
+- **E2E tests**: `npm run test:e2e` (Playwright — needs built assets + a seeded DB; boots `php artisan serve` itself or reuses a running one). First run: `npx playwright install chromium`. See the **Testing & CI** section for the full picture.
 - **Build deps gotcha**: If `npm install` ever leaves you without vite (because of `NODE_ENV=production`), the project's `.npmrc` should prevent it. If you do hit it, run `npm install --include=dev`.
 - **SSR in dev**: Not active — `npm run dev` uses CSR only. SSR applies to production builds.
 - **SSR toggle**: Set `INERTIA_SSR_ENABLED=false` in `.env` to disable SSR even in production.
