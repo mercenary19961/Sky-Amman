@@ -1,10 +1,12 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 import type { FormEvent } from 'react';
 
 export default function Login() {
     const turnstileRef = useRef<TurnstileHandle>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const { data, setData, post, processing, errors, setError, reset } = useForm({
         email: '',
@@ -49,14 +51,26 @@ export default function Login() {
 
                     <div>
                         <label className="block text-sm font-medium mb-1">Password</label>
-                        <input
-                            type="password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            autoComplete="current-password"
-                            className="w-full px-3 py-2 border border-ink/10 rounded focus:outline-none focus:border-primary"
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                autoComplete="current-password"
+                                className="w-full px-3 py-2 pr-10 border border-ink/10 rounded focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                aria-pressed={showPassword}
+                                tabIndex={-1}
+                                className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-muted hover:text-ink transition-colors"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                         {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password}</p>}
                     </div>
 
