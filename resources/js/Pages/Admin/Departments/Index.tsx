@@ -38,11 +38,11 @@ const NAME_MAX = 120;
 const ROLE_MAX = 120;
 
 /** Group heading above a pair of EN/AR fields (e.g. "Name", "Role"). */
-function GroupLabel({ label }: { label: string }) {
+function GroupLabel({ label, hint = 'at least one language' }: { label: string; hint?: string }) {
     return (
         <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink dark:text-zinc-100">
             {label} <span className="text-red-500">*</span>
-            <span className="font-normal text-[11px] text-ink-muted">— at least one language</span>
+            <span className="font-normal text-[11px] text-ink-muted">— {hint}</span>
         </div>
     );
 }
@@ -225,8 +225,13 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
         setPreview(f ? URL.createObjectURL(f) : item?.image_url ?? null);
     };
 
-    const hasName = nameEn.trim() !== '' || nameAr.trim() !== '';
-    const hasRole = roleEn.trim() !== '' || roleAr.trim() !== '';
+    const nameEnOk = nameEn.trim() !== '';
+    const nameArOk = nameAr.trim() !== '';
+    const roleEnOk = roleEn.trim() !== '';
+    const roleArOk = roleAr.trim() !== '';
+    // Name and role must both be filled in BOTH languages (shown per the visitor's locale).
+    const hasName = nameEnOk && nameArOk;
+    const hasRole = roleEnOk && roleArOk;
     const hasPhoto = file !== null || preview !== null;
     // Photo is optional for new members and for the current photo-less ones, but a
     // member that ALREADY has a photo must keep one (there's no remove path, so
@@ -237,8 +242,10 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
     const canSubmit = hasName && hasRole && (!photoRequired || hasPhoto) && isDirty && !processing;
 
     const missing = [
-        !hasName && 'a name',
-        !hasRole && 'a role',
+        !nameEnOk && 'the English name',
+        !nameArOk && 'the Arabic name',
+        !roleEnOk && 'the English role',
+        !roleArOk && 'the Arabic role',
         photoRequired && !hasPhoto && 'a photo',
     ].filter(Boolean) as string[];
 
@@ -336,7 +343,7 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                             </div>
 
                             <div>
-                                <GroupLabel label="Name" />
+                                <GroupLabel label="Name" hint="both languages required" />
                                 <div className="space-y-3">
                                     <div>
                                         <LabelWithCount label="English" value={nameEn} max={NAME_MAX} />
@@ -350,7 +357,7 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                             </div>
 
                             <div>
-                                <GroupLabel label="Role" />
+                                <GroupLabel label="Role" hint="both languages required" />
                                 <div className="space-y-3">
                                     <div>
                                         <LabelWithCount label="English" value={roleEn} max={ROLE_MAX} />
@@ -364,8 +371,8 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
                             </div>
 
                             <p className="text-xs text-ink-muted">
-                                If you fill only one language for a field, it&rsquo;s shown for both on the site. New
-                                members appear on the homepage right away.
+                                Both the name and role are required in English and Arabic. New members appear on the
+                                homepage right away.
                             </p>
 
                             {missing.length > 0 && (

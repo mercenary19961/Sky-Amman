@@ -124,22 +124,23 @@ class DepartmentMemberController extends Controller
     }
 
     /**
-     * Name and role each require AT LEAST ONE language; photo is optional (the
-     * card shows a placeholder until one is uploaded).
+     * Name and role are both required in BOTH languages — the homepage shows them
+     * per the visitor's locale, so a missing language would fall back oddly. Photo
+     * is optional (the card shows a placeholder until one is uploaded).
      */
     private function validateData(Request $request): array
     {
         return $request->validate([
-            'name_en' => ['nullable', 'required_without:name_ar', 'string', 'max:120'],
-            'name_ar' => ['nullable', 'required_without:name_en', 'string', 'max:120'],
-            'role_en' => ['nullable', 'required_without:role_ar', 'string', 'max:120'],
-            'role_ar' => ['nullable', 'required_without:role_en', 'string', 'max:120'],
+            'name_en' => ['required', 'string', 'max:120'],
+            'name_ar' => ['required', 'string', 'max:120'],
+            'role_en' => ['required', 'string', 'max:120'],
+            'role_ar' => ['required', 'string', 'max:120'],
             'image'   => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
         ], [
-            'name_en.required_without' => 'Enter the name in at least one language.',
-            'name_ar.required_without' => 'Enter the name in at least one language.',
-            'role_en.required_without' => 'Enter the role in at least one language.',
-            'role_ar.required_without' => 'Enter the role in at least one language.',
+            'name_en.required' => 'Enter the name in English.',
+            'name_ar.required' => 'Enter the name in Arabic.',
+            'role_en.required' => 'Enter the role in English.',
+            'role_ar.required' => 'Enter the role in Arabic.',
         ]);
     }
 }
