@@ -399,7 +399,7 @@ export function Footer() {
                 <img
                     src="/images/home/skyamman-logo-large.png"
                     alt="SkyAmman — Real Estate Consultancy"
-                    className="absolute left-[49%] top-[-20%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                    className="absolute left-[49%] top-[-16%] w-[34%] h-[65%] z-40 object-contain select-none pointer-events-none"
                 />
             </div>
         </footer>
