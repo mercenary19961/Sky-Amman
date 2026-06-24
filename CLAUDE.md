@@ -412,7 +412,7 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 
 - **Frontend** — `npx tsc --noEmit` → `npm run test:js` → `npm run build` (client + SSR).
 - **Backend** — `composer install` → `cp .env.example .env` + `key:generate` → `php artisan test`. (No asset build — feature tests stub Vite; see gotcha below.)
-- **E2E** — PHP + Node → install deps → `migrate:fresh --seed` on sqlite → `npm run build` → `npx playwright install --with-deps chromium` → `npx playwright test`. Uploads the HTML report as an artifact on failure.
+- **E2E** — runs inside the official Playwright container (`mcr.microsoft.com/playwright:v1.61.0-noble`, which ships Chromium + its OS deps, so there's no slow `playwright install --with-deps` step). Inside it: setup PHP 8.2 + Node 22 → install deps → `migrate:fresh --seed` on sqlite → `npm run build` → `npx playwright test`. Uploads the HTML report as an artifact on failure. **When you bump `@playwright/test`, bump the image tag to match** (else browser/version mismatch).
 
 ### Testing gotchas (learned the hard way)
 
