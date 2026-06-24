@@ -1,5 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
     Plus, Pencil, Trash2, ShieldCheck, ShieldAlert, X, Power, Lock,
 } from 'lucide-react';
@@ -32,6 +32,12 @@ const EMPTY: FormData = {
     password: '', password_confirmation: '', admin_confirmed: false,
 };
 
+// Stable snapshot of the editable fields, captured when the panel opens, so the
+// Save button only enables once something actually changes (admin_confirmed is
+// excluded — it's applied at submit time via form.transform).
+const snapshotOf = (d: Pick<FormData, 'name' | 'email' | 'role' | 'is_active' | 'password' | 'password_confirmation'>) =>
+    JSON.stringify([d.name, d.email, d.role, d.is_active, d.password, d.password_confirmation]);
+
 export default function Users() {
     const { users, currentUserId } = usePage<UsersPageProps>().props;
 
@@ -41,20 +47,25 @@ export default function Users() {
     const [confirmText, setConfirmText] = useState('');
 
     const form = useForm<FormData>({ ...EMPTY });
+    // Baseline snapshot taken when the panel opens; drives the dirty check below.
+    const baseline = useRef(snapshotOf(EMPTY));
 
     function openCreate() {
         setEditing(null);
         form.setData({ ...EMPTY });
+        baseline.current = snapshotOf(EMPTY);
         form.clearErrors();
         setPanelOpen(true);
     }
 
     function openEdit(u: UserListItem) {
         setEditing(u);
-        form.setData({
+        const data: FormData = {
             name: u.name, email: u.email, role: u.role, is_active: u.is_active,
             password: '', password_confirmation: '', admin_confirmed: false,
-        });
+        };
+        form.setData(data);
+        baseline.current = snapshotOf(data);
         form.clearErrors();
         setPanelOpen(true);
     }
@@ -107,7 +118,9 @@ export default function Users() {
     // Name + email must also be valid before the button lights up.
     const nameOk = form.data.name.trim().length > 0;
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.data.email.trim());
-    const canSubmit = !form.processing && nameOk && emailOk && passwordOk;
+    // …and only once something actually changed since the panel opened.
+    const isDirty = snapshotOf(form.data) !== baseline.current;
+    const canSubmit = !form.processing && isDirty && nameOk && emailOk && passwordOk;
 
     return (
         <AdminLayout title="Users">

@@ -265,6 +265,7 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
     const [preview, setPreview] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
+    const baseline = useRef(''); // snapshot of the text fields at open, for the dirty check
 
     useEffect(() => {
         setNameEn(item?.name_en ?? '');
@@ -273,6 +274,7 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
         setQuoteAr(item?.quote_ar ?? '');
         setFile(null);
         setPreview(item?.image_url ?? null);
+        baseline.current = JSON.stringify([item?.name_en ?? '', item?.name_ar ?? '', item?.quote_en ?? '', item?.quote_ar ?? '']);
         if (fileRef.current) fileRef.current.value = '';
     }, [editing]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -286,7 +288,9 @@ function FormDrawer({ editing, onClose }: { editing: EditingState; onClose: () =
     const hasPhoto = !!file || !!preview;
     const hasName = nameEn.trim() !== '' || nameAr.trim() !== '';
     const hasQuote = quoteEn.trim() !== '' || quoteAr.trim() !== '';
-    const canSubmit = hasPhoto && hasName && hasQuote && !processing;
+    // Only enable once something changed since the drawer opened (text edited or a new photo picked).
+    const isDirty = file !== null || JSON.stringify([nameEn, nameAr, quoteEn, quoteAr]) !== baseline.current;
+    const canSubmit = hasPhoto && hasName && hasQuote && isDirty && !processing;
 
     const missing = [
         !hasPhoto && 'a photo',

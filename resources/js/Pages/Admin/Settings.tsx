@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Save, Phone, MapPin, Share2, Play, Search, Send } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import type { SettingsPageProps, SettingRow } from '@/types/admin/settings';
@@ -225,12 +225,24 @@ export default function Settings() {
         setLeadRouting(prev => ({ ...prev, [type]: email }));
     }
 
+    // Dirty tracking — the Save button stays greyed/disabled until something
+    // actually changes, then lights up. The baseline is captured on first render
+    // and re-set after a successful save.
+    const serialize = (v: Record<string, string>, lr: Record<string, string>) =>
+        JSON.stringify({ ...v, lead_routing: JSON.stringify(lr) });
+    const baseline = useRef<string | null>(null);
+    const snapshot = serialize(values, leadRouting);
+    if (baseline.current === null) baseline.current = snapshot;
+    const isDirty = snapshot !== baseline.current;
+
     function save() {
         const payload = Object.entries({ ...values, lead_routing: JSON.stringify(leadRouting) })
             .map(([key, value]) => ({ key, value }));
+        const saved = snapshot;
         setProcessing(true);
         router.put('/admin/settings', { settings: payload } as any, {
             preserveScroll: true,
+            onSuccess: () => { baseline.current = saved; }, // re-baseline → button greys again
             onFinish: () => setProcessing(false),
         });
     }
@@ -274,11 +286,17 @@ export default function Settings() {
         <button
             type="button"
             onClick={save}
-            disabled={processing}
-            className={`inline-flex items-center gap-2 px-4 py-2 bg-primary text-zinc-900 rounded text-sm font-medium hover:bg-primary-dark disabled:opacity-60 transition-colors ${className}`}
+            disabled={processing || !isDirty}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors ${
+                !isDirty
+                    ? 'bg-ink/10 text-ink/40 cursor-not-allowed'
+                    : processing
+                        ? 'bg-primary text-zinc-900 opacity-60'
+                        : 'bg-primary text-zinc-900 hover:bg-primary-dark'
+            } ${className}`}
         >
             <Save size={15} />
-            {processing ? 'Saving…' : 'Save All Settings'}
+            {processing ? 'Saving…' : isDirty ? 'Save All Settings' : 'All changes saved'}
         </button>
     );
 
