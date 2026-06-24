@@ -61,6 +61,12 @@ jobs:
   e2e:
     name: E2E — Playwright
     runs-on: ubuntu-latest
+    # Run inside the official Playwright image, which ships Chromium + all of its
+    # OS dependencies pre-installed. This removes the slow `playwright install
+    # --with-deps` apt download (the ~5-min step). Pin the tag to the
+    # @playwright/test version in package.json so the bundled browser matches.
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.0-noble
     steps:
       - uses: actions/checkout@v4
 
@@ -91,9 +97,6 @@ jobs:
 
       - name: Build assets (client + SSR)
         run: npm run build
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: npx playwright test
