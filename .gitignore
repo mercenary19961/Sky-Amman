@@ -31,3 +31,9 @@ _ide_helper.php
 _ide_helper_models.php
 .phpstorm.meta.php
 
+# Playwright E2E artifacts
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+

@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { toWaMeNumber } from '@/lib/phone';
 import type { PageProps } from '@/types';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -21,7 +22,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
  */
 export function WhatsAppButton() {
     const { siteSettings } = usePage<PageProps>().props;
-    const number = (siteSettings?.phone ?? '').replace(/\D/g, '');
+    const number = toWaMeNumber(siteSettings?.phone);
     if (!number) return null;
 
     return (

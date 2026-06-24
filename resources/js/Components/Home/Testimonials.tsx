@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ExternalLink, Play, User as UserIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
+import { youtubeId, youtubeThumb, youtubeEmbed } from '@/lib/youtube';
+import { wrapIndex, shorterDirection } from '@/lib/carousel';
 import type { SiteContentBundle, TestimonialCard } from '@/types/home';
 
 interface TestimonialsProps {
@@ -24,21 +26,6 @@ interface Client {
 // a YouTube link renders as a lazy-loaded embed; anything else is treated as a
 // generic embed URL (e.g. Vimeo) for an <iframe>.
 const VIDEO_FILE_RE = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
-
-/**
- * Extract the 11-char video id from any common YouTube URL shape
- * (watch?v=, youtu.be/, embed/, shorts/, /v/). Returns null for non-YouTube
- * URLs so an admin can paste a normal share/watch link and it Just Works.
- */
-function youtubeId(url: string): string | null {
-    const m = url.match(
-        /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
-    );
-    return m ? m[1] : null;
-}
-
-const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-const youtubeEmbed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
 
 export function Testimonials({ content, videos, testimonials }: TestimonialsProps) {
     const { language } = useLanguage();
@@ -126,7 +113,7 @@ function ClientCardsCarousel({ clients }: { clients: Client[] }) {
         setActiveIndex((i) => (N === 0 ? 0 : i % N));
     }, [N]);
 
-    const wrap = (i: number) => ((i % N) + N) % N;
+    const wrap = (i: number) => wrapIndex(i, N);
     const next = () => setActiveIndex((i) => wrap(i + 1));
     const prev = () => setActiveIndex((i) => wrap(i - 1));
 
@@ -230,7 +217,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
         );
     }
 
-    const wrap = (i: number) => ((i % N) + N) % N;
+    const wrap = (i: number) => wrapIndex(i, N);
     const next = () => {
         setDirection(1);
         setActiveIndex((i) => wrap(i + 1));
@@ -243,9 +230,7 @@ function TestimonialVideos({ videos }: { videos: string[] }) {
         const dest = wrap(target);
         if (dest !== activeIndex) {
             // Pick the shorter way around the ring so a dot click feels natural.
-            const forward = wrap(dest - activeIndex);
-            const backward = wrap(activeIndex - dest);
-            setDirection(forward <= backward ? 1 : -1);
+            setDirection(shorterDirection(activeIndex, dest, N));
         }
         setActiveIndex(dest);
     };

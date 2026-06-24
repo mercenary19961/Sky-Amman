@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useAnimationControls, useInView } from 'framer
 import { Check, Phone } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { cmsText } from '@/lib/cms';
 import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
 
 // The real public pages we ship (mirrors Header NAV_ITEMS). "Listings" in the
@@ -35,11 +36,7 @@ const SOCIAL_KEYS: { key: string; settingKey: string; comingSoon?: true }[] = [
 type FooterText = (section: string, key: string, fallbackKey: string) => string;
 
 function makeFooterText(bundle: SiteContentBundle | undefined, t: TFunction): FooterText {
-    return (section, key, fallbackKey) => {
-        const entry = bundle?.[section]?.[key];
-        if (entry && entry.is_visible && entry.content) return entry.content;
-        return t(fallbackKey);
-    };
+    return (section, key, fallbackKey) => cmsText(bundle?.[section]?.[key], t(fallbackKey));
 }
 
 // Each cloud image spans this fraction of the viewport (matches w-[84.8%] in
@@ -359,7 +356,7 @@ export function Footer() {
               which is exactly how the design "places" the villa & logo so only
               their lower portions show.
             */}
-            <div ref={heroRef} className="relative w-full aspect-1280/450 max-h-140 overflow-hidden">
+            <div ref={heroRef} className="relative w-full aspect-1280/520 max-h-160 overflow-hidden">
                 {/* z-30 — bottom-right cloud cluster (footer-clouds.webp), bleeds off right.
                     Slides in once, then drifts continuously across the screen. Sits in
                     front of the apartment (z-20), same as the left cluster. */}
@@ -374,13 +371,14 @@ export function Footer() {
                     inView={heroInView}
                 />
 
-                {/* z-20 — villa photo. Anchored so its bottom aligns with the hero
-                    bottom; the upper half of the photo (sky) is clipped by the hero. */}
+                {/* z-20 — villa photo. The band is sized (aspect 1280/673 + a matching
+                    max-h) to the villa's exact height so the FULL villa fits with no top
+                    clipping AND no empty headroom — it sits flush under the copyright. */}
                 <img
                     src="/images/home/footer-apartment-padded.webp"
                     alt=""
                     aria-hidden="true"
-                    className="absolute right-[19.5%] top-[-48.9%] w-[93.5%] h-[149.6%] z-20 object-contain object-bottom select-none pointer-events-none"
+                    className="absolute right-[20.5%] top-0 w-[93.5%] h-full z-20 object-contain object-bottom select-none pointer-events-none"
                 />
 
                 {/* z-30 — bottom-LEFT cloud cluster (same footer-clouds.webp reused),
@@ -401,7 +399,7 @@ export function Footer() {
                 <img
                     src="/images/home/skyamman-logo-large.png"
                     alt="SkyAmman — Real Estate Consultancy"
-                    className="absolute left-[49%] top-[-20%] w-[38%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                    className="absolute left-[49%] top-[-16%] w-[34%] h-[65%] z-40 object-contain select-none pointer-events-none"
                 />
             </div>
         </footer>

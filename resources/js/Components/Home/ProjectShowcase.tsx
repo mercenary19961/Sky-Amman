@@ -5,6 +5,7 @@ import type { PanInfo } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
+import { wrapIndex, shorterDirection } from '@/lib/carousel';
 import type { FeaturedProject } from '@/types/home';
 
 interface ProjectShowcaseProps {
@@ -38,21 +39,19 @@ export function ProjectShowcase({ title, ctaLabel, projects, single = false }: P
     }, [single]);
 
     const goTo = (i: number) => {
-        const target = ((i % N) + N) % N;
+        const target = wrapIndex(i, N);
         if (target !== activeIndex) {
-            const forward = (target - activeIndex + N) % N;
-            const backward = (activeIndex - target + N) % N;
-            setDirection(forward <= backward ? 1 : -1);
+            setDirection(shorterDirection(activeIndex, target, N));
         }
         setActiveIndex(target);
     };
     const next = () => {
         setDirection(1);
-        setActiveIndex((activeIndex + 1) % N);
+        setActiveIndex(wrapIndex(activeIndex + 1, N));
     };
     const prev = () => {
         setDirection(-1);
-        setActiveIndex((activeIndex - 1 + N) % N);
+        setActiveIndex(wrapIndex(activeIndex - 1, N));
     };
 
     // Rotate so the active project sits first, then keep the first N visible.

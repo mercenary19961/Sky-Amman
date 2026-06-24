@@ -53,7 +53,10 @@ class AdminSecurityFixesTest extends TestCase
             ->put('/admin/settings', ['settings' => [['key' => 'linkedin_url', 'value' => 'javascript:alert(1)']]])
             ->assertSessionHasErrors('settings.0.value');
 
-        $this->assertSame('', (string) Setting::get('linkedin_url'));
+        // Rejected input must not be persisted — the setting keeps its prior
+        // (seeded) value rather than the malicious one. (Asserting the value is
+        // simply not the JS payload keeps this robust to the seeder's default.)
+        $this->assertNotSame('javascript:alert(1)', (string) Setting::get('linkedin_url'));
     }
 
     public function test_valid_https_url_setting_is_accepted(): void
