@@ -154,6 +154,24 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 - FK constraint warning: seeders/migrations referencing `created_by => 1` fail if users table is empty. Use `null` for nullable FK columns in data seeds.
 - Cloudflare cache: static assets are keyed WITHOUT query strings, so `?v=X` does NOT bust edge cache — use Cloudflare dashboard's Custom Purge by URL when verifying new content.
 
+#### Switching to the client's custom domain (checklist)
+
+When the site moves from `sky-amman-production.up.railway.app` to the client's real domain, update only these — **the SSR service needs NO changes** (its `INERTIA_SSR_URL` points at the Railway **private internal** domain `skyammanwebsite.railway.internal:13714`, derived from the SSR service *name*, not from any public/custom domain; the Node sidecar never reads `APP_URL`):
+
+1. **`APP_URL=https://<client-domain>`** on the **main** `Sky-Amman` service — drives canonical tags, `og:url`, `sitemap.xml` URLs, the `robots.txt` `Sitemap:` line, hreflang alternates, emailed reset links, and `asset()` URLs. Baked by `config:cache`, so **redeploy the main app** after changing it. Keep `https://` (pairs with `URL::forceScheme('https')`).
+2. **Turnstile keys** (`TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`) on the main app — Turnstile keys are **domain-bound**; mint new ones for the client's domain in Cloudflare and swap them in.
+3. **`og_image_url`** (Admin → Settings → SEO; a DB setting, NOT an env var) — set to the absolute URL on the new domain, e.g. `https://<client-domain>/images/og-image.png`.
+4. **Resend** (when email is un-postponed): `MAIL_FROM_ADDRESS` on the new domain + DKIM/SPF/DMARC verification for that domain.
+5. **Cloudflare**: add the custom domain, point DNS at the Railway edge, proxy on.
+
+| Variable / setting | Change for new domain? |
+|---|---|
+| `INERTIA_SSR_URL`, `INERTIA_SSR_ENABLED`, SSR start cmd / port | ❌ No (internal Railway networking) |
+| `APP_URL` (main app) | ✅ Yes → **redeploy main app** |
+| `TURNSTILE_*` (main app) | ✅ Yes (domain-bound keys) |
+| `og_image_url` (DB setting) | ✅ Yes |
+| `MAIL_FROM_ADDRESS` + DNS (Resend, when live) | ✅ Yes |
+
 ### SSR Sidecar (Railway) — production SSR (LIVE 2026-06-23)
 
 SSR is served by a **second Railway service** ("SSR Service", same repo/branch, identical Railpack build) — only its start command differs.
