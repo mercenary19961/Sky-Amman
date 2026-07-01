@@ -455,20 +455,35 @@ function downgradeThumb(img: HTMLImageElement, id: string) {
 }
 
 /**
- * Videos with no maxres thumbnail fail in TWO ways, so we need both handlers:
- *   • some CDN nodes 404 the file            → caught by onError (thumbFallback)
- *   • most serve a 120×90 GREY STUB with 200 → caught by onLoad (thumbGuard),
- *     which downgrades when the decoded width is tiny (real thumbs are ≥480px).
- * Either way we fall back to hqdefault so the frame is never a grey blur.
+ * Decide whether a finished-loading maxres `<img>` is really a usable thumbnail.
+ * Videos with no maxres fail two ways: some CDN nodes 404 it (naturalWidth 0),
+ * most serve a 120×90 GREY STUB with HTTP 200. Real thumbs are ≥480px wide.
  */
+function needsDowngrade(img: HTMLImageElement) {
+    return img.naturalWidth === 0 || img.naturalWidth <= 120;
+}
+
+// onError: covers the 404 path.
 function thumbFallback(id: string) {
     return (e: SyntheticEvent<HTMLImageElement>) => downgradeThumb(e.currentTarget, id);
 }
 
+// onLoad: covers the 200 grey-stub path for images that load after hydration.
 function thumbGuard(id: string) {
     return (e: SyntheticEvent<HTMLImageElement>) => {
         const img = e.currentTarget;
-        if (img.naturalWidth > 0 && img.naturalWidth <= 120) downgradeThumb(img, id);
+        if (needsDowngrade(img)) downgradeThumb(img, id);
+    };
+}
+
+// ref: under SSR the browser starts loading the `<img>` from the server HTML
+// *before* React hydrates, so onLoad/onError may have already fired and won't
+// run again. Re-check synchronously the moment the element mounts if it's
+// already `complete` — this is what makes the thumbnail correct on first paint
+// instead of only after the user navigates the carousel.
+function thumbRef(id: string) {
+    return (img: HTMLImageElement | null) => {
+        if (img && img.complete && needsDowngrade(img)) downgradeThumb(img, id);
     };
 }
 
@@ -536,6 +551,7 @@ function CenterVideo({ src }: { src: string }) {
                 ) : (
                     <>
                         <img
+                            ref={thumbRef(ytId)}
                             src={youtubeThumb(ytId)}
                             onError={thumbFallback(ytId)}
                             onLoad={thumbGuard(ytId)}
@@ -608,6 +624,7 @@ function SidePreview({ src }: { src: string }) {
     if (ytId) {
         return (
             <img
+                ref={thumbRef(ytId)}
                 src={youtubeThumb(ytId)}
                 onError={thumbFallback(ytId)}
                 onLoad={thumbGuard(ytId)}
