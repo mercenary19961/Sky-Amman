@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -6,6 +6,11 @@ import { ChevronRight, Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/cn';
 import type { PageProps } from '@/types';
+
+// useLayoutEffect runs before the browser paints (so we can correct the navbar
+// tone before the first visible frame), but it warns during SSR — fall back to
+// useEffect on the server where there's no DOM to measure anyway.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const NAV_ITEMS = [
     { key: 'home', href: '/' },
@@ -18,6 +23,13 @@ const NAV_ITEMS = [
     { key: 'contact', href: '/contact' },
 ] as const;
 
+// Routes whose top section is dark (data-nav-bg="dark" on the first section, so
+// the navbar overlays a dark hero at scroll 0). Seeding the initial tone from
+// the route makes the server render the correct navbar tone, avoiding a
+// white-backdrop flash before hydration can measure the DOM. Keep in sync with
+// which pages start with a `data-nav-bg="dark"` section (Home, Security).
+const DARK_HERO_ROUTES: readonly string[] = ['/', '/security'];
+
 export function Header() {
     const { t } = useTranslation();
     const { language, toggleLanguage } = useLanguage();
@@ -27,7 +39,17 @@ export function Header() {
     // their root (= "this section's background is dark, so the navbar should
     // render light/white content while it's overlapping me"). Default tone is
     // "light" — dark text/logo on a light page background.
-    const [navBg, setNavBg] = useState<'light' | 'dark'>('light');
+    // Seed from the route (available during SSR) so the server already renders
+    // the right tone — the scroll/resize measurement below refines it after mount.
+    const [navBg, setNavBg] = useState<'light' | 'dark'>(
+        DARK_HERO_ROUTES.includes(url.split('?')[0]) ? 'dark' : 'light',
+    );
+
+    // The gradient starts un-animated so the first (pre-paint) tone correction
+    // is instant — no 0.5s white-band fade on refresh over a dark hero. We only
+    // enable the opacity transition once the initial measurement has settled, so
+    // later scroll-driven tone changes still animate smoothly.
+    const [settled, setSettled] = useState(false);
 
     // Hide-on-scroll-down / reveal-on-scroll-up.
     const [hidden, setHidden] = useState(false);
@@ -69,7 +91,7 @@ export function Header() {
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
 
-    useEffect(() => {
+    useIsomorphicLayoutEffect(() => {
         if (typeof window === 'undefined') return;
 
         const SAMPLE_Y = 32; // px — sampled at the vertical center of the navbar
@@ -91,6 +113,9 @@ export function Header() {
         };
 
         updateNavBg();
+        // Enable transitions only after the initial tone is locked in, so the
+        // first correction doesn't animate.
+        setSettled(true);
         window.addEventListener('scroll', updateNavBg, { passive: true });
         window.addEventListener('resize', updateNavBg);
         return () => {
@@ -123,7 +148,10 @@ export function Header() {
                 className={cn(
                     // Bar height only (h-24) so it never bleeds into the expanded
                     // mobile menu panel below — keeps that panel a clean white.
-                    'absolute inset-x-0 top-0 h-24 pointer-events-none bg-linear-to-b from-[#5299CC] to-white transition-opacity duration-300',
+                    'absolute inset-x-0 top-0 h-24 pointer-events-none bg-linear-to-b from-[#5299CC] to-white',
+                    // Only animate opacity after the first measurement, so the
+                    // initial tone correction on refresh is instant (no fade).
+                    settled && 'transition-opacity duration-300',
                     isDark ? 'opacity-0' : 'opacity-100',
                 )}
             />
