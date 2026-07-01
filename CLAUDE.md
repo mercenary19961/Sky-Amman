@@ -156,21 +156,28 @@ These patterns are proven from Nuor Steel. Follow them exactly.
 
 #### Switching to the client's custom domain (checklist)
 
-When the site moves from `sky-amman-production.up.railway.app` to the client's real domain, update only these — **the SSR service needs NO changes** (its `INERTIA_SSR_URL` points at the Railway **private internal** domain `skyammanwebsite.railway.internal:13714`, derived from the SSR service *name*, not from any public/custom domain; the Node sidecar never reads `APP_URL`):
+> **⚠️ Actual domain layout as shipped (2026-07-01):** the client's DNS is managed by a third party (Almond Solutions), NOT Cloudflare. The switchover ended up as a **`www`-canonical + apex-redirect** setup, so the canonical domain is **`https://www.skyamman.com`**, NOT the bare apex:
+> - **`www.skyamman.com`** → `CNAME` → Railway target (`yup9rbrk.up.railway.app`). This is the live site (Let's Encrypt cert issued by Railway). **This is the canonical domain — use it for `APP_URL`, Turnstile, og_image_url.**
+> - **`skyamman.com`** (apex) → still an `A` record on the **old IIS host** (`192.250.231.20`, mysecurecloudhost.com), which serves a `web.config` **301 redirect** to `https://www.skyamman.com` (it has its own valid Let's Encrypt cert, so no warning before the hop). A plain CNAME can't sit on an apex and the provider offered no ALIAS/ANAME, so the apex was NOT pointed at Railway — the redirect handles the bare domain instead.
+>   - **Consequence 1:** the bare domain depends on the **old hosting account staying alive** to serve the redirect (www works directly regardless).
+>   - **Consequence 2:** Railway's `skyamman.com` custom-domain entry will sit at "Waiting for DNS update" **forever** (apex never points at Railway) — **remove that entry** in Railway and keep only `www.skyamman.com` + the default `.up.railway.app`.
 
-1. **`APP_URL=https://<client-domain>`** on the **main** `Sky-Amman` service — drives canonical tags, `og:url`, `sitemap.xml` URLs, the `robots.txt` `Sitemap:` line, hreflang alternates, emailed reset links, and `asset()` URLs. Baked by `config:cache`, so **redeploy the main app** after changing it. Keep `https://` (pairs with `URL::forceScheme('https')`).
-2. **Turnstile keys** (`TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`) on the main app — Turnstile keys are **domain-bound**; mint new ones for the client's domain in Cloudflare and swap them in.
-3. **`og_image_url`** (Admin → Settings → SEO; a DB setting, NOT an env var) — set to the absolute URL on the new domain, e.g. `https://<client-domain>/images/og-image.png`.
+When moving from `sky-amman-production.up.railway.app` to the client's real domain, update only these — **the SSR service needs NO changes** (its `INERTIA_SSR_URL` points at the Railway **private internal** domain `skyammanwebsite.railway.internal:13714`, derived from the SSR service *name*, not from any public/custom domain; the Node sidecar never reads `APP_URL`):
+
+1. **`APP_URL=https://www.skyamman.com`** (the **www** canonical domain — not the apex) on the **main** `Sky-Amman` service — drives canonical tags, `og:url`, `sitemap.xml` URLs, the `robots.txt` `Sitemap:` line, hreflang alternates, emailed reset links, and `asset()` URLs. Baked by `config:cache`, so **redeploy the main app** after changing it. Keep `https://` (pairs with `URL::forceScheme('https')`).
+2. **Turnstile keys** (`TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`) on the main app — Turnstile keys are **domain-bound**; mint new ones for hostname **`www.skyamman.com`** (forms only ever render on www — the apex redirects) and swap them in.
+3. **`og_image_url`** (Admin → Settings → SEO; a DB setting, NOT an env var) — set to `https://www.skyamman.com/images/og-image.png`.
 4. **Resend** (when email is un-postponed): `MAIL_FROM_ADDRESS` on the new domain + DKIM/SPF/DMARC verification for that domain.
-5. **Cloudflare**: add the custom domain, point DNS at the Railway edge, proxy on.
+5. **DNS / apex** — done by the client's DNS team (see the domain-layout note above): `www` CNAME → Railway, apex `A` → old host with a 301 redirect to www. No Cloudflare involved.
 
 | Variable / setting | Change for new domain? |
 |---|---|
 | `INERTIA_SSR_URL`, `INERTIA_SSR_ENABLED`, SSR start cmd / port | ❌ No (internal Railway networking) |
-| `APP_URL` (main app) | ✅ Yes → **redeploy main app** |
-| `TURNSTILE_*` (main app) | ✅ Yes (domain-bound keys) |
-| `og_image_url` (DB setting) | ✅ Yes |
+| `APP_URL` (main app) → `https://www.skyamman.com` | ✅ Yes → **redeploy main app** |
+| `TURNSTILE_*` (main app) — hostname `www.skyamman.com` | ✅ Yes (domain-bound keys) |
+| `og_image_url` (DB setting) → `https://www.skyamman.com/...` | ✅ Yes |
 | `MAIL_FROM_ADDRESS` + DNS (Resend, when live) | ✅ Yes |
+| Railway `skyamman.com` custom-domain entry | 🗑️ Remove (apex never points at Railway) |
 
 ### SSR Sidecar (Railway) — production SSR (LIVE 2026-06-23)
 
