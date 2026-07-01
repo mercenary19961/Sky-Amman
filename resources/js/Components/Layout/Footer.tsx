@@ -395,11 +395,13 @@ export function Footer() {
                     inView={heroInView}
                 />
 
-                {/* z-40 — SKYAMMAN logo, center-right, overlaps the villa */}
+                {/* z-40 — SKYAMMAN wordmark, center-right, overlaps the villa.
+                    Wide single-line lockup (~3.85:1), shown in full via h-auto
+                    (natural aspect) so top-% anchors its real top edge — no bleed. */}
                 <img
-                    src="/images/home/skyamman-logo-large.png"
+                    src="/images/home/skyamman-logo-large.webp"
                     alt="SkyAmman — Real Estate Consultancy"
-                    className="absolute left-[49%] top-[-16%] w-[34%] h-[65%] z-40 object-contain select-none pointer-events-none"
+                    className="absolute left-[51%] top-[4%] w-[42%] h-auto z-40 object-contain select-none pointer-events-none"
                 />
             </div>
         </footer>
