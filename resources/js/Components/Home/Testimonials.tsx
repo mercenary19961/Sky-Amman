@@ -445,17 +445,30 @@ function VideoSlot({ className, index, src, variant, direction, onClick, ariaLab
 }
 
 /**
- * `onError` for a YouTube thumbnail `<img>`: not every video has a maxres image
- * (YouTube 404s those), so swap to the always-present hqdefault once. Shared by
- * the centre clip and the side previews so both degrade gracefully.
+ * Downgrade a YouTube thumbnail `<img>` from maxres to the always-present
+ * hqdefault (480×360), once. Shared by the error and placeholder-detection paths.
+ */
+function downgradeThumb(img: HTMLImageElement, id: string) {
+    if (img.dataset.thumbFallback) return;
+    img.dataset.thumbFallback = '1';
+    img.src = youtubeThumb(id, 'hqdefault');
+}
+
+/**
+ * Videos with no maxres thumbnail fail in TWO ways, so we need both handlers:
+ *   • some CDN nodes 404 the file            → caught by onError (thumbFallback)
+ *   • most serve a 120×90 GREY STUB with 200 → caught by onLoad (thumbGuard),
+ *     which downgrades when the decoded width is tiny (real thumbs are ≥480px).
+ * Either way we fall back to hqdefault so the frame is never a grey blur.
  */
 function thumbFallback(id: string) {
+    return (e: SyntheticEvent<HTMLImageElement>) => downgradeThumb(e.currentTarget, id);
+}
+
+function thumbGuard(id: string) {
     return (e: SyntheticEvent<HTMLImageElement>) => {
         const img = e.currentTarget;
-        if (!img.dataset.thumbFallback) {
-            img.dataset.thumbFallback = '1';
-            img.src = youtubeThumb(id, 'hqdefault');
-        }
+        if (img.naturalWidth > 0 && img.naturalWidth <= 120) downgradeThumb(img, id);
     };
 }
 
@@ -525,6 +538,7 @@ function CenterVideo({ src }: { src: string }) {
                         <img
                             src={youtubeThumb(ytId)}
                             onError={thumbFallback(ytId)}
+                            onLoad={thumbGuard(ytId)}
                             alt=""
                             aria-hidden="true"
                             className="w-full h-full object-cover"
@@ -596,6 +610,7 @@ function SidePreview({ src }: { src: string }) {
             <img
                 src={youtubeThumb(ytId)}
                 onError={thumbFallback(ytId)}
+                onLoad={thumbGuard(ytId)}
                 alt=""
                 aria-hidden="true"
                 className="w-full h-full rounded-3xl object-cover opacity-60 shadow-md pointer-events-none"
