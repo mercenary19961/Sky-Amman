@@ -509,6 +509,15 @@ function CenterVideo({ src }: { src: string }) {
                     <>
                         <img
                             src={youtubeThumb(ytId)}
+                            onError={(e) => {
+                                // Not every video has a maxres thumb (YouTube 404s
+                                // those) — fall back to hqdefault once.
+                                const img = e.currentTarget;
+                                if (!img.dataset.thumbFallback) {
+                                    img.dataset.thumbFallback = '1';
+                                    img.src = youtubeThumb(ytId, 'hqdefault');
+                                }
+                            }}
                             alt=""
                             aria-hidden="true"
                             className="w-full h-full object-cover"

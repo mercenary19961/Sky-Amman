@@ -31,7 +31,10 @@ describe('youtubeId', () => {
     });
 
     it('builds thumb and embed URLs from an id', () => {
-        expect(youtubeThumb('abc12345678')).toBe('https://i.ytimg.com/vi/abc12345678/hqdefault.jpg');
+        // Defaults to maxres so the large public frame stays crisp.
+        expect(youtubeThumb('abc12345678')).toBe('https://i.ytimg.com/vi/abc12345678/maxresdefault.jpg');
+        // Callers can request a smaller thumb for fallback / small previews.
+        expect(youtubeThumb('abc12345678', 'hqdefault')).toBe('https://i.ytimg.com/vi/abc12345678/hqdefault.jpg');
         expect(youtubeEmbed('abc12345678')).toBe('https://www.youtube-nocookie.com/embed/abc12345678?rel=0');
     });
 });

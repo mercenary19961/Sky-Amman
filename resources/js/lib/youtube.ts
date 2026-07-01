@@ -15,5 +15,15 @@ export function youtubeId(url: string): string | null {
     return m ? m[1] : null;
 }
 
-export const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+/**
+ * Thumbnail URL for a video id. Defaults to `maxresdefault` (1280×720) so the
+ * large public testimonial frame stays crisp; callers rendering a small preview
+ * can ask for `hqdefault` (480×360). Note: not every video has a maxres thumb —
+ * `i.ytimg.com` returns a 404 for those, so consumers should `onError`-fall back
+ * to `youtubeThumb(id, 'hqdefault')`.
+ */
+export const youtubeThumb = (
+    id: string,
+    quality: 'hqdefault' | 'sddefault' | 'maxresdefault' = 'maxresdefault',
+) => `https://i.ytimg.com/vi/${id}/${quality}.jpg`;
 export const youtubeEmbed = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
