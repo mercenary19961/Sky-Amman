@@ -2,6 +2,9 @@
 
 > Quick reference for AI assistants and developers
 
+> **📍 Doc sync:** CLAUDE.md last synced to commit `e082021` — 2026-07-02 10:29 (Thu).
+> _Convention: whenever you edit this file, refresh this line to the current commit — run_ `git log -1 --format="%h %cd" --date=format:"%Y-%m-%d %H:%M (%a)"` _and paste the hash + date + time here. This anchors the doc to a known code state; it pairs with the prose `> Last updated:` changelog at the bottom of Build Progress._
+
 ---
 
 ## Project Overview
