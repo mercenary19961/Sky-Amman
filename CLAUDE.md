@@ -2,7 +2,7 @@
 
 > Quick reference for AI assistants and developers
 
-> **📍 Doc sync:** CLAUDE.md last synced to commit `e082021` — 2026-07-02 10:29 (Thu).
+> **📍 Doc sync:** CLAUDE.md last synced to commit `1e4ec77` — 2026-07-02 11:34 (Thu).
 > _Convention: whenever you edit this file, refresh this line to the current commit — run_ `git log -1 --format="%h %cd" --date=format:"%Y-%m-%d %H:%M (%a)"` _and paste the hash + date + time here. This anchors the doc to a known code state; it pairs with the prose `> Last updated:` changelog at the bottom of Build Progress._
 
 ---
@@ -426,6 +426,14 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 1. **Event renamed:** The 419/CSRF auto-reload listener is `router.on('httpException', ...)` in v3, not `router.on('invalid', ...)`. Same payload shape (`event.detail.response.status`), same `event.preventDefault()` pattern. Applied in [resources/js/app.tsx](resources/js/app.tsx).
 2. **Page resolver must unwrap `.default`:** v3's `resolve` callback expects `Promise<Component>`, but `resolvePageComponent` returns `Promise<{ default: Component }>`. Chain `.then((m) => m.default)` in both [app.tsx](resources/js/app.tsx) and [ssr.tsx](resources/js/ssr.tsx). Without the unwrap you get a runtime "page is not a function" error during hydration.
 
+### Logged-in users hitting `/admin/login` were dumped on the PUBLIC homepage (2026-07-05)
+
+**Symptom:** after logging in (especially when the login request hiccuped/was slow and the page got reloaded), the browser landed on the public homepage instead of the admin panel; navigating to `/admin` manually then worked, because the login *had* succeeded server-side.
+
+**Root cause:** `/admin/login` (+ forgot/reset-password) sit in the `guest` middleware group. When an **already-authenticated** user requests a `guest` route, Laravel's `RedirectIfAuthenticated::defaultRedirectUri()` looks for a route named `dashboard`, then `home`, then falls back to `/`. This app names the **public homepage** route `home` ([routes/web.php](routes/web.php)) and the admin dashboard `admin.dashboard` (which the framework never checks) — so authenticated admins got redirected to the marketing homepage. Any re-request of the login URL post-login triggered it: the 419 auto-reload, an error-modal + manual reload after a slow/timed-out response, or opening a bookmarked `/admin/login` with a remember-me cookie.
+
+**Fix:** `$middleware->redirectUsersTo('/admin')` in [bootstrap/app.php](bootstrap/app.php). **Cross-project trap:** any Laravel 11+/12 app that names a public route `home` (or `dashboard`) and keeps its admin login under `guest` middleware has this exact behavior (check Nuor Steel / HardRock).
+
 ### YouTube thumbnails: maxres, the 200 grey-stub trap, and the SSR hydration race (2026-07-01)
 
 The homepage Testimonials video thumbnails ([Testimonials.tsx](resources/js/Components/Home/Testimonials.tsx), helpers in [lib/youtube.ts](resources/js/lib/youtube.ts)) surfaced **three stacked gotchas** worth remembering before touching any YouTube-image code:
@@ -571,6 +579,8 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 - [ ] **Seed page SEO defaults + extend "Reset to Default" to cover SEO.** The admin Site Content **"Reset to Default"** safeguard ([SiteContentController::reset](app/Http/Controllers/Admin/SiteContentController.php), admin-only, type-to-confirm "Reset to Default") restores every `site_content` row to [`SiteContentSeeder::rows()`](database/seeders/SiteContentSeeder.php) — **text + visibility only**. Per-page SEO (`seo_title_*`/`seo_description_*` on the `pages` table) is **intentionally NOT reset** because there are no real SEO defaults seeded yet (PagesSeeder seeds empty SEO). **When the real SEO copy is decided:** (1) seed it in `PagesSeeder`, (2) extend `reset()` to also restore each page's SEO fields from those defaults (snapshot old/new into the same change-log entry so it stays revertable). The reset is logged as a single revertable `site_content` change (`model_id = "all"`).
 - [ ] Final testing & go-live
 
+> **Last updated:** 2026-07-05 — **Fix: logged-in users hitting `/admin/login` no longer land on the public homepage.** Added `$middleware->redirectUsersTo('/admin')` in [bootstrap/app.php](bootstrap/app.php) — Laravel's `RedirectIfAuthenticated` default was resolving to the route named `home` (the public homepage). See the new Foundation Gotcha "Logged-in users hitting `/admin/login` were dumped on the PUBLIC homepage". Verified via curl (authed GET `/admin/login` → 302 `/admin`) + LoginTest green.
+>
 > **Last updated:** 2026-07-01 — **Client domain (`skyamman.com`) DNS switchover + testimonial YouTube-thumbnail fixes.**
 > - **Custom domain is live as a `www`-canonical + apex-redirect setup.** DNS is managed by the client's team (Almond Solutions), NOT Cloudflare. Final state: **`www.skyamman.com`** → CNAME → Railway (`yup9rbrk.up.railway.app`), Railway-issued Let's Encrypt cert ✅; **`skyamman.com`** (apex) stays an `A` record on the **old IIS host** (`192.250.231.20`) which serves a `web.config` **301 → `https://www.skyamman.com`** (has its own valid cert, so no warning before the hop). A plain CNAME can't sit on an apex and the provider offered no ALIAS/ANAME, so the redirect handles the bare domain. See the **rewritten** "Switching to the client's custom domain" checklist for the two consequences (bare domain now depends on the old hosting account staying alive; Railway's `skyamman.com` custom-domain entry sits "Waiting for DNS update" forever → **remove it**, keep only `www`).
 >   - **⚠️ `www.skyamman.com` is now the CANONICAL domain — not the apex.** This changes the app-side switchover: set **`APP_URL=https://www.skyamman.com`** (+ redeploy main app), mint Turnstile keys for hostname **`www.skyamman.com`**, and set `og_image_url` → `https://www.skyamman.com/images/og-image.png`. The checklist + table were corrected to use `www` everywhere.
