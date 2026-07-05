@@ -2,7 +2,7 @@
 
 > Quick reference for AI assistants and developers
 
-> **📍 Doc sync:** CLAUDE.md last synced to commit `1e4ec77` — 2026-07-02 11:34 (Thu).
+> **📍 Doc sync:** CLAUDE.md last synced to commit `19b5757` — 2026-07-05 10:38 (Sun).
 > _Convention: whenever you edit this file, refresh this line to the current commit — run_ `git log -1 --format="%h %cd" --date=format:"%Y-%m-%d %H:%M (%a)"` _and paste the hash + date + time here. This anchors the doc to a known code state; it pairs with the prose `> Last updated:` changelog at the bottom of Build Progress._
 
 ---
@@ -426,6 +426,16 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 1. **Event renamed:** The 419/CSRF auto-reload listener is `router.on('httpException', ...)` in v3, not `router.on('invalid', ...)`. Same payload shape (`event.detail.response.status`), same `event.preventDefault()` pattern. Applied in [resources/js/app.tsx](resources/js/app.tsx).
 2. **Page resolver must unwrap `.default`:** v3's `resolve` callback expects `Promise<Component>`, but `resolvePageComponent` returns `Promise<{ default: Component }>`. Chain `.then((m) => m.default)` in both [app.tsx](resources/js/app.tsx) and [ssr.tsx](resources/js/ssr.tsx). Without the unwrap you get a runtime "page is not a function" error during hydration.
 
+### Fixed-size stage inside a `h-screen overflow-hidden` pin clips on short laptops (2026-07-05)
+
+**Symptom:** the AssurancePillars "001 FINANCIAL ASSURANCE" disc appeared cut off / "hidden behind the section above" on some laptops but not others — user's machine fine, two colleagues' laptops broken. Screen-dependent bugs like this smell like z-index; it wasn't.
+
+**Root cause:** viewport-HEIGHT threshold. The stage was `max-width: min(900px, 90vw)` → the `aspect-2/1` dome is a fixed **450px** tall on any laptop ≥1000px wide, the disc (`w-64`, 256px) overhangs the dome's top by **128px**, and the sticky pin box is `h-screen overflow-hidden items-center` — it centered only the dome, leaving the disc `(100vh − 450)/2 − 128` from the top. Below **706px of viewport height** that's negative → `overflow-hidden` clips the disc at the box edge; while scrolling into the section that edge sits flush against the previous section, so it *reads* as "hidden behind the above section". 768p panels (~630px usable) and 1080p @ 150% Windows scaling (~585px usable) are below the threshold; a ~730px viewport clears it by 12px — hence "works on my machine".
+
+**Fix ([AssurancePillars.tsx](resources/js/Components/Home/AssurancePillars.tsx)):** (1) `mt-28 lg:mt-32` on the stage so the flex-centered box includes the disc overhang (centers the full disc+dome block); (2) height-aware width cap `min(900px, 90vw, calc((100vh - 160px) * 2))` so the dome itself shrinks on very short viewports (orbit radius follows automatically via the ResizeObserver). Verified via Playwright at 630/585/550px-tall viewports — disc fully visible in all.
+
+**Lesson:** any fixed-px composition centered inside a `h-screen` + `overflow-hidden` pin needs a viewport-height budget check — test at **1280×585** (1080p laptop @ 150% scaling, the most common "short" Windows viewport), not just at full desktop height. DevTools responsive mode reproduces it in seconds.
+
 ### Logged-in users hitting `/admin/login` were dumped on the PUBLIC homepage (2026-07-05)
 
 **Symptom:** after logging in (especially when the login request hiccuped/was slow and the page got reloaded), the browser landed on the public homepage instead of the admin panel; navigating to `/admin` manually then worked, because the login *had* succeeded server-side.
@@ -579,6 +589,8 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 - [ ] **Seed page SEO defaults + extend "Reset to Default" to cover SEO.** The admin Site Content **"Reset to Default"** safeguard ([SiteContentController::reset](app/Http/Controllers/Admin/SiteContentController.php), admin-only, type-to-confirm "Reset to Default") restores every `site_content` row to [`SiteContentSeeder::rows()`](database/seeders/SiteContentSeeder.php) — **text + visibility only**. Per-page SEO (`seo_title_*`/`seo_description_*` on the `pages` table) is **intentionally NOT reset** because there are no real SEO defaults seeded yet (PagesSeeder seeds empty SEO). **When the real SEO copy is decided:** (1) seed it in `PagesSeeder`, (2) extend `reset()` to also restore each page's SEO fields from those defaults (snapshot old/new into the same change-log entry so it stays revertable). The reset is logged as a single revertable `site_content` change (`model_id = "all"`).
 - [ ] Final testing & go-live
 
+> **Last updated:** 2026-07-05 — **Fix: AssurancePillars disc clipped on short viewports (768p / 150%-scaled laptops).** The pinned stage now reserves the disc overhang inside the centered box (`mt-28 lg:mt-32`) and caps stage width by viewport height (`calc((100vh - 160px) * 2)`), so the "001" disc no longer gets cut off by the sticky box's `overflow-hidden` on viewports under ~706px tall. Playwright-verified at 630/585/550px heights. See the new Foundation Gotcha "Fixed-size stage inside a `h-screen overflow-hidden` pin clips on short laptops".
+>
 > **Last updated:** 2026-07-05 — **Fix: logged-in users hitting `/admin/login` no longer land on the public homepage.** Added `$middleware->redirectUsersTo('/admin')` in [bootstrap/app.php](bootstrap/app.php) — Laravel's `RedirectIfAuthenticated` default was resolving to the route named `home` (the public homepage). See the new Foundation Gotcha "Logged-in users hitting `/admin/login` were dumped on the PUBLIC homepage". Verified via curl (authed GET `/admin/login` → 302 `/admin`) + LoginTest green.
 >
 > **Last updated:** 2026-07-01 — **Client domain (`skyamman.com`) DNS switchover + testimonial YouTube-thumbnail fixes.**
