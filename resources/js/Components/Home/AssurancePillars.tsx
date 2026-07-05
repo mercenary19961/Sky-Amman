@@ -285,7 +285,12 @@ interface PillarStageProps {
  */
 function PillarStage({ active, activeIndex, direction, transitionSign, compact = false }: PillarStageProps) {
     const innerSize = compact ? 'w-40 h-40' : 'w-56 h-56 lg:w-64 lg:h-64';
-    const stageMaxWidth = compact ? '100%' : 'min(900px, 90vw)';
+    // The dome is width/2 tall and the disc overhangs its top by up to 128px,
+    // all inside an overflow-hidden h-screen box — so the stage width must be
+    // capped by viewport HEIGHT too, or short laptops (768p panels, 1080p at
+    // 150% Windows scaling → <706px viewports) clip the disc at the top edge.
+    // 160px = disc overhang + slack; ×2 converts allowed dome height to width.
+    const stageMaxWidth = compact ? '100%' : 'min(900px, 90vw, calc((100vh - 160px) * 2))';
 
     // Measure the half-circle's rendered height; that becomes the orbit radius.
     const halfCircleRef = useRef<HTMLDivElement>(null);
@@ -368,7 +373,13 @@ function PillarStage({ active, activeIndex, direction, transitionSign, compact =
     } as const;
 
     return (
-        <div className="relative w-full mx-auto" style={{ maxWidth: stageMaxWidth }}>
+        // mt reserves the disc's overhang (half of w-56/w-64) inside the box the
+        // sticky flex centers — so it centers the full disc+dome block, not just
+        // the dome with the disc poking out above it into the clipped zone.
+        <div
+            className={`relative w-full mx-auto ${compact ? '' : 'mt-28 lg:mt-32'}`}
+            style={{ maxWidth: stageMaxWidth }}
+        >
             {/* True half-circle: aspect 2/1 + rounded-t-full = perfect semicircle. */}
             <div ref={halfCircleRef} className="relative w-full aspect-2/1">
                 <div

@@ -42,6 +42,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
 
+        // Already-authenticated users hitting a `guest` route (/admin/login,
+        // forgot/reset-password) belong in the admin panel. Without this,
+        // RedirectIfAuthenticated::defaultRedirectUri() finds the PUBLIC route
+        // named 'home' and dumps logged-in admins on the homepage.
+        $middleware->redirectUsersTo('/admin');
+
         $middleware->alias([
             'admin' => AdminMiddleware::class,
         ]);
