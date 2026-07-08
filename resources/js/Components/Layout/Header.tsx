@@ -164,7 +164,7 @@ export function Header() {
                     {/* White logo in both states — over dark/blue sections directly,
                         and over light sections on the navbar's blue backdrop gradient. */}
                     <img
-                        src="/images/logo-white.png"
+                        src="/images/logo-white.webp"
                         alt="SkyAmman"
                         className="h-16 sm:h-20 w-auto select-none"
                     />
