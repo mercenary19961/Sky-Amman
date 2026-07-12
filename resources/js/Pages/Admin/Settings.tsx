@@ -164,7 +164,7 @@ function SeoBody({ values, setValue }: { values: Record<string, string>; setValu
             <div>
                 <FL>OG Image URL</FL>
                 <input type="url" value={values['og_image_url'] ?? ''} onChange={e => setValue('og_image_url', e.target.value)} placeholder="https://…" className={inputClass()} />
-                <Hint>Publicly accessible image URL used as the default social sharing preview.</Hint>
+                <Hint>Optional. A built-in default image is used automatically. Paste a public image URL here to override it.</Hint>
             </div>
         </div>
     );
@@ -264,7 +264,9 @@ export default function Settings() {
             if (!(values['seo_description_en'] ?? '').trim()) miss.push('description');
             if (!(values['seo_title_ar'] ?? '').trim()) miss.push('title AR');
             if (!(values['seo_description_ar'] ?? '').trim()) miss.push('desc AR');
-            if (!(values['og_image_url'] ?? '').trim()) miss.push('OG image');
+            // OG image intentionally not checked: it falls back to a committed
+            // default (public/images/og-image.png) in HandleInertiaRequests, so
+            // there's always a valid social-share image. The field is optional.
             return miss.length > 0 ? `Defaults missing: ${miss.join(', ')}` : null;
         }
         return null;
