@@ -20,7 +20,11 @@ createServer((page) =>
     createInertiaApp({
         page,
         render: renderToString,
-        title: (title) => (title ? `SkyAmman | ${title}` : 'SkyAmman'),
+        // Keep in sync with app.tsx: don't re-brand an already-branded title.
+        title: (title) => {
+            if (!title) return 'SkyAmman';
+            return title.includes('SkyAmman') ? title : `SkyAmman | ${title}`;
+        },
         // Same v3 unwrap as app.tsx — resolvePageComponent returns
         // Promise<{ default: Component }>; Inertia wants Promise<Component>.
         resolve: (name) =>

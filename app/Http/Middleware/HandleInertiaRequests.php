@@ -104,7 +104,10 @@ class HandleInertiaRequests extends Middleware
             'google_maps_place_url' => $this->cachedSettings['google_maps_place_url'] ?? '',
             'seo_title' => $this->cachedSettings[$isAr ? 'seo_title_ar' : 'seo_title_en'] ?? '',
             'seo_description' => $this->cachedSettings[$isAr ? 'seo_description_ar' : 'seo_description_en'] ?? '',
-            'og_image_url' => $this->cachedSettings['og_image_url'] ?? '',
+            // Falls back to the committed default image (public/images/og-image.png)
+            // when no custom URL is set, so every page always has a social-share
+            // image. Admins can still override it via Settings → SEO.
+            'og_image_url' => ($this->cachedSettings['og_image_url'] ?? '') ?: url('/images/og-image.png'),
         ];
     }
 }
