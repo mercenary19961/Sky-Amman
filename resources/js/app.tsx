@@ -28,7 +28,13 @@ router.on('httpException', (event) => {
 });
 
 createInertiaApp({
-    title: (title) => (title ? `SkyAmman | ${title}` : 'SkyAmman'),
+    // The home page's SEO title already carries the brand ("SkyAmman — …"), so
+    // don't prepend it again (that produced "SkyAmman | SkyAmman — …"). Only
+    // brand the short per-page titles ("Properties" → "SkyAmman | Properties").
+    title: (title) => {
+        if (!title) return 'SkyAmman';
+        return title.includes('SkyAmman') ? title : `SkyAmman | ${title}`;
+    },
     progress: false,
     // resolvePageComponent resolves to { default: Component }; Inertia v3's
     // resolver wants the component itself, so unwrap with .then(m => m.default).

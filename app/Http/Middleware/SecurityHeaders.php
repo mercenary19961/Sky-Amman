@@ -49,6 +49,12 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'self'",
+            // Auto-upgrade any stray http:// request to https:// at the browser.
+            // Railway terminates TLS at its edge and forwards to the container
+            // over http, so request-derived URLs (redirect()->intended(), the
+            // Ziggy 'location') can come out http:// even though the page is
+            // https — this prevents those from being blocked as mixed content.
+            'upgrade-insecure-requests',
         ]);
     }
 }
