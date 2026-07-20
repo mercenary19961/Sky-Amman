@@ -34,4 +34,11 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    // Google Tag Manager. Empty = the container snippet is not rendered at all,
+    // so local dev and tests never hit analytics. GA4 lives INSIDE the container
+    // (configured by the marketing team in the GTM UI), not in this codebase.
+    'gtm' => [
+        'container_id' => env('GTM_CONTAINER_ID'),
+    ],
+
 ];

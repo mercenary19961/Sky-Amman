@@ -41,9 +41,16 @@ class SecurityHeaders
             "img-src 'self' data: blob: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
             // Turnstile + Google Maps + LinkedIn/Instagram + YouTube embeds.
-            "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://www.linkedin.com https://www.instagram.com https://www.youtube.com https://www.youtube-nocookie.com",
+            // googletagmanager.com covers GTM's <noscript> fallback iframe;
+            // tagassistant.google.com is GTM's Preview/debug overlay.
+            "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://www.linkedin.com https://www.instagram.com https://www.youtube.com https://www.youtube-nocookie.com https://www.googletagmanager.com https://tagassistant.google.com",
             // Inertia XHRs target self; Turnstile siteverify runs server-side.
-            "connect-src 'self' https://cloudflareinsights.com",
+            // The Google hosts are where GA4 actually SENDS its hits — without
+            // them the container loads and tags appear to fire while every
+            // measurement is silently blocked, which looks like "GA4 is broken".
+            // ⚠️ Any NEW third-party tag added in the GTM UI (Meta Pixel, LinkedIn
+            // Insight, Hotjar…) needs its host added here too, or it is blocked.
+            "connect-src 'self' https://cloudflareinsights.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://tagassistant.google.com",
             "media-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
