@@ -2,7 +2,7 @@
 
 > Quick reference for AI assistants and developers
 
-> **📍 Doc sync:** CLAUDE.md last synced to commit `54217ea` — 2026-07-20 14:51 (Mon).
+> **📍 Doc sync:** CLAUDE.md last synced to commit `e856c42` — 2026-07-21 11:42 (Tue).
 > _Convention: whenever you edit this file, refresh this line to the current commit — run_ `git log -1 --format="%h %cd" --date=format:"%Y-%m-%d %H:%M (%a)"` _and paste the hash + date + time here. This anchors the doc to a known code state; it pairs with the prose `> Last updated:` changelog at the bottom of Build Progress._
 
 ---
@@ -372,10 +372,24 @@ Single-language (English), single-theme (light). Sidebar groups mirror Nuor Stee
 
 **Image strategy:** Page-structural / decorative imagery (`hero-villa`, `footer-villa-photo`, `footer-clouds-1`, `skyamman-logo-large`, `buy-early-strip`, etc.) stays committed under [public/images/home/](public/images/home/) — code-managed by default. There is **no standalone Media Library** in the sidebar. Project gallery uploads use [`Media::storeFile()`](app/Models/Media.php) inside the project edit form. **Exception (2026-06-07): the "Page Images" section** lets editors override *registered* structural slots (`ManagedImage::SLOTS` — currently the 3 About "Crafted" images) with an upload, falling back to the committed default otherwise — so a slot stays code-managed until someone explicitly swaps it (innovation #24). The `site_content.media_id` and `pages.og_image_id` columns remain in the schema as nullable but stay unused (cheap optionality if the policy ever changes).
 
-### Admin roles
+### Admin roles + per-editor grants (innovation #27)
 
-- **Admin**: Full access (users, settings, change log)
-- **Editor**: Content management only (no users / settings / change log). The `adminOnly` flag on sidebar items hides them from editors.
+- **Admin**: full access. `Gate::before` short-circuits every ability check, so an admin's stored `permissions` are irrelevant (and are nulled on save).
+- **Editor**: content management by default, **plus** any admin-only sections an admin has granted on their account (added 2026-07-21 — Cookie Consent was the trigger).
+
+**How it works.** [`User::ABILITIES`](app/Models/User.php) is a code-defined registry (`consent.view`, `change_log.view|revert|delete`, `settings.view|edit`, `content.reset`) and is the single source of truth: [AppServiceProvider](app/Providers/AppServiceProvider.php) defines one gate per entry, routes guard with `can:{ability}`, [UserController](app/Http/Controllers/Admin/UserController.php) validates against it, and the admin UI renders from it. Grants live in a **`users.permissions` JSON column** (migration `2026_07_21_000003`) — not a pivot table, since the ability set is fixed, tiny, and always read whole.
+
+**Adding a grantable section = 3 edits:** one `ABILITIES` entry + a `can:` guard on its routes + an `ability` key on its `AdminSidebar` item.
+
+**Security invariants (all covered by [PermissionsTest](tests/Feature/Admin/PermissionsTest.php), 20 tests):**
+- **⚠️ Users & Auth is NOT grantable and must stay that way.** An editor who can manage accounts could create an admin or promote themselves, so exposing it would let the permission system escalate past its own boundary. Those routes keep the hard `admin` middleware; no ability string exists for them.
+- **The route is the gate; the sidebar is decoration.** `auth.user.abilities` is shared for nav filtering only — every route carries its own `can:`, so a tampered client can reveal a link but not a page.
+- **Guards are per-VERB.** `GET /settings` needs `settings.view`, `PUT /settings` needs `settings.edit`. Reading never implies writing.
+- **Unknown ability strings are dropped** on save and return `false` from `hasPermission()` — a typo'd guard locks the door rather than opening it.
+- **`requires` implication is applied server-side** (`normalisePermissions()`), so "edit without view" can't be stored; the UI mirrors it, including a revoke cascade.
+- **Promotion to admin nulls the grant list**, so a later demotion starts from zero rather than silently restoring old reach.
+- **Cookie Consent has view only** — it's an append-only evidence log with no mutation path, so there is nothing to grant edit/delete over.
+- The **Undo toast** is now gated on `change_log.revert` rather than `isAdmin()` ([HandleInertiaRequests](app/Http/Middleware/HandleInertiaRequests.php)), so a granted editor gets a working undo instead of a button that 403s.
 
 ### Innovations (vs. Nuor Steel)
 
@@ -409,6 +423,8 @@ These extend the Nuor playbook for real-estate-specific needs.
 25. **Shuffled Projects-Gallery pool (`GalleryImage`)** — the public Properties "Projects Gallery" section is fed by [`GalleryImage::pool()`](app/Models/GalleryImage.php): images from **active sold projects** (their uploaded `ProjectImage` Media, or the committed render gallery / placeholder via `displayImageUrls()`) **concatenated with editor uploads** (the `gallery_images` table). Each pool item carries a **stable `id`** (`img-{id}` / `proj-{id}-{i}` / `gal-{id}`) so the admin can hide individual tiles by id (`gallery_hidden` JSON setting) regardless of source. The public page filters out hidden ids, **shuffles every visit**, shows `gallery_count` tiles (setting) and pages the rest with arrows. Admin **Projects Gallery** ([GalleryImageController](app/Http/Controllers/Admin/GalleryImageController.php)) renders the same pool in two columns (sold-project + uploaded), per-image hide toggle, upload, and the tile-count input. Rationale: surfaces real delivered work (sold villas) automatically while letting editors top up the pool — no separate "is this a gallery image?" flag needed on projects.
 
 26. **Self-hosted cookie consent instead of a CMP** — a bilingual banner + append-only proof log + admin analytics, built in-house because every vendor free tier failed on either language (no Arabic at any tier, CookieYes/Cookiebot alike), traffic caps (CookieYes: 5,000 pageviews/month), or card-gating (CookieYes now forces a Pro trial on new domains). Key design choice: **gate everything through Google Consent Mode v2 rather than per-tag blocking** — an inline denied-by-default block above the GTM snippet means GA4, Meta Pixel, LinkedIn Insight and Google Ads all honour the choice with zero vendor-specific code, and adding a new tag needs no consent work at all. The proof log is append-only (evidence, not state), the choice cookie is exempted from Laravel's encryption so it's readable pre-hydration, and a `POLICY_VERSION` pair (PHP + TS) re-prompts everyone when the wording changes. Full detail: "Cookie consent (self-hosted)" under Architecture Patterns.
+
+27. **Registry-driven per-editor authorization** — instead of a permissions package or a pivot table, one PHP constant (`User::ABILITIES`) drives gates, route guards, server validation, sidebar filtering and the admin UI. Grants are a JSON column; `Gate::before` gives admins everything so no admin row ever stores a grant. The design decision worth copying: **the escalation boundary is expressed by ABSENCE** — Users & Auth has no ability string at all and keeps hard `admin` middleware, so the permission system structurally cannot be used to widen itself. Second: **abilities are per-verb** (`settings.view` vs `settings.edit`), and `requires` implication is normalised server-side so an incoherent grant set can't be persisted. Full detail under Admin roles.
 
 ### ChangeLog / Revert semantics — compound-edit behavior catalog (audited 2026-07-06)
 
@@ -483,6 +499,30 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 2. Added **`upgrade-insecure-requests`** to the CSP ([SecurityHeaders](app/Http/Middleware/SecurityHeaders.php)) as a browser-level backstop that auto-upgrades any stray `http://` request to `https://`.
 
 **Lesson / cross-project:** when a Laravel-on-Railway app leaves Cloudflare (or the proxy topology changes at all), the `trustProxies` allowlist goes stale. The tells: (a) request-derived URLs come out `http://` even though `forceScheme` is on and assets are https; (b) every visitor shows the same client IP. **Red herrings from leaving Cloudflare** (ignore them): `/cdn-cgi/*` 404s and the Turnstile "Cannot determine Turnstile's embedded location, are you running Turnstile on a Cloudflare Zone?" warning — both are cosmetic (Turnstile still validates; the widget shows "Success!").
+
+### A stray hostname served a self-canonicalising DUPLICATE of the whole site (2026-07-21)
+
+**Symptom:** `https://sky-amman-production.up.railway.app` (the old pre-custom-domain Railway URL) still returned **200 on every page** long after the switch to `www.skyamman.com` — and served `<link rel="canonical" href="https://sky-amman-production.up.railway.app">`, an og:url on that host, a `robots.txt` advertising `Sitemap: https://sky-amman-production.up.railway.app/sitemap.xml`, and a sitemap listing its own URLs. A complete duplicate site, actively telling Google *it* was canonical, competing with the real domain right after Search Console verification + sitemap submission.
+
+**Root cause:** Laravel's `url()` / `route()` build from the **REQUEST host**, not `APP_URL`. `APP_URL` only applies outside an HTTP request context (console, queues). So the app canonicalises whatever hostname the visitor arrived on. **`URL::forceScheme('https')` does not help — it pins the SCHEME, not the HOST.**
+
+**Fix ([AppServiceProvider](app/Providers/AppServiceProvider.php)):** `URL::forceRootUrl(config('app.url'))` alongside the existing `forceScheme`, under `APP_ENV=production`. Both are needed and they do different jobs — with only `forceRootUrl`, a pinned `https://` root still emits `http://` because the scheme is taken from the request (this is exactly what made the first version of [CanonicalHostTest](tests/Feature/CanonicalHostTest.php) fail).
+
+**⚠️ Consequence for any future staging environment:** it must NOT run with `APP_ENV=production`, or every link, canonical and sitemap URL it emits will point at the live site.
+
+**Also do the infra half:** deleting the unused generated domain in Railway is the real cure; the code change is the backstop that stops *any* stray hostname (future preview URLs included) from self-canonicalising. If the old domain was indexed, remove it in Search Console too — a 404/removed domain isn't retroactive.
+
+### Turnstile: the "first submit always fails, second works" race (2026-07-21)
+
+**Symptom:** users reported that the FIRST attempt at a Turnstile-gated form always failed, and retrying worked. It looked like a flaky Cloudflare check.
+
+**Root cause: a race in OUR form, not Cloudflare.** Turnstile solves **asynchronously**, and a **first-time visitor** takes noticeably longer than a returning one (no prior Cloudflare state, sometimes a real interactive challenge). Every submit button was gated on `disabled={processing}` **only** — nothing stopped a submit before `callback(token)` fired. So: user fills the form fast → submits with `cf-turnstile-response` still `''` → server-side `TurnstileVerifier` rejects it → meanwhile the token arrives → the retry succeeds. A returning visitor solves instantly and never sees it, which is why it read as "first time only".
+
+**Fix:** [Turnstile.tsx](resources/js/Components/Public/Turnstile.tsx) now reports a **`TurnstileStatus`** (`disabled | pending | ready | error`) via `onStatusChange`, and all **four** consumers (Contact, footer newsletter, admin Login, ForgotPassword) gate submit on it. `disabled` means no site key is configured (dev), so the gate stays OPEN there — otherwise local forms would be permanently unsubmittable.
+
+**Second bug found in the same file:** the old `error-callback` set `errored` state permanently, and the effect early-returned on it, so **any** Turnstile error left a dead widget that could only be recovered by a full page reload. It now renders an inline note with a **Retry** button that remounts the widget (via an `attempt` counter) without losing typed input; the "reload the page" hint is kept only there, where it's genuinely the right advice.
+
+**Lesson:** any async third-party verification widget needs its own readiness state wired into the submit button. "Disabled while processing" is not enough — the dangerous window is *before* the user ever clicks.
 
 ### Adding rows to a seeder AFTER first deploy never reaches production (2026-07-21)
 
@@ -683,6 +723,9 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 - [ ] **⚖️ Privacy policy copy needs Jordanian counsel sign-off before launch.** The **page is built** (`/privacy`, 2026-07-21) and both links now reach it, but the seeded copy is written by an AI, not a lawyer. The **data-flow sections are factual** (they describe what this codebase actually collects and which third parties actually receive it — keep them in sync if those flows change). The **`retention`, `rights` and `contact` sections state legal positions** and are deliberately vague: no specific retention periods, no statutory citations, no governing-law clause. Have counsel review those three, then edit via Admin → Site Content → Privacy Policy (no deploy needed). **Do not let the "Last updated" date imply a review that hasn't happened.**
 - [ ] Final testing & go-live
 
+> **Last updated:** 2026-07-21 — **Self-hosted cookie consent, privacy page, and per-editor authorization.** See the individual entries below; the headline items: consent banner + proof log + admin analytics built in-house (no CMP vendor), `/privacy` shipped, and the **Users page became "Users & Auth"** with a grant matrix letting admins open specific admin-only sections to individual editors (innovation #27). **137 backend tests green.**
+> - ⚠️ **New production trap documented:** rows added to a seeder *after* the 2026-06-18 bootstrap migrations never reach Railway (seeders don't run on deploy). `/privacy` 404'd in production while working locally for exactly this reason. Any new `pages`/`site_content`/settings row now needs a seeder entry **and** a scoped data migration. See the Foundation Gotcha.
+>
 > **Last updated:** 2026-07-20 — **Search Console verification + sitemap submitted + Google Tag Manager installed.**
 > - **Google Search Console verified** for the `www.skyamman.com` property via the HTML-file method ([public/googlee5b4a3ebe46a90cc.html](public/googlee5b4a3ebe46a90cc.html), commit `54217ea`). **Leave that file in place permanently** — Google re-checks periodically and removing it revokes ownership. Verify the **www** property, never the apex (the apex 301s off the old IIS host and never serves the file). Sitemap submitted: all 21 URLs (6 static pages + 15 villa details) confirmed HTTP 200 before submission; the 3 sold Dabouq 7 villas are correctly excluded by [SitemapController](app/Http/Controllers/SitemapController.php).
 > - **GTM installed instead of GA4 gtag.js direct** (marketing team's call, so they own tag config without a deploy each time). Container `GTM-THTNDKNV`, opt-in via `GTM_CONTAINER_ID`, snippet in [app.blade.php](resources/views/app.blade.php), **excluded from `/admin/*`** so staff sessions don't skew reports. New section: **Analytics (Google Tag Manager)**. 4 tests in [GoogleTagManagerTest](tests/Feature/GoogleTagManagerTest.php) (97 backend tests green).

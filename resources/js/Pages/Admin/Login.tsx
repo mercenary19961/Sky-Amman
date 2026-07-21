@@ -1,14 +1,17 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { Turnstile, type TurnstileHandle, type TurnstileStatus } from '@/Components/Public/Turnstile';
 import type { FormEvent } from 'react';
 
 export default function Login() {
     const turnstileRef = useRef<TurnstileHandle>(null);
     const [showPassword, setShowPassword] = useState(false);
+    // Gate submit until the challenge resolves ('disabled' = no site key in dev).
+    const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
+    const turnstileReady = turnstileStatus === 'ready' || turnstileStatus === 'disabled';
 
-    const { data, setData, post, processing, errors, setError, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -91,8 +94,10 @@ export default function Login() {
                     <Turnstile
                         ref={turnstileRef}
                         onVerify={(token) => setData('cf-turnstile-response', token)}
-                        onError={() => setError('cf-turnstile-response' as never, 'Bot check failed. Please reload.')}
+                        // The widget now renders its own error note + retry, so
+                        // no duplicate "please reload" message here.
                         onExpire={() => setData('cf-turnstile-response', '')}
+                        onStatusChange={setTurnstileStatus}
                     />
                     {errors['cf-turnstile-response'] && (
                         <p className="text-xs text-red-600">{errors['cf-turnstile-response']}</p>
@@ -100,7 +105,7 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        disabled={processing}
+                        disabled={processing || !turnstileReady}
                         className="w-full bg-primary-strong hover:bg-primary-strong-hover text-white font-medium py-2 rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {processing ? 'Signing in…' : 'Sign in'}

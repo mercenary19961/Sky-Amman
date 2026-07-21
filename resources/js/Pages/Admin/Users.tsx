@@ -8,7 +8,7 @@ import { ConfirmDeleteButton as ConfirmButton } from '@/Components/Admin/Confirm
 import { Select } from '@/Components/Admin/Select';
 import { PasswordField, PASSWORD_RULES } from '@/Components/Admin/PasswordField';
 import { cn } from '@/lib/cn';
-import type { UsersPageProps, UserListItem, UserRole } from '@/types/admin/user';
+import type { UsersPageProps, UserListItem, UserRole, Ability } from '@/types/admin/user';
 
 const ROLE_LABELS: Record<UserRole, string> = { admin: 'Admin', editor: 'Editor' };
 const ROLE_COLORS: Record<UserRole, string> = {
@@ -24,22 +24,34 @@ interface FormData {
     password: string;
     password_confirmation: string;
     admin_confirmed: boolean;
-    [key: string]: string | boolean;
+    permissions: string[];
+    [key: string]: string | boolean | string[];
 }
 
 const EMPTY: FormData = {
     name: '', email: '', role: 'editor', is_active: true,
     password: '', password_confirmation: '', admin_confirmed: false,
+    permissions: [],
 };
 
 // Stable snapshot of the editable fields, captured when the panel opens, so the
 // Save button only enables once something actually changes (admin_confirmed is
-// excluded — it's applied at submit time via form.transform).
-const snapshotOf = (d: Pick<FormData, 'name' | 'email' | 'role' | 'is_active' | 'password' | 'password_confirmation'>) =>
-    JSON.stringify([d.name, d.email, d.role, d.is_active, d.password, d.password_confirmation]);
+// excluded — it's applied at submit time via form.transform). Permissions are
+// sorted first so re-checking boxes back to the original set reads as clean.
+const snapshotOf = (d: FormData) =>
+    JSON.stringify([
+        d.name, d.email, d.role, d.is_active, d.password, d.password_confirmation,
+        [...d.permissions].sort(),
+    ]);
 
 export default function Users() {
-    const { users, currentUserId } = usePage<UsersPageProps>().props;
+    const { users, currentUserId, abilities } = usePage<UsersPageProps>().props;
+
+    // Registry grouped for display, preserving the server's ordering.
+    const abilityGroups = abilities.reduce<Record<string, Ability[]>>((acc, a) => {
+        (acc[a.group] ??= []).push(a);
+        return acc;
+    }, {});
 
     const [panelOpen, setPanelOpen] = useState(false);
     const [editing, setEditing] = useState<UserListItem | null>(null);
@@ -63,6 +75,7 @@ export default function Users() {
         const data: FormData = {
             name: u.name, email: u.email, role: u.role, is_active: u.is_active,
             password: '', password_confirmation: '', admin_confirmed: false,
+            permissions: u.permissions ?? [],
         };
         form.setData(data);
         baseline.current = snapshotOf(data);
@@ -108,6 +121,39 @@ export default function Users() {
 
     const confirmReady = confirmText.trim().toLowerCase() === form.data.email.trim().toLowerCase();
 
+    /**
+     * Toggle a grant, keeping the `requires` chain coherent so the UI can't show
+     * a state the server would silently rewrite (it re-applies this on save).
+     * Granting pulls in parents; revoking drops anything that depended on it.
+     */
+    function toggleAbility(key: string, on: boolean) {
+        const next = new Set(form.data.permissions);
+
+        if (on) {
+            next.add(key);
+            let parent = abilities.find((a) => a.key === key)?.requires;
+            while (parent) {
+                next.add(parent);
+                parent = abilities.find((a) => a.key === parent)?.requires;
+            }
+        } else {
+            next.delete(key);
+            // Cascade: anything requiring this (directly or transitively) goes too.
+            let changed = true;
+            while (changed) {
+                changed = false;
+                for (const a of abilities) {
+                    if (a.requires && next.has(a.key) && !next.has(a.requires)) {
+                        next.delete(a.key);
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        form.setData('permissions', [...next]);
+    }
+
     // Client-side password gate (mirrors the server policy, minus the breach check).
     // On edit a blank password means "keep current", so it's allowed.
     const pwEntered = form.data.password.length > 0;
@@ -123,12 +169,13 @@ export default function Users() {
     const canSubmit = !form.processing && isDirty && nameOk && emailOk && passwordOk;
 
     return (
-        <AdminLayout title="Users">
-            <Head title="Users" />
+        <AdminLayout title="Users & Auth">
+            <Head title="Users & Auth" />
 
             <div className="flex items-center justify-between mb-6">
                 <p className="text-sm text-ink-muted">
-                    Admin & editor accounts. Editors manage content only; admins also see Settings, Users, and the Change Log.
+                    Admin &amp; editor accounts. Editors manage content; admins reach everything. Grant an
+                    editor extra sections from the Authorization panel when editing them.
                 </p>
                 <button
                     type="button"
@@ -230,7 +277,9 @@ export default function Users() {
             {panelOpen && (
                 <div className="fixed inset-0 z-40">
                     <div className="absolute inset-0 bg-black/40" onClick={closePanel} />
-                    <div className="absolute inset-y-0 inset-e-0 w-full max-w-md bg-white dark:bg-zinc-800 shadow-xl flex flex-col">
+                    {/* Wider than a standard slide-over because it now holds two
+                        columns: account details and the authorization matrix. */}
+                    <div className="absolute inset-y-0 inset-e-0 w-full max-w-3xl bg-white dark:bg-zinc-800 shadow-xl flex flex-col">
                         <div className="flex items-center justify-between px-5 h-16 border-b border-ink/5 dark:border-white/10">
                             <h2 className="font-semibold text-ink">{editing ? 'Edit User' : 'Add User'}</h2>
                             <button type="button" onClick={closePanel} className="text-ink-muted hover:text-ink transition-colors">
@@ -238,7 +287,12 @@ export default function Users() {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 space-y-4">
+                        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 grid gap-6 lg:grid-cols-2 lg:gap-8 items-start">
+                          <div className="space-y-4">
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                Account
+                            </h3>
+
                             <Field label="Name" error={form.errors.name}>
                                 <input
                                     type="text"
@@ -307,6 +361,79 @@ export default function Users() {
                                     matchAgainst={form.data.password}
                                 />
                             </div>
+                          </div>
+
+                          {/* ── Authorization ─────────────────────────────── */}
+                          <div className="space-y-4 lg:border-s lg:border-ink/5 lg:dark:border-white/10 lg:ps-8">
+                            <div>
+                                <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                                    Authorization
+                                </h3>
+                                <p className="mt-1 text-xs text-ink-muted">
+                                    Extra sections this editor may reach. Everything else in the panel is
+                                    already open to editors.
+                                </p>
+                            </div>
+
+                            {form.data.role === 'admin' ? (
+                                <div className="rounded-lg bg-violet-50 dark:bg-violet-500/10 p-4">
+                                    <p className="flex items-center gap-1.5 text-sm font-medium text-violet-700 dark:text-violet-300">
+                                        <ShieldCheck size={14} />
+                                        Full access
+                                    </p>
+                                    <p className="mt-1 text-xs text-violet-700/80 dark:text-violet-300/80">
+                                        Admins reach every section, so there is nothing to grant. Switching
+                                        this account back to Editor starts it with no admin-section access.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {Object.entries(abilityGroups).map(([group, items]) => (
+                                        <div key={group}>
+                                            <p className="text-xs font-medium text-ink mb-1.5">{group}</p>
+                                            <div className="space-y-1.5">
+                                                {items.map((a) => {
+                                                    const checked = form.data.permissions.includes(a.key);
+                                                    return (
+                                                        <label
+                                                            key={a.key}
+                                                            className="flex gap-2.5 rounded-lg p-2.5 bg-zinc-50 dark:bg-zinc-700/40 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700/70 transition-colors"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={checked}
+                                                                onChange={(e) => toggleAbility(a.key, e.target.checked)}
+                                                                className="mt-0.5 w-4 h-4 shrink-0 accent-primary"
+                                                            />
+                                                            <span className="min-w-0">
+                                                                <span className="block text-sm text-ink">{a.label}</span>
+                                                                <span className="block text-xs text-ink-muted leading-relaxed">
+                                                                    {a.description}
+                                                                </span>
+                                                                {a.requires && checked && (
+                                                                    <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-ink-muted">
+                                                                        <Lock size={10} />
+                                                                        includes “{abilities.find((x) => x.key === a.requires)?.label}”
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <p className="text-xs text-ink-muted flex gap-1.5">
+                                        <ShieldAlert size={13} className="shrink-0 mt-0.5" />
+                                        <span>
+                                            Users &amp; Auth can’t be granted — an editor who manages accounts
+                                            could promote themselves to admin.
+                                        </span>
+                                    </p>
+                                </div>
+                            )}
+                          </div>
                         </form>
 
                         <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-ink/5 dark:border-white/10">

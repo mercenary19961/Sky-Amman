@@ -31,7 +31,10 @@ interface NavItem {
     label: string;
     path: string;
     icon: React.ReactNode;
+    /** Hard admin gate — not grantable to editors (see User::ABILITIES). */
     adminOnly?: boolean;
+    /** Visible to an editor holding this ability. Admins always pass. */
+    ability?: string;
     built?: boolean;
 }
 
@@ -74,12 +77,12 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'System',
         items: [
-            { label: 'Users', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: true },
-            { label: 'Change Log', path: '/admin/change-log', icon: <History size={18} />, adminOnly: true, built: true },
-            { label: 'Cookie Consent', path: '/admin/consent', icon: <Cookie size={18} />, adminOnly: true, built: true },
+            { label: 'Users & Auth', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: true },
+            { label: 'Change Log', path: '/admin/change-log', icon: <History size={18} />, ability: 'change_log.view', built: true },
+            { label: 'Cookie Consent', path: '/admin/consent', icon: <Cookie size={18} />, ability: 'consent.view', built: true },
             // Settings sits last — it's the least-visited screen and the one you
             // want furthest from an accidental click.
-            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: true },
+            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, ability: 'settings.view', built: true },
         ],
     },
 ];
@@ -88,6 +91,15 @@ export function AdminSidebar({ collapsed, mobileOpen, onToggle, onMobileClose }:
     const { auth } = usePage<PageProps>().props;
     const currentUrl = usePage<PageProps>().url;
     const isAdmin = auth.user?.role === 'admin';
+    const abilities = auth.user?.abilities ?? [];
+
+    // Presentation only — every route re-checks server-side. An item shows when
+    // it's ungated, or the user is an admin, or they hold its specific grant.
+    const canSee = (item: NavItem) => {
+        if (item.adminOnly) return isAdmin;
+        if (item.ability) return isAdmin || abilities.includes(item.ability);
+        return true;
+    };
 
     // Mobile always shows full labels when open. Desktop respects `collapsed`.
     const showLabels = mobileOpen || !collapsed;
@@ -140,7 +152,7 @@ export function AdminSidebar({ collapsed, mobileOpen, onToggle, onMobileClose }:
 
                 <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
                     {NAV_GROUPS.map((group) => {
-                        const visible = group.items.filter((i) => !i.adminOnly || isAdmin);
+                        const visible = group.items.filter(canSee);
                         if (visible.length === 0) return null;
                         return (
                             <div key={group.label}>

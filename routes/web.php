@@ -188,29 +188,49 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/contacts/{id}/force', [ContactSubmissionController::class, 'forceDestroy'])->name('contacts.force-destroy')->where('id', '[0-9]+');
 
     // Settings + Users — admin only.
+    // ── Users & Auth — ADMIN ONLY, never grantable ────────────────────────────
+    // Deliberately still behind `admin` rather than a `can:` gate: an editor who
+    // can manage users could create an admin or promote themselves, so exposing
+    // this would let the permission system escalate past its own boundary.
     Route::middleware('admin')->group(function () {
-        // Reset all Site Content text back to the shipped defaults (safeguard).
-        Route::post('/content/reset', [SiteContentController::class, 'reset'])->name('content.reset');
-
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
-
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->where('id', '[0-9]+');
         Route::post('/users/{id}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->where('id', '[0-9]+');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->where('id', '[0-9]+');
-
-        // Cookie-consent log. Admin-only: it holds visitor IPs and is the
-        // evidence trail, so it sits with the other System-group screens.
-        Route::get('/consent', [AdminConsentController::class, 'index'])->name('consent.index');
-
-        // Change Log + Revert (audit history).
-        Route::get('/change-log', [ChangeLogController::class, 'index'])->name('change-log.index');
-        Route::delete('/change-log/undo/{modelType}', [ChangeLogController::class, 'dismissUndo'])->name('change-log.undo-dismiss')->where('modelType', '[a-z_]+');
-        Route::post('/change-log/{id}/revert', [ChangeLogController::class, 'revert'])->name('change-log.revert')->where('id', '[0-9]+');
-        Route::delete('/change-log/{id}', [ChangeLogController::class, 'destroy'])->name('change-log.destroy')->where('id', '[0-9]+');
     });
+
+    // ── Grantable sections (User::ABILITIES) ──────────────────────────────────
+    // `can:` resolves the gates defined in AppServiceProvider. Admins pass via
+    // Gate::before; editors need the specific grant on their account. Guarding
+    // per-VERB matters: read and write are separate abilities, so a "view
+    // settings" grant must not also allow saving them.
+
+    // Reset all Site Content text back to the shipped defaults (safeguard).
+    Route::post('/content/reset', [SiteContentController::class, 'reset'])
+        ->middleware('can:content.reset')->name('content.reset');
+
+    Route::get('/settings', [SettingController::class, 'index'])
+        ->middleware('can:settings.view')->name('settings.index');
+    Route::put('/settings', [SettingController::class, 'update'])
+        ->middleware('can:settings.edit')->name('settings.update');
+
+    // Cookie-consent log — read-only by design (append-only evidence trail),
+    // which is why there's no edit/delete ability to grant. Holds visitor IPs.
+    Route::get('/consent', [AdminConsentController::class, 'index'])
+        ->middleware('can:consent.view')->name('consent.index');
+
+    // Change Log + Revert (audit history).
+    Route::get('/change-log', [ChangeLogController::class, 'index'])
+        ->middleware('can:change_log.view')->name('change-log.index');
+    // Dismissing the undo pointer isn't destructive, but it belongs to the undo
+    // flow, so it rides with the revert grant rather than needing its own.
+    Route::delete('/change-log/undo/{modelType}', [ChangeLogController::class, 'dismissUndo'])
+        ->middleware('can:change_log.revert')->name('change-log.undo-dismiss')->where('modelType', '[a-z_]+');
+    Route::post('/change-log/{id}/revert', [ChangeLogController::class, 'revert'])
+        ->middleware('can:change_log.revert')->name('change-log.revert')->where('id', '[0-9]+');
+    Route::delete('/change-log/{id}', [ChangeLogController::class, 'destroy'])
+        ->middleware('can:change_log.delete')->name('change-log.destroy')->where('id', '[0-9]+');
 
     // Projects — literal paths (trash, create) must come before the {id} wildcard.
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');

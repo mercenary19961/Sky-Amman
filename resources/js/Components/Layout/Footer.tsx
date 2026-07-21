@@ -7,7 +7,7 @@ import { Check, Phone } from 'lucide-react';
 import type { PageProps, SiteContentBundle, SiteSettings } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cmsText } from '@/lib/cms';
-import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { Turnstile, type TurnstileHandle, type TurnstileStatus } from '@/Components/Public/Turnstile';
 
 // The real public pages we ship (mirrors Header NAV_ITEMS). "Listings" in the
 // design maps to our /properties route.
@@ -149,6 +149,9 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
     const [processing, setProcessing] = useState(false);
     const [token, setToken] = useState('');
     const turnstileRef = useRef<TurnstileHandle>(null);
+    // Gate submit until the challenge resolves ('disabled' = no site key in dev).
+    const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
+    const turnstileReady = turnstileStatus === 'ready' || turnstileStatus === 'disabled';
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -220,10 +223,15 @@ function NewsletterSignup({ t, ft, siteSettings }: { t: TFunction; ft: FooterTex
                                 placeholder={t('footer.subscribe.placeholder')}
                                 className="rounded-full bg-white/95 text-ink px-4 py-2 text-xs placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-white"
                             />
-                            <Turnstile ref={turnstileRef} onVerify={setToken} onExpire={() => setToken('')} />
+                            <Turnstile
+                                ref={turnstileRef}
+                                onVerify={setToken}
+                                onExpire={() => setToken('')}
+                                onStatusChange={setTurnstileStatus}
+                            />
                             <button
                                 type="submit"
-                                disabled={processing}
+                                disabled={processing || !turnstileReady}
                                 className="inline-flex items-center justify-center rounded-full bg-white text-primary px-5 py-1.5 text-xs font-medium hover:bg-surface-muted transition-colors disabled:opacity-60"
                             >
                                 {processing ? t('footer.subscribe.submitting') : t('footer.subscribe.submit')}

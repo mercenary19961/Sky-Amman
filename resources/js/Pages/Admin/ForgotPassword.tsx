@@ -1,15 +1,18 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { Turnstile, type TurnstileHandle, type TurnstileStatus } from '@/Components/Public/Turnstile';
 import type { FormEvent } from 'react';
 import type { PageProps } from '@/types';
 
 export default function ForgotPassword() {
     const turnstileRef = useRef<TurnstileHandle>(null);
     const { flash } = usePage<PageProps>().props;
+    // Gate submit until the challenge resolves ('disabled' = no site key in dev).
+    const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
+    const turnstileReady = turnstileStatus === 'ready' || turnstileStatus === 'disabled';
 
-    const { data, setData, post, processing, errors, setError, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         'cf-turnstile-response': '',
     });
@@ -64,8 +67,9 @@ export default function ForgotPassword() {
                         <Turnstile
                             ref={turnstileRef}
                             onVerify={(token) => setData('cf-turnstile-response', token)}
-                            onError={() => setError('cf-turnstile-response' as never, 'Bot check failed. Please reload.')}
+                            // The widget renders its own error note + retry now.
                             onExpire={() => setData('cf-turnstile-response', '')}
+                            onStatusChange={setTurnstileStatus}
                         />
                         {errors['cf-turnstile-response'] && (
                             <p className="text-xs text-red-600">{errors['cf-turnstile-response']}</p>
@@ -73,7 +77,7 @@ export default function ForgotPassword() {
 
                         <button
                             type="submit"
-                            disabled={processing}
+                            disabled={processing || !turnstileReady}
                             className="w-full bg-primary-strong hover:bg-primary-strong-hover text-white font-medium py-2 rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {processing ? 'Sending…' : 'Send reset link'}
