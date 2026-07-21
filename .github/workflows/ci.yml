@@ -2,8 +2,9 @@ name: CI
 
 # Runs the guardrails on every PR (and on pushes to main) so a regression
 # can't be merged silently: TypeScript type-check, Vitest unit tests, the
-# production build (client + SSR), the PHPUnit suite, and Playwright E2E
-# (mobile-overflow guard + desktop smoke journeys).
+# production build (client + SSR) + a per-chunk bundle-size budget, the PHPUnit
+# suite, Playwright E2E (mobile-overflow guard + desktop smoke journeys), and a
+# Lighthouse pass (perf / a11y / best-practices / SEO) on the key public pages.
 on:
   pull_request:
   push:
@@ -32,6 +33,13 @@ jobs:
 
       - name: Build (client + SSR)
         run: npm run build
+
+      # Hard gate: fails if any JS chunk exceeds the per-chunk cap. This is the
+      # deterministic perf guard (catches a fat dependency landing in one chunk,
+      # e.g. the 338 kB recharts we removed). Contrast with Lighthouse below,
+      # which is an informational report.
+      - name: Bundle-size budget
+        run: npm run check:bundle
 
   backend:
     name: Backend — PHPUnit
@@ -108,3 +116,49 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  lighthouse:
+    name: Lighthouse — perf / a11y / SEO
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: ctype, curl, dom, fileinfo, filter, hash, mbstring, openssl, pcre, pdo, pdo_sqlite, sqlite3, session, tokenizer, xml
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Same app-boot pattern as the E2E job — Lighthouse audits real, seeded
+      # pages (the villa detail URL below is a seeded slug).
+      - name: Prepare app (.env + key + seeded sqlite DB)
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate:fresh --seed --force
+
+      - name: Build assets (client + SSR)
+        run: npm run build
+
+      # Boots the server (via .lighthouserc.json startServerCommand), audits the
+      # key public pages, asserts category scores. Assertions are `warn` for now
+      # (reports, never blocks) — see the note in .lighthouserc.json. ubuntu-latest
+      # ships Chrome, which lhci uses.
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./.lighthouserc.json
+          temporaryPublicStorage: true

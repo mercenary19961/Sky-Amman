@@ -7,7 +7,8 @@
         "dev": "vite",
         "test:js": "vitest run",
         "test:js:watch": "vitest",
-        "test:e2e": "playwright test"
+        "test:e2e": "playwright test",
+        "check:bundle": "node scripts/check-bundle-size.mjs"
     },
     "devDependencies": {
         "@playwright/test": "^1.61.0",
@@ -40,7 +41,6 @@
         "react-dropzone": "^15.0.0",
         "react-hook-form": "^7.71.1",
         "react-i18next": "^17.0.2",
-        "recharts": "^3.8.1",
         "tailwind-merge": "^3.4.0",
         "typescript": "^6.0.2",
         "zod": "^4.3.6"

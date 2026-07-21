@@ -1,0 +1,32 @@
+{
+  "//": "Lighthouse CI — perf / accessibility / best-practices / SEO on the key public pages. Run in CI by the `lighthouse` job (see .github/workflows/ci.yml). Boots `php artisan serve` against the seeded sqlite DB, audits each URL, then asserts category scores.",
+  "ci": {
+    "collect": {
+      "startServerCommand": "php artisan serve --port=8000",
+      "startServerReadyPattern": "Server running",
+      "startServerReadyTimeout": 30000,
+      "url": [
+        "http://127.0.0.1:8000/",
+        "http://127.0.0.1:8000/properties",
+        "http://127.0.0.1:8000/properties/dabouq-7-villa-3",
+        "http://127.0.0.1:8000/contact"
+      ],
+      "numberOfRuns": 1,
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "//": "Everything starts as `warn` (reports the score, never blocks a merge). Reason: these thresholds were set WITHOUT a verified baseline run, and a perf gate that fails on unverified numbers just trains people to ignore CI. After reviewing the first few real runs, promote the deterministic categories (seo, accessibility, best-practices) to `error`. Leave `performance` as warn unless numberOfRuns is raised — a single CI run is noisy (±10 pts).",
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.5 }],
+        "categories:accessibility": ["warn", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

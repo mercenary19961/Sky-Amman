@@ -47,9 +47,6 @@ export default defineConfig({
                         if (id.includes('framer-motion')) {
                             return 'vendor-motion';
                         }
-                        if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-')) {
-                            return 'vendor-charts';
-                        }
                     }
                 },
             },
