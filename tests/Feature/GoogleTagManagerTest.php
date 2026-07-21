@@ -59,6 +59,39 @@ class GoogleTagManagerTest extends TestCase
             ->assertDontSee('googletagmanager.com');
     }
 
+    public function test_consent_mode_defaults_are_declared_before_the_tag_manager(): void
+    {
+        // Order is load-bearing: the defaults block denies every storage type,
+        // so GTM loading first would let tags fire before consent is known.
+        config(['services.gtm.container_id' => self::CONTAINER]);
+
+        $html = (string) $this->get('/')->assertOk()->getContent();
+
+        $defaults = strpos($html, "gtag('consent', 'default'");
+        $gtm = strpos($html, 'googletagmanager.com/gtm.js');
+
+        $this->assertNotFalse($defaults, 'Consent Mode defaults missing');
+        $this->assertNotFalse($gtm, 'GTM snippet missing');
+        $this->assertLessThan($gtm, $defaults, 'Consent Mode defaults must precede GTM');
+    }
+
+    public function test_consent_mode_denies_every_tracking_storage_by_default(): void
+    {
+        $html = (string) $this->get('/')->assertOk()->getContent();
+
+        // Anything that can identify or profile a visitor starts denied.
+        foreach (['ad_storage', 'ad_user_data', 'ad_personalization', 'analytics_storage'] as $signal) {
+            $this->assertMatchesRegularExpression(
+                "/{$signal}: 'denied'/",
+                $html,
+                "{$signal} must default to denied"
+            );
+        }
+
+        // Session/CSRF integrity is not tracking and must not be gated.
+        $this->assertStringContainsString("security_storage: 'granted'", $html);
+    }
+
     public function test_csp_allows_the_hosts_ga4_actually_sends_hits_to(): void
     {
         // Guards the silent-failure mode: container loads, tags look like they

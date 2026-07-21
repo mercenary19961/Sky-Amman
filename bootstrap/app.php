@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConsentController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
@@ -32,6 +33,16 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             SecurityHeaders::class,
             HandleInertiaRequests::class,
+        ]);
+
+        // The consent cookie must be readable by JavaScript: the banner decides
+        // whether to render, and pushes Consent Mode signals to GTM, BEFORE
+        // React hydrates. Laravel encrypts cookies by default, which would leave
+        // document.cookie holding an opaque blob. Only the choice itself is
+        // exempted — the companion `_uid` cookie stays encrypted and httpOnly,
+        // since only the server reads it. Nothing secret lives in here.
+        $middleware->encryptCookies(except: [
+            ConsentController::COOKIE,
         ]);
 
         // Already-authenticated users hitting a `guest` route (/admin/login,

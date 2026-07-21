@@ -25,6 +25,20 @@ test('can navigate from home to the properties listing', async ({ page }) => {
     await expect(page.getByRole('heading').first()).toBeVisible();
 });
 
+test('the footer privacy link reaches a real page', async ({ page }) => {
+    // Guards the original bug: the link existed as href="#" for months. A page
+    // nobody can reach is the same as no page, and the cookie banner points at
+    // this URL too — so a 404 here breaks the consent flow's disclosure.
+    await page.goto('/');
+
+    const link = page.locator('footer a[href="/privacy"]');
+    await expect(link).toBeVisible();
+
+    await link.click();
+    await expect(page).toHaveURL(/\/privacy$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
 test('contact page shows the inquiry form', async ({ page }) => {
     await page.goto('/contact');
 

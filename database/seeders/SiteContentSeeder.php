@@ -171,6 +171,49 @@ class SiteContentSeeder extends Seeder
             ['footer', 'sections',  'follow_us',   'Follow us',   'تابعنا'],
             ['footer', 'copyright', 'text',           'All rights reserved', 'جميع الحقوق محفوظة'],
             ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],
+
+            // ── Privacy Policy ────────────────────────────────────────────────
+            // The DATA-FLOW sections below are factual: they describe what this
+            // codebase actually collects (contact form, newsletter, consent log,
+            // server logs) and which third parties actually receive it. Keep them
+            // in sync if those flows change.
+            // ⚠️ The 'retention', 'rights' and 'contact' sections state legal
+            // positions and are deliberately non-specific — they need Jordanian
+            // counsel to confirm before launch. See CLAUDE.md → Remaining.
+            ['privacy', 'hero', 'title', 'Privacy Policy', 'سياسة الخصوصية'],
+            ['privacy', 'hero', 'updated', 'Last updated: July 2026', 'آخر تحديث: تموز ٢٠٢٦'],
+
+            ['privacy', 'intro', 'body', 'This policy explains what personal information Sky Amman collects through this website, why we collect it, and the choices you have. We collect only what we need to respond to you and to run the site.', 'توضّح هذه السياسة ما تجمعه سكاي عمان من معلومات شخصية عبر هذا الموقع، ولماذا نجمعها، وما هي الخيارات المتاحة لك. نحن نجمع فقط ما نحتاجه للرد عليك ولتشغيل الموقع.'],
+
+            ['privacy', 'collect', 'title', 'What we collect', 'ما الذي نجمعه'],
+            ['privacy', 'collect', 'form', 'When you submit an enquiry, we collect your name, email address, phone number, your message, the type of request, and the property you asked about if you started from a listing page.', 'عند إرسال استفسار، نجمع اسمك وبريدك الإلكتروني ورقم هاتفك ونص رسالتك ونوع الطلب، والعقار الذي سألت عنه إن كنت قد بدأت من صفحة عقار.'],
+            ['privacy', 'collect', 'newsletter', 'If you subscribe to our newsletter, we store your email address.', 'إذا اشتركت في نشرتنا الإخبارية، فإننا نحتفظ ببريدك الإلكتروني.'],
+            ['privacy', 'collect', 'technical', 'For security and to prevent abuse, we record the IP address used to submit a form. Our servers also keep standard access logs.', 'لأغراض الأمان ومنع إساءة الاستخدام، نسجّل عنوان الـ IP المستخدم عند إرسال أي نموذج. كما تحتفظ خوادمنا بسجلات وصول اعتيادية.'],
+            ['privacy', 'collect', 'consent', 'When you make a choice on the cookie banner, we record that choice together with the date, your IP address and your browser type, as proof of the preference you set.', 'عند اتخاذ قرارك في شريط ملفات تعريف الارتباط، نسجّل هذا القرار مع التاريخ وعنوان الـ IP ونوع المتصفح، كإثبات للتفضيل الذي اخترته.'],
+
+            ['privacy', 'use', 'title', 'How we use it', 'كيف نستخدمها'],
+            ['privacy', 'use', 'body', 'We use your details to reply to your enquiry, to route it to the right member of our team, and to send you the newsletter if you asked for it. We do not sell your personal information.', 'نستخدم بياناتك للرد على استفسارك، ولتحويله إلى الشخص المختص في فريقنا، ولإرسال النشرة الإخبارية إن طلبتها. نحن لا نبيع معلوماتك الشخصية.'],
+
+            ['privacy', 'cookies', 'title', 'Cookies and your choices', 'ملفات تعريف الارتباط وخياراتك'],
+            ['privacy', 'cookies', 'necessary', 'Strictly necessary cookies keep the site working: they remember your language, secure the forms against misuse, and maintain your session. These cannot be switched off and are not used to track you.', 'الملفات الضرورية تُبقي الموقع يعمل: تتذكر لغتك، وتحمي النماذج من إساءة الاستخدام، وتحافظ على جلستك. لا يمكن إيقافها ولا تُستخدم لتتبعك.'],
+            ['privacy', 'cookies', 'analytics', 'Analytics cookies help us understand which pages and properties get attention, so we can improve them. These are only set if you allow them.', 'ملفات التحليلات تساعدنا على معرفة الصفحات والعقارات التي تحظى بالاهتمام لتطويرها. لا تُفعّل إلا إذا سمحت بها.'],
+            ['privacy', 'cookies', 'marketing', 'Marketing cookies let us measure our advertising and show you relevant properties on other websites. These are only set if you allow them.', 'ملفات التسويق تتيح لنا قياس نتائج إعلاناتنا وعرض عقارات مناسبة لك على مواقع أخرى. لا تُفعّل إلا إذا سمحت بها.'],
+            ['privacy', 'cookies', 'manage', 'You choose when you first visit, and your choice is remembered for one year. Analytics and marketing cookies stay switched off unless you turn them on. You can also clear this site\'s cookies in your browser at any time to be asked again.', 'تختار عند زيارتك الأولى، ويُحفظ اختيارك لمدة عام. تبقى ملفات التحليلات والتسويق معطّلة ما لم تُفعّلها بنفسك. ويمكنك أيضاً حذف ملفات هذا الموقع من متصفحك في أي وقت ليُطرح عليك السؤال من جديد.'],
+
+            ['privacy', 'sharing', 'title', 'Who else receives data', 'من يتلقى البيانات أيضاً'],
+            ['privacy', 'sharing', 'body', 'We use a small number of service providers to run the site. Where a provider is listed below as depending on your consent, it receives nothing at all unless you allowed that cookie category.', 'نستعين بعدد محدود من مزوّدي الخدمات لتشغيل الموقع. وحين يُذكر أدناه أن مزوّداً يعتمد على موافقتك، فإنه لا يتلقى أي شيء إطلاقاً ما لم تسمح بتلك الفئة.'],
+            ['privacy', 'sharing', 'hosting', 'Hosting and email delivery providers process the site and any messages you send us. These are necessary for the site to function.', 'يقوم مزوّدو الاستضافة وإرسال البريد بمعالجة الموقع وأي رسائل ترسلها إلينا. وهذه ضرورية لعمل الموقع.'],
+            ['privacy', 'sharing', 'analytics', 'Google Analytics receives usage data only if you allow analytics cookies.', 'تتلقى خدمة Google Analytics بيانات الاستخدام فقط إذا سمحت بملفات التحليلات.'],
+            ['privacy', 'sharing', 'marketing', 'Google, Meta and LinkedIn receive advertising data only if you allow marketing cookies.', 'تتلقى Google وMeta وLinkedIn بيانات إعلانية فقط إذا سمحت بملفات التسويق.'],
+
+            ['privacy', 'retention', 'title', 'How long we keep it', 'مدة الاحتفاظ بالبيانات'],
+            ['privacy', 'retention', 'body', 'We keep enquiries for as long as we need them to respond to you and to maintain our business records. Newsletter subscriptions are kept until you ask to be removed. Cookie consent records are kept as evidence of the choice you made.', 'نحتفظ بالاستفسارات طالما احتجناها للرد عليك ولحفظ سجلاتنا التجارية. وتبقى اشتراكات النشرة الإخبارية حتى تطلب إزالتها. أما سجلات الموافقة على ملفات تعريف الارتباط فنحتفظ بها كإثبات للاختيار الذي اتخذته.'],
+
+            ['privacy', 'rights', 'title', 'Your rights', 'حقوقك'],
+            ['privacy', 'rights', 'body', 'You can ask us what personal information we hold about you, ask us to correct it if it is wrong, or ask us to delete it. You can also withdraw your cookie consent at any time. Contact us using the details below and we will respond.', 'يمكنك أن تطلب معرفة المعلومات الشخصية التي نحتفظ بها عنك، أو تصحيحها إن كانت خاطئة، أو حذفها. كما يمكنك سحب موافقتك على ملفات تعريف الارتباط في أي وقت. تواصل معنا عبر البيانات أدناه وسنقوم بالرد.'],
+
+            ['privacy', 'contact', 'title', 'Contact us', 'تواصل معنا'],
+            ['privacy', 'contact', 'body', 'For any question about this policy or about your personal information, please contact us using the details on our Contact page.', 'لأي استفسار حول هذه السياسة أو حول معلوماتك الشخصية، يُرجى التواصل معنا عبر البيانات الموجودة في صفحة اتصل بنا.'],
         ];
     }
 

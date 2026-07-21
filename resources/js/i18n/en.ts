@@ -312,6 +312,31 @@ const en = {
         copyright: 'All rights reserved',
         privacyPolicy: 'Privacy policy',
     },
+    consent: {
+        title: 'We value your privacy',
+        body: 'We use cookies to keep the site working, understand how it is used, and show relevant ads. You choose what to allow.',
+        acceptAll: 'Accept all',
+        rejectAll: 'Reject all',
+        customise: 'Customise',
+        save: 'Save choices',
+        back: 'Back',
+        privacyLink: 'Read our privacy policy',
+        categories: {
+            necessary: {
+                label: 'Strictly necessary',
+                always: 'Always on',
+                description: 'Needed for the site to work: your language choice, form security and session. These never track you.',
+            },
+            analytics: {
+                label: 'Analytics',
+                description: 'Helps us see which pages and properties get attention, so we can improve them.',
+            },
+            marketing: {
+                label: 'Marketing',
+                description: 'Lets us measure our ads and show you relevant properties on other sites.',
+            },
+        },
+    },
 } as const;
 
 export default en;
