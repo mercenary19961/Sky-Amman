@@ -8,6 +8,7 @@ import { createRoot, hydrateRoot } from 'react-dom/client';
 import type { ComponentType, ReactNode } from 'react';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { initStaleTabRefresh } from '@/lib/staleRefresh';
 
 function Providers({ children }: { children: ReactNode }) {
     return (
@@ -26,6 +27,11 @@ router.on('httpException', (event) => {
         window.location.reload();
     }
 });
+
+// Auto-refresh tabs left open for hours so a content change reaches them without
+// a manual reload (see lib/staleRefresh). Admin only refreshes on refocus and
+// only when nothing looks unsaved, so an in-progress edit is never lost.
+initStaleTabRefresh();
 
 createInertiaApp({
     // The home page's SEO title already carries the brand ("SkyAmman — …"), so
