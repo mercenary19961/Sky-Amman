@@ -74,8 +74,15 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
 
     const logout = () => { router.post('/admin/logout'); };
 
+    // `scheme-dark` sets CSS color-scheme, which is what makes the browser paint
+    // NATIVE UI dark inside this subtree: scrollbars (the sidebar's was rendering
+    // as a bright light slab against the near-black panel), plus select dropdowns
+    // and date pickers. Deliberately here and not on <html> — the same stylesheet
+    // serves the light public site. Note it's the standards-based mechanism, not
+    // a Tailwind theme switch; the sibling `dark` class only drives `dark:`
+    // variants, which is why the panel looked dark while its scrollbars did not.
     return (
-        <div className="dark min-h-screen bg-surface-muted text-ink" dir="ltr">
+        <div className="dark scheme-dark min-h-screen bg-surface-muted text-ink" dir="ltr">
             <AdminSidebar
                 collapsed={sidebarCollapsed}
                 mobileOpen={mobileOpen}
