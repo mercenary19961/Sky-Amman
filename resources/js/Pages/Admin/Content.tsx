@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     AlertTriangle, Eye, EyeOff, Save, Maximize2, Minimize2,
     ExternalLink, MousePointerClick, ChevronRight, RotateCcw,
-    Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom,
+    Home, Building2, TrendingUp, Hammer, Shield, Info, Mail, PanelBottom, FileLock2,
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { UndoButton } from '@/Components/Admin/UndoButton';
@@ -27,7 +27,7 @@ function toLabel(str: string): string {
 // (its route + nav item are commented out — see CLAUDE.md). Re-add it here to
 // surface its content in the editor when the page is un-parked. The icon/url/
 // label entries below are kept so re-adding is a one-line change.
-const PAGE_ORDER = ['home', 'properties', 'self_build', 'security', 'about', 'contact', 'footer'];
+const PAGE_ORDER = ['home', 'properties', 'self_build', 'security', 'about', 'contact', 'privacy', 'footer'];
 
 const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
     home:       Home,
@@ -37,6 +37,7 @@ const PAGE_ICONS: Record<string, React.ComponentType<{ size?: number; className?
     security:   Shield,
     about:      Info,
     contact:    Mail,
+    privacy:    FileLock2,
     footer:     PanelBottom,
 };
 
@@ -77,6 +78,7 @@ const PAGE_URLS: Record<string, string> = {
     security:   '/security',
     about:      '/about',
     contact:    '/contact',
+    privacy:    '/privacy',
     footer:     '/', // layout pseudo-page — preview the homepage and scroll to bottom
 };
 

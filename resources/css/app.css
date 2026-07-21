@@ -1,8 +1,10 @@
 @import 'tailwindcss';
 
 /* Class-based dark mode — used exclusively by the admin panel.
-   Public pages never carry the .dark class so this never leaks. */
-@variant dark (&:where(.dark, .dark *));
+   Public pages never carry the .dark class so this never leaks.
+   `@custom-variant` DEFINES a variant; `@variant` (its former spelling here) now
+   only APPLIES one inside a rule, and was deprecated for definitions in TW 4.1. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

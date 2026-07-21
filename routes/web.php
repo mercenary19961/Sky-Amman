@@ -22,6 +22,7 @@ use App\Http\Controllers\ConsentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\PropertiesController;
 // Investment page parked — route + import disabled for now (see CLAUDE.md). Re-enable both to relist.
 // use App\Http\Controllers\InvestmentController;
@@ -52,6 +53,7 @@ Route::middleware('throttle:120,1')->group(function () {
     Route::get('/security', [SecurityController::class, 'show'])->name('security');
     Route::get('/about', [AboutController::class, 'show'])->name('about');
     Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+    Route::get('/privacy', [PrivacyController::class, 'show'])->name('privacy');
 });
 
 // Investment — content-only editorial page (why invest in Amman).
