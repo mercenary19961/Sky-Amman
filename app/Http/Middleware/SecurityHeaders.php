@@ -85,6 +85,10 @@ class SecurityHeaders
             'https://snap.licdn.com',
             // Meta (Facebook) Pixel.
             'https://connect.facebook.net',
+            // CookieYes consent banner. Blocking this is worse than it looks:
+            // no banner means Consent Mode never signals, so the EEA/UK tags
+            // stay dormant with no visible cause.
+            'https://cdn-cookieyes.com',
         ];
     }
 
@@ -148,6 +152,10 @@ class SecurityHeaders
             // Meta Pixel.
             'https://www.facebook.com',
             'https://connect.facebook.net',
+            // CookieYes: banner config + the consent-proof log. If the banner's
+            // cookie-details table renders empty, add directory.cookieyes.com.
+            'https://cdn-cookieyes.com',
+            'https://log.cookieyes.com',
         ];
     }
 }

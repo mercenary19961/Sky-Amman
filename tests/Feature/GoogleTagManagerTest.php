@@ -59,6 +59,32 @@ class GoogleTagManagerTest extends TestCase
             ->assertDontSee('googletagmanager.com');
     }
 
+    public function test_consent_banner_loads_before_the_tag_manager(): void
+    {
+        // Order is load-bearing: CookieYes sets the Google Consent Mode defaults,
+        // so GTM firing first would mean tags run before consent is known.
+        config([
+            'services.cookieyes.site_id' => 'abc123',
+            'services.gtm.container_id' => self::CONTAINER,
+        ]);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $banner = strpos($html, 'cdn-cookieyes.com');
+        $gtm = strpos($html, 'googletagmanager.com/gtm.js');
+
+        $this->assertNotFalse($banner, 'consent banner missing');
+        $this->assertNotFalse($gtm, 'GTM snippet missing');
+        $this->assertLessThan($gtm, $banner, 'consent banner must precede GTM');
+    }
+
+    public function test_consent_banner_is_absent_when_not_configured(): void
+    {
+        config(['services.cookieyes.site_id' => null]);
+
+        $this->get('/')->assertOk()->assertDontSee('cookieyes');
+    }
+
     public function test_csp_allows_the_hosts_ga4_actually_sends_hits_to(): void
     {
         // Guards the silent-failure mode: container loads, tags look like they

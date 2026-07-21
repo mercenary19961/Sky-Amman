@@ -4,19 +4,30 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Google Tag Manager. Renders only when GTM_CONTAINER_ID is set, and never
-         on /admin/* so staff sessions don't count as site traffic. Placed as high
-         in <head> as possible per Google's guidance. GA4 is configured as a tag
-         inside the container, not in this codebase. --}}
-    @if ($gtmId = config('services.gtm.container_id'))
-        @unless (request()->is('admin', 'admin/*'))
+    {{-- Third-party marketing scripts. Each is opt-in via its own env var, and
+         none render on /admin/* — staff sessions would otherwise be counted as
+         site traffic, and a consent banner on the admin login is just noise. --}}
+    @unless (request()->is('admin', 'admin/*'))
+        {{-- CookieYes consent banner. ⚠️ MUST stay ABOVE the GTM snippet: it sets
+             the Google Consent Mode defaults, and anything loaded before it can
+             fire tags before consent is known. Same vendor as the HardRock site,
+             but each domain needs its OWN CookieYes site ID. --}}
+        @if ($cookieYesId = config('services.cookieyes.site_id'))
+            <script id="cookieyes" type="text/javascript"
+                src="https://cdn-cookieyes.com/client_data/{{ $cookieYesId }}/script.js"></script>
+        @endif
+
+        {{-- Google Tag Manager, as high in <head> as possible per Google's
+             guidance. GA4 and the ad tags are configured inside the container
+             by the marketing team, not in this codebase. --}}
+        @if ($gtmId = config('services.gtm.container_id'))
             <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','{{ $gtmId }}');</script>
-        @endunless
-    @endif
+        @endif
+    @endunless
 
     <title inertia>{{ config('app.name', 'SkyAmman') }}</title>
 

@@ -41,4 +41,10 @@ return [
         'container_id' => env('GTM_CONTAINER_ID'),
     ],
 
+    // CookieYes consent banner (same vendor as the HardRock site). Empty = no
+    // banner. The ID is per-DOMAIN — do not reuse another project's.
+    'cookieyes' => [
+        'site_id' => env('COOKIEYES_SITE_ID'),
+    ],
+
 ];
