@@ -2,7 +2,7 @@
 
 > Quick reference for AI assistants and developers
 
-> **📍 Doc sync:** CLAUDE.md last synced to commit `e856c42` — 2026-07-21 11:42 (Tue).
+> **📍 Doc sync:** CLAUDE.md last synced to commit `c24ebdf` — 2026-07-21 13:11 (Tue).
 > _Convention: whenever you edit this file, refresh this line to the current commit — run_ `git log -1 --format="%h %cd" --date=format:"%Y-%m-%d %H:%M (%a)"` _and paste the hash + date + time here. This anchors the doc to a known code state; it pairs with the prose `> Last updated:` changelog at the bottom of Build Progress._
 
 ---
@@ -598,14 +598,23 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 ### Layers
 
 - **PHPUnit (backend)** — `php artisan test`. PHPUnit 11 (**NOT Pest**), in-memory SQLite ([phpunit.xml](phpunit.xml)), `RefreshDatabase`. Feature tests cover the lead funnel (contact + newsletter validation/sanitization/lead-routing), auth (login throttle, `is_active`, enumeration), admin authz, the change-log **revert** matrix, and public-route smoke; unit/model tests cover `Setting`, `Project::displayImageUrls()` fallback chain, `GalleryImage::pool()`. ~93 tests in [tests/Feature](tests/Feature) + [tests/Unit](tests/Unit).
+- **Bundle-size gate** — `npm run check:bundle` ([scripts/check-bundle-size.mjs](scripts/check-bundle-size.mjs)). Runs after the build in CI's Frontend job; fails if any JS chunk exceeds the per-chunk cap. See "Performance regression testing" below.
 - **Vitest (frontend units)** — `npm run test:js` (`test:js:watch` for watch). **Pure TS helpers only** — `node` env, no jsdom ([vitest.config.ts](vitest.config.ts)). Covers the extracted [resources/js/lib](resources/js/lib) helpers: `youtube` (URL→id regex), `carousel` (`wrapIndex`/`shorterDirection` ring math, shared by ProjectShowcase + Testimonials), `phone` (`toWaMeNumber`), `cms` (CMS-first/i18n fallback resolver, used by the Footer), `cn`. Tests co-located as `lib/*.test.ts`. ~20 tests.
 - **Playwright (E2E)** — `npm run test:e2e`. Real Chromium against a `php artisan serve` instance Playwright boots itself (reuses a running one locally) — see [playwright.config.ts](playwright.config.ts). Two specs in [tests/e2e](tests/e2e): **`overflow.spec.ts`** = the **mobile horizontal-overflow guard** (`scrollWidth ≤ innerWidth` on every public route at a phone viewport — the invariant that would have caught the Self Build "dig deep" overflow), and **`smoke.spec.ts`** (desktop: Inertia app renders, home→properties nav, contact form present; selectors are href/role-based so CMS copy changes don't break them). First run needs `npx playwright install chromium`.
 
 ### CI jobs ([ci.yml](.github/workflows/ci.yml))
 
-- **Frontend** — `npx tsc --noEmit` → `npm run test:js` → `npm run build` (client + SSR).
+- **Frontend** — `npx tsc --noEmit` → `npm run test:js` → `npm run build` (client + SSR) → **`npm run check:bundle`** (per-chunk bundle-size gate).
 - **Backend** — `composer install` → `cp .env.example .env` + `key:generate` → `php artisan test`. (No asset build — feature tests stub Vite; see gotcha below.)
 - **E2E** — runs inside the official Playwright container (`mcr.microsoft.com/playwright:v1.61.0-noble`, which ships Chromium + its OS deps, so there's no slow `playwright install --with-deps` step). Inside it: setup PHP 8.2 + Node 22 → install deps → `migrate:fresh --seed` on sqlite → `npm run build` → `npx playwright test`. Uploads the HTML report as an artifact on failure. **When you bump `@playwright/test`, bump the image tag to match** (else browser/version mismatch).
+- **Lighthouse** — perf / accessibility / best-practices / SEO on 4 key public pages (home, properties, a villa detail, contact). Boots `php artisan serve` against a seeded sqlite DB via `.lighthouserc.json`'s `startServerCommand`, audits with `treosh/lighthouse-ci-action`, uploads the report to temporary public storage. **The two perf layers are deliberately different in kind:** the bundle-size gate is a **hard, deterministic gate** (fails the build); Lighthouse is an **informational report** whose assertions are all `warn` for now — a perf gate that blocks merges on unverified/noisy numbers just trains people to ignore CI. **After a few real runs, promote the deterministic categories (seo, accessibility, best-practices) to `error` in `.lighthouserc.json`; leave `performance` as `warn` unless `numberOfRuns` is raised** (a single CI run varies ±10 pts).
+
+### Performance regression testing — what IS and ISN'T covered
+
+The suite is a strong **correctness** net; performance is guarded at two specific points, and **neither compares one commit against another** (no stored baseline, no commit-to-commit diff — that's genuinely flaky on shared CI runners, so it's intentionally not attempted):
+- **Bundle size** (`scripts/check-bundle-size.mjs`): per-**chunk** raw-size cap (300 kB), the deterministic gate. Per-chunk not total, because a total budget false-fails as the app grows more pages — a fat new dependency lands in ONE chunk, which is exactly what this catches (it would have blocked the 338 kB recharts). Tune `MAX_CHUNK_KB`; add reviewed exceptions to `OVERRIDES` rather than raising the global cap. Runs locally too: `npm run check:bundle` after a build.
+- **Lighthouse**: page-level scores (perf/a11y/SEO/best-practices), currently report-only (see above).
+- **Not covered:** raw page-load *timing* thresholds, and any current-vs-previous-commit comparison. If a change made a page 3× slower without adding bundle weight or dropping a Lighthouse category, nothing would flag it.
 
 ### Testing gotchas (learned the hard way)
 
@@ -723,7 +732,8 @@ Three test layers, all run on every PR by GitHub Actions ([.github/workflows/ci.
 - [ ] **⚖️ Privacy policy copy needs Jordanian counsel sign-off before launch.** The **page is built** (`/privacy`, 2026-07-21) and both links now reach it, but the seeded copy is written by an AI, not a lawyer. The **data-flow sections are factual** (they describe what this codebase actually collects and which third parties actually receive it — keep them in sync if those flows change). The **`retention`, `rights` and `contact` sections state legal positions** and are deliberately vague: no specific retention periods, no statutory citations, no governing-law clause. Have counsel review those three, then edit via Admin → Site Content → Privacy Policy (no deploy needed). **Do not let the "Last updated" date imply a review that hasn't happened.**
 - [ ] Final testing & go-live
 
-> **Last updated:** 2026-07-21 — **Self-hosted cookie consent, privacy page, and per-editor authorization.** See the individual entries below; the headline items: consent banner + proof log + admin analytics built in-house (no CMP vendor), `/privacy` shipped, and the **Users page became "Users & Auth"** with a grant matrix letting admins open specific admin-only sections to individual editors (innovation #27). **137 backend tests green.**
+> **Last updated:** 2026-07-21 — **Self-hosted cookie consent, privacy page, per-editor authorization, and CI perf gates.** See the individual entries below; the headline items: consent banner + proof log + admin analytics built in-house (no CMP vendor), `/privacy` shipped, the **Users page became "Users & Auth"** with a grant matrix letting admins open specific admin-only sections to individual editors (innovation #27), and **two CI performance guards** (a hard per-chunk bundle-size gate + a report-only Lighthouse job). **141 backend tests green.**
+> - **recharts removed** (338 kB, biggest chunk in the build) — the admin Dashboard's inquiries chart is now a plain-CSS bar chart like the Cookie Consent trend; the admin has no charting library. **Bundle-size gate** (`npm run check:bundle`) added to CI so a fat dependency can't silently reland. **Lighthouse CI** job added (warn-level, report-only until baselined). See Testing & CI → "Performance regression testing".
 > - ⚠️ **New production trap documented:** rows added to a seeder *after* the 2026-06-18 bootstrap migrations never reach Railway (seeders don't run on deploy). `/privacy` 404'd in production while working locally for exactly this reason. Any new `pages`/`site_content`/settings row now needs a seeder entry **and** a scoped data migration. See the Foundation Gotcha.
 >
 > **Last updated:** 2026-07-20 — **Search Console verification + sitemap submitted + Google Tag Manager installed.**

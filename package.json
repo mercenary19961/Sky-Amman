@@ -7,7 +7,8 @@
         "dev": "vite",
         "test:js": "vitest run",
         "test:js:watch": "vitest",
-        "test:e2e": "playwright test"
+        "test:e2e": "playwright test",
+        "check:bundle": "node scripts/check-bundle-size.mjs"
     },
     "devDependencies": {
         "@playwright/test": "^1.61.0",
