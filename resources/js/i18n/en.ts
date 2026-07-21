@@ -312,6 +312,14 @@ const en = {
         copyright: 'All rights reserved',
         privacyPolicy: 'Privacy policy',
     },
+    turnstile: {
+        // Shown while the challenge is still running. A first-time visitor waits
+        // noticeably longer than a returning one, so this explains the disabled
+        // submit button instead of leaving it looking broken.
+        pending: 'Checking your browser… the button will enable in a moment.',
+        error: 'We couldn’t complete the security check. This is usually a browser extension or a blocked script.',
+        retry: 'Try again',
+    },
     consent: {
         title: 'We value your privacy',
         body: 'We use cookies to keep the site working, understand how it is used, and show relevant ads. You choose what to allow.',

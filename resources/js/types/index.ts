@@ -16,6 +16,12 @@ export interface User {
     name: string;
     email: string;
     role: 'admin' | 'editor';
+    /**
+     * Admin-section grants (User::ABILITIES on the PHP side). Admins receive the
+     * full list. Drives sidebar visibility ONLY — routes carry their own `can:`
+     * guards, so this is never the security boundary.
+     */
+    abilities?: string[];
     created_at: string;
     updated_at: string;
 }
