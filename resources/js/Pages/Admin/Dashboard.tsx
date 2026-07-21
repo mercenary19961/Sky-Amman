@@ -1,14 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
-import {
     Building2,
     MessageSquare,
     AlertTriangle,
@@ -24,7 +15,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { cn } from '@/lib/cn';
-import type { DashboardPageProps, ContentHealthItem } from '@/types/admin/dashboard';
+import type { DashboardPageProps, ContentHealthItem, DailyInquiry } from '@/types/admin/dashboard';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -196,14 +187,40 @@ function SeoHealthList<T extends { title_en: string; missing: string[] }>(
     );
 }
 
-// ── Custom tooltip for the area chart ─────────────────────────────────────────
+// ── Daily-inquiries bar chart ─────────────────────────────────────────────────
 
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
-    if (!active || !payload?.length) return null;
+/**
+ * Plain-CSS bar chart, same approach as the Cookie Consent "Decisions per day"
+ * trend — no charting library (dropped recharts, which was 338kB for this one
+ * graph). Each bar reveals its date + count on hover; first/last dates anchor
+ * the 30-day range.
+ */
+const CHART_H = 176;
+
+function InquiriesTrend({ data }: { data: DailyInquiry[] }) {
+    const peak = Math.max(1, ...data.map((d) => d.count));
+
     return (
-        <div className="bg-zinc-900 text-white text-xs px-3 py-2 rounded shadow-lg">
-            <div className="font-medium">{label ? formatDateLabel(label) : ''}</div>
-            <div className="text-zinc-300">{payload[0].value} {payload[0].value === 1 ? 'inquiry' : 'inquiries'}</div>
+        <div>
+            <div className="flex items-end gap-px" style={{ height: CHART_H }} role="img" aria-label="Daily inquiries, last 30 days">
+                {data.map((d) => (
+                    <div key={d.date} className="group relative flex-1">
+                        <div
+                            className="w-full rounded-t-sm bg-primary/30 group-hover:bg-primary transition-colors"
+                            style={{ height: `${Math.max(2, (d.count / peak) * CHART_H)}px` }}
+                        />
+                        <span className="pointer-events-none absolute bottom-full inset-s-1/2 z-10 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-ink px-2 py-1 text-[11px] text-white group-hover:block dark:bg-zinc-900">
+                            {formatDateLabel(d.date)}: {d.count} {d.count === 1 ? 'inquiry' : 'inquiries'}
+                        </span>
+                    </div>
+                ))}
+            </div>
+            {data.length > 0 && (
+                <div className="mt-1.5 flex justify-between text-[10px] text-ink-muted">
+                    <span>{formatDateLabel(data[0].date)}</span>
+                    <span>{formatDateLabel(data[data.length - 1].date)}</span>
+                </div>
+            )}
         </div>
     );
 }
@@ -305,41 +322,7 @@ export default function Dashboard() {
                             No inquiries yet. They'll show up here once the contact form goes live.
                         </div>
                     ) : (
-                        <ResponsiveContainer width="100%" height={176}>
-                            <AreaChart data={dailyInquiries} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="inquiryGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#94C4EE" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#94C4EE" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                                <XAxis
-                                    dataKey="date"
-                                    tickFormatter={formatDateLabel}
-                                    tick={{ fontSize: 10, fill: '#9ca3af' }}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    interval={6}
-                                />
-                                <YAxis
-                                    allowDecimals={false}
-                                    tick={{ fontSize: 10, fill: '#9ca3af' }}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <Tooltip content={<ChartTooltip />} />
-                                <Area
-                                    type="monotone"
-                                    dataKey="count"
-                                    stroke="#94C4EE"
-                                    strokeWidth={2}
-                                    fill="url(#inquiryGradient)"
-                                    dot={false}
-                                    activeDot={{ r: 4, fill: '#94C4EE' }}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                        <InquiriesTrend data={dailyInquiries} />
                     )}
                 </SectionCard>
 
