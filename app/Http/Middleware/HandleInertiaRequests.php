@@ -28,6 +28,11 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'role' => $request->user()->role,
+                    // Which admin-only sections this account can reach. Drives
+                    // sidebar filtering only — it is a CONVENIENCE, never the
+                    // gate: every route carries its own `can:` guard, so a
+                    // tampered client can reveal a nav link but not the page.
+                    'abilities' => $request->user()->effectiveAbilities(),
                 ] : null,
             ],
             'locale' => session('locale', 'en'),
@@ -38,10 +43,14 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
             ],
             // One-shot payload set by ChangeLogService after a tracked save, so the
-            // admin can revert the change just made via the UndoToast. Admin-only:
-            // the revert route is behind the `admin` middleware, so surfacing the
-            // Undo affordance to editors would only hand them a button that 403s.
-            'undo' => fn () => $request->user()?->isAdmin() ? $request->session()->get('undo') : null,
+            // user can revert what they just did via the UndoToast. Gated on the
+            // same ability as the revert route itself — surfacing the affordance
+            // to someone without the grant would only hand them a button that
+            // 403s. (Was `isAdmin()`; now an editor granted change_log.revert
+            // gets a working undo too.)
+            'undo' => fn () => $request->user()?->hasPermission('change_log.revert')
+                ? $request->session()->get('undo')
+                : null,
             'siteSettings' => fn () => $this->getSiteSettings(),
             // Footer copy is admin-editable via the Site Content editor under the
             // "footer" pseudo-page. Both locales ship to the client so the language

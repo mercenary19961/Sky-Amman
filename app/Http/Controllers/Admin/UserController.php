@@ -33,20 +33,61 @@ class UserController extends Controller
     {
         $users = User::query()
             ->orderBy('name')
-            ->get(['id', 'name', 'email', 'role', 'is_active', 'created_at'])
+            ->get(['id', 'name', 'email', 'role', 'is_active', 'permissions', 'created_at'])
             ->map(fn (User $u) => [
-                'id'         => $u->id,
-                'name'       => $u->name,
-                'email'      => $u->email,
-                'role'       => $u->role,
-                'is_active'  => $u->is_active,
-                'created_at' => $u->created_at->format('M j, Y'),
+                'id'          => $u->id,
+                'name'        => $u->name,
+                'email'       => $u->email,
+                'role'        => $u->role,
+                'is_active'   => $u->is_active,
+                'permissions' => $u->permissions ?? [],
+                'created_at'  => $u->created_at->format('M j, Y'),
             ]);
 
         return Inertia::render('Admin/Users', [
             'users'         => $users,
             'currentUserId' => $request->user()->id,
+            // The grantable registry, so the UI renders from the same source of
+            // truth the gates and validation use.
+            'abilities'     => collect(User::ABILITIES)
+                ->map(fn (array $meta, string $key) => $meta + ['key' => $key])
+                ->values(),
         ]);
+    }
+
+    /**
+     * Clean a submitted grant list.
+     *
+     * Drops unknown keys (so a hand-crafted request can't invent an ability) and
+     * applies `requires` implication, because "edit settings without seeing
+     * them" is an incoherent state that would render as a broken UI.
+     *
+     * @param  list<string>|null  $requested
+     * @return list<string>
+     */
+    private function normalisePermissions(?array $requested): array
+    {
+        $granted = array_values(array_intersect(
+            $requested ?? [],
+            array_keys(User::ABILITIES),
+        ));
+
+        // Pull in parents. Loop until stable so a chain (a → b → c) resolves.
+        do {
+            $before = count($granted);
+
+            foreach ($granted as $ability) {
+                $parent = User::ABILITIES[$ability]['requires'] ?? null;
+
+                if ($parent !== null && ! in_array($parent, $granted, true)) {
+                    $granted[] = $parent;
+                }
+            }
+        } while (count($granted) !== $before);
+
+        sort($granted);
+
+        return $granted;
     }
 
     public function store(Request $request, ChangeLogService $changeLog): RedirectResponse
@@ -58,6 +99,8 @@ class UserController extends Controller
             'is_active'       => ['boolean'],
             'password'        => ['required', 'confirmed', Password::defaults()],
             'admin_confirmed' => ['boolean'],
+            'permissions'     => ['array'],
+            'permissions.*'   => ['string'],
         ]);
 
         // Server-side backstop for the type-to-confirm modal.
@@ -71,6 +114,11 @@ class UserController extends Controller
             'role'      => $data['role'],
             'is_active' => $request->boolean('is_active', true),
             'password'  => $data['password'], // hashed via the model's 'hashed' cast
+            // Admins bypass every gate, so storing grants for one would be dead
+            // data that silently reactivates if they're ever demoted.
+            'permissions' => $data['role'] === 'admin'
+                ? null
+                : $this->normalisePermissions($data['permissions'] ?? []),
         ]);
 
         $changeLog->log('user', $user->id, 'create', null, $user->attributesToArray(), $user->name);
@@ -95,6 +143,8 @@ class UserController extends Controller
             'is_active'       => ['boolean'],
             'password'        => ['nullable', 'confirmed', Password::defaults()],
             'admin_confirmed' => ['boolean'],
+            'permissions'     => ['array'],
+            'permissions.*'   => ['string'],
         ]);
 
         $old = $user->attributesToArray();
@@ -119,6 +169,12 @@ class UserController extends Controller
         $user->email     = $data['email'];
         $user->role      = $data['role'];
         $user->is_active = $willBeActive;
+        // Promoting to admin clears the grant list (admins bypass gates anyway);
+        // demoting to editor therefore starts from NO admin-section access, so a
+        // former admin never silently keeps reach they were never granted.
+        $user->permissions = $data['role'] === 'admin'
+            ? null
+            : $this->normalisePermissions($data['permissions'] ?? []);
 
         if (! empty($data['password'])) {
             $user->password = $data['password']; // hashed via cast

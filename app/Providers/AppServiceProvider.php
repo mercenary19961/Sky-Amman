@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Ssr\TimeoutHttpGateway;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -44,6 +46,19 @@ class AppServiceProvider extends ServiceProvider
             ->numbers()
             ->symbols()
             ->uncompromised());
+
+        // Per-editor grants for the admin-only sections. One gate per entry in
+        // User::ABILITIES, so routes guard with `can:consent.view` and the
+        // registry stays the single source of truth.
+        //
+        // Gate::before gives admins everything. It also means a DEACTIVATED
+        // admin is still an admin here — that's fine, because `is_active` is
+        // enforced at login, so they can't hold a session to use it.
+        Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
+
+        foreach (array_keys(User::ABILITIES) as $ability) {
+            Gate::define($ability, fn (User $user) => $user->hasPermission($ability));
+        }
 
         // Point the password-reset email link at our Inertia reset page (token in
         // the path, email as a query param so the form can prefill it).
