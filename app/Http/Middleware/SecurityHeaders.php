@@ -36,21 +36,14 @@ class SecurityHeaders
     {
         return implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://www.googletagmanager.com",
+            'script-src '.implode(' ', $this->scriptSrc()),
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            // Wide-open https: also covers every marketing pixel/beacon, which is
+            // why no vendor needs an img-src entry below.
             "img-src 'self' data: blob: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
-            // Turnstile + Google Maps + LinkedIn/Instagram + YouTube embeds.
-            // googletagmanager.com covers GTM's <noscript> fallback iframe;
-            // tagassistant.google.com is GTM's Preview/debug overlay.
-            "frame-src 'self' https://challenges.cloudflare.com https://www.google.com https://www.linkedin.com https://www.instagram.com https://www.youtube.com https://www.youtube-nocookie.com https://www.googletagmanager.com https://tagassistant.google.com",
-            // Inertia XHRs target self; Turnstile siteverify runs server-side.
-            // The Google hosts are where GA4 actually SENDS its hits — without
-            // them the container loads and tags appear to fire while every
-            // measurement is silently blocked, which looks like "GA4 is broken".
-            // ⚠️ Any NEW third-party tag added in the GTM UI (Meta Pixel, LinkedIn
-            // Insight, Hotjar…) needs its host added here too, or it is blocked.
-            "connect-src 'self' https://cloudflareinsights.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://tagassistant.google.com",
+            'frame-src '.implode(' ', $this->frameSrc()),
+            'connect-src '.implode(' ', $this->connectSrc()),
             "media-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
@@ -63,5 +56,98 @@ class SecurityHeaders
             // https — this prevents those from being blocked as mixed content.
             'upgrade-insecure-requests',
         ]);
+    }
+
+    /**
+     * Where scripts may LOAD from.
+     *
+     * ⚠️ Marketing tags are added/removed by the marketing team in the GTM UI,
+     * but a strict CSP means each vendor still needs its hosts listed in these
+     * three methods or the browser blocks it — silently, from GTM's point of
+     * view (Tag Assistant reports "fired successfully" either way). Approved
+     * vendors: Google (GA4 + Ads), LinkedIn, Meta. Anything else needs adding.
+     *
+     * @return list<string>
+     */
+    private function scriptSrc(): array
+    {
+        return [
+            "'self'",
+            "'unsafe-inline'",
+            'https://challenges.cloudflare.com',
+            'https://static.cloudflareinsights.com',
+            // GTM container itself + Google Ads conversion/remarketing tags.
+            'https://www.googletagmanager.com',
+            'https://www.googleadservices.com',
+            'https://googleads.g.doubleclick.net',
+            // LinkedIn Insight Tag. NOTE: this is snap.licdn.com, NOT the
+            // www.linkedin.com already in frame-src (that one is the post embed).
+            'https://snap.licdn.com',
+            // Meta (Facebook) Pixel.
+            'https://connect.facebook.net',
+        ];
+    }
+
+    /**
+     * Which origins may be embedded as iframes.
+     *
+     * @return list<string>
+     */
+    private function frameSrc(): array
+    {
+        return [
+            "'self'",
+            // Turnstile + Google Maps + LinkedIn/Instagram + YouTube embeds.
+            'https://challenges.cloudflare.com',
+            'https://www.google.com',
+            'https://www.linkedin.com',
+            'https://www.instagram.com',
+            'https://www.youtube.com',
+            'https://www.youtube-nocookie.com',
+            // GTM's <noscript> fallback iframe + its Preview/debug overlay.
+            'https://www.googletagmanager.com',
+            'https://tagassistant.google.com',
+            // Google Ads conversion linker.
+            'https://td.doubleclick.net',
+            // Meta Pixel's iframe fallback.
+            'https://www.facebook.com',
+        ];
+    }
+
+    /**
+     * Where the page may SEND data (fetch / XHR / sendBeacon).
+     *
+     * This is the directive that silently kills analytics when it's wrong: a tag
+     * loads fine via script-src and reports success, then every measurement it
+     * sends is blocked here. Vendors send to different hosts than they load from.
+     *
+     * @return list<string>
+     */
+    private function connectSrc(): array
+    {
+        return [
+            // Inertia XHRs target self; Turnstile siteverify runs server-side.
+            "'self'",
+            'https://cloudflareinsights.com',
+            // GA4 measurement endpoints (incl. regional, e.g. region1.*).
+            'https://www.google-analytics.com',
+            'https://*.google-analytics.com',
+            'https://*.analytics.google.com',
+            'https://www.googletagmanager.com',
+            'https://tagassistant.google.com',
+            // Google Ads conversions + remarketing audience pings. The audience
+            // ping targets the visitor's country TLD (google.jo for most traffic
+            // here) — add other TLDs if reporting looks short in a new market.
+            'https://googleads.g.doubleclick.net',
+            'https://stats.g.doubleclick.net',
+            'https://www.google.com',
+            'https://www.google.jo',
+            // LinkedIn Insight Tag beacons.
+            'https://px.ads.linkedin.com',
+            'https://px4.ads.linkedin.com',
+            // Meta Pixel.
+            'https://www.facebook.com',
+            'https://connect.facebook.net',
+        ];
     }
 }

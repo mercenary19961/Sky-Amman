@@ -4,19 +4,62 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Google Tag Manager. Renders only when GTM_CONTAINER_ID is set, and never
-         on /admin/* so staff sessions don't count as site traffic. Placed as high
-         in <head> as possible per Google's guidance. GA4 is configured as a tag
-         inside the container, not in this codebase. --}}
-    @if ($gtmId = config('services.gtm.container_id'))
-        @unless (request()->is('admin', 'admin/*'))
+    {{-- Third-party marketing scripts. Each is opt-in via its own env var, and
+         none render on /admin/* — staff sessions would otherwise be counted as
+         site traffic, and a consent banner on the admin login is just noise. --}}
+    @unless (request()->is('admin', 'admin/*'))
+        {{-- Google Consent Mode v2 defaults. ⚠️ MUST stay ABOVE the GTM snippet
+             and stay INLINE (not bundled): it has to execute before any tag can
+             read consent state, and a Vite bundle is deferred until after GTM
+             would already have fired. Everything starts DENIED, so no tag sets a
+             cookie until the visitor chooses; the banner then calls
+             gtag('consent','update',…). Re-granting on repeat visits is done
+             here too, from the cookie, so a returning visitor's tags work on the
+             first paint rather than after React hydrates.
+
+             `security_storage` is always granted — it covers CSRF/session
+             integrity, which isn't optional and isn't tracking. --}}
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+
+            gtag('consent', 'default', {
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                analytics_storage: 'denied',
+                functionality_storage: 'granted',
+                personalization_storage: 'denied',
+                security_storage: 'granted',
+                wait_for_update: 500
+            });
+
+            try {
+                var c = document.cookie.match(/(?:^|;\s*){{ \App\Http\Controllers\ConsentController::COOKIE }}=([^;]*)/);
+                if (c) {
+                    var v = JSON.parse(decodeURIComponent(c[1]));
+                    gtag('consent', 'update', {
+                        ad_storage: v.marketing ? 'granted' : 'denied',
+                        ad_user_data: v.marketing ? 'granted' : 'denied',
+                        ad_personalization: v.marketing ? 'granted' : 'denied',
+                        analytics_storage: v.analytics ? 'granted' : 'denied',
+                        personalization_storage: v.marketing ? 'granted' : 'denied'
+                    });
+                }
+            } catch (e) { /* malformed cookie — stay denied */ }
+        </script>
+
+        {{-- Google Tag Manager, as high in <head> as possible per Google's
+             guidance. GA4 and the ad tags are configured inside the container
+             by the marketing team, not in this codebase. --}}
+        @if ($gtmId = config('services.gtm.container_id'))
             <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','{{ $gtmId }}');</script>
-        @endunless
-    @endif
+        @endif
+    @endunless
 
     <title inertia>{{ config('app.name', 'SkyAmman') }}</title>
 
