@@ -15,6 +15,7 @@ import {
     Contact,
     Images,
     GalleryThumbnails,
+    Cookie,
     Menu,
 } from 'lucide-react';
 import { AdminSidebar } from '@/Components/Layout/AdminSidebar';
@@ -36,6 +37,7 @@ const PAGE_ICONS: Array<[path: string, icon: React.ComponentType<{ size?: number
     ['/admin/settings',  SettingsIcon],
     ['/admin/users',     UsersIcon],
     ['/admin/change-log', History],
+    ['/admin/consent',   Cookie],
 ];
 
 interface AdminLayoutProps {

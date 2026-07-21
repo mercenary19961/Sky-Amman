@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ChangeLogController;
+use App\Http\Controllers\Admin\ConsentController as AdminConsentController;
 use App\Http\Controllers\Admin\ContactSubmissionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProjectController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Admin\TestimonialVideoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\ConsentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SitemapController;
@@ -90,6 +92,13 @@ Route::post('/locale/{locale}', [LocaleController::class, 'set'])
 Route::post('/newsletter', [NewsletterController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('newsletter.subscribe');
+
+// Cookie-consent choice from the banner. A looser limit than the lead forms:
+// this is one click by an ordinary visitor, and a throttled-out consent POST
+// means the banner can't record a decision the visitor already made.
+Route::post('/consent', [ConsentController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('consent.store');
 
 // Auth (admin login). Per-IP throttle layered with the per-email throttle in
 // LoginController to defend against both IP rotation and email fanning.
@@ -189,6 +198,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update')->where('id', '[0-9]+');
         Route::post('/users/{id}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle')->where('id', '[0-9]+');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->where('id', '[0-9]+');
+
+        // Cookie-consent log. Admin-only: it holds visitor IPs and is the
+        // evidence trail, so it sits with the other System-group screens.
+        Route::get('/consent', [AdminConsentController::class, 'index'])->name('consent.index');
 
         // Change Log + Revert (audit history).
         Route::get('/change-log', [ChangeLogController::class, 'index'])->name('change-log.index');
