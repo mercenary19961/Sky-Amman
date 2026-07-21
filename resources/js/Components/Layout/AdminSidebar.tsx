@@ -74,10 +74,12 @@ const NAV_GROUPS: NavGroup[] = [
     {
         label: 'System',
         items: [
-            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: true },
             { label: 'Users', path: '/admin/users', icon: <UsersIcon size={18} />, adminOnly: true, built: true },
             { label: 'Change Log', path: '/admin/change-log', icon: <History size={18} />, adminOnly: true, built: true },
             { label: 'Cookie Consent', path: '/admin/consent', icon: <Cookie size={18} />, adminOnly: true, built: true },
+            // Settings sits last — it's the least-visited screen and the one you
+            // want furthest from an accidental click.
+            { label: 'Settings', path: '/admin/settings', icon: <SettingsIcon size={18} />, adminOnly: true, built: true },
         ],
     },
 ];
