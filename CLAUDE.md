@@ -484,6 +484,18 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 
 **Lesson / cross-project:** when a Laravel-on-Railway app leaves Cloudflare (or the proxy topology changes at all), the `trustProxies` allowlist goes stale. The tells: (a) request-derived URLs come out `http://` even though `forceScheme` is on and assets are https; (b) every visitor shows the same client IP. **Red herrings from leaving Cloudflare** (ignore them): `/cdn-cgi/*` 404s and the Turnstile "Cannot determine Turnstile's embedded location, are you running Turnstile on a Cloudflare Zone?" warning — both are cosmetic (Turnstile still validates; the widget shows "Success!").
 
+### Adding rows to a seeder AFTER first deploy never reaches production (2026-07-21)
+
+**Symptom:** `/privacy` returned **404 in production** while working perfectly in local dev. The route existed, the deploy had landed (verified: the Consent Mode block was in the live HTML), `/about` returned 200 — only the new page 404'd.
+
+**Root cause:** the page's `pages` row and its 26 `site_content` rows were added to `PagesSeeder`/`SiteContentSeeder`. **Seeders don't run on Railway deploys — only migrations do.** The `2026_06_18_00000*` bootstrap migrations *call* those seeders, but they already ran on first deploy and the `migrations` table stops them re-running. So seeder edits made after that point reach local dev (where you run `db:seed` by hand) and **never** reach production. The controller's `abort_if($page === null …)` then 404s. Silent and environment-specific, which is the worst combination.
+
+**Fix:** a new data migration (`2026_07_21_000002_seed_privacy_page`) that inserts just those rows.
+
+**⚠️ Do NOT fix this by re-running the seeder from the new migration.** The `2026_06_18_*` migrations could safely call `(new SiteContentSeeder())->run()` because they executed against an **empty** database. Doing that now would `updateOrCreate` **every** row and silently overwrite copy the client has edited through the admin. Instead, filter the seeder's own data to the new rows (`SiteContentSeeder::rows()` is public static) and use **`firstOrCreate`**, so an existing row is left untouched.
+
+**Rule for this project:** any new `pages` / `site_content` / settings row added after 2026-06-18 needs BOTH a seeder entry (for fresh installs + `migrate:fresh --seed`) AND a scoped data migration (for production). Adding only the seeder entry is a production-only 404 waiting to happen.
+
 ### A strict CSP breaks analytics SILENTLY — allowlist the send hosts, not just the script host (2026-07-20)
 
 **Symptom to expect (and pre-empt):** you allowlist `https://www.googletagmanager.com` under `script-src`, GTM loads, the container fires, Tag Assistant shows tags "fired successfully" — and **GA4 reports zero data**. Everything looks installed. Nothing is measured.
