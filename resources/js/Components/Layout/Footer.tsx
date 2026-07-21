@@ -338,7 +338,7 @@ export function Footer() {
             {/* Copyright */}
             <div className="section-x pb-6 text-xs text-white/85">
                 © {year} {ft('copyright', 'text', 'footer.copyright')} ·{' '}
-                <a href="#" className="hover:text-white">
+                <a href="/privacy" className="hover:text-white">
                     {ft('copyright', 'privacy_policy', 'footer.privacyPolicy')}
                 </a>
             </div>

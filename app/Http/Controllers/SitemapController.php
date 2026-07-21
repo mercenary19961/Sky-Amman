@@ -8,8 +8,10 @@ use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
-    // Page slug → public URL path. Footer and investment are excluded:
-    // footer has no public URL; investment is parked.
+    // Page slug → public URL path. This is an ALLOWLIST — a new `pages` row is
+    // not advertised until it's added here. Deliberately absent: `footer` (no
+    // public URL), `investment` (parked), and `privacy` (it ships `noindex`,
+    // so listing it would tell Google to crawl a page we asked it to skip).
     private const PAGE_PATHS = [
         'home'       => '/',
         'properties' => '/properties',
