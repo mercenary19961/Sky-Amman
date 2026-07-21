@@ -500,6 +500,30 @@ Railway terminates SSL at its edge and forwards requests to the container over H
 
 **Lesson / cross-project:** when a Laravel-on-Railway app leaves Cloudflare (or the proxy topology changes at all), the `trustProxies` allowlist goes stale. The tells: (a) request-derived URLs come out `http://` even though `forceScheme` is on and assets are https; (b) every visitor shows the same client IP. **Red herrings from leaving Cloudflare** (ignore them): `/cdn-cgi/*` 404s and the Turnstile "Cannot determine Turnstile's embedded location, are you running Turnstile on a Cloudflare Zone?" warning — both are cosmetic (Turnstile still validates; the widget shows "Success!").
 
+### A stray hostname served a self-canonicalising DUPLICATE of the whole site (2026-07-21)
+
+**Symptom:** `https://sky-amman-production.up.railway.app` (the old pre-custom-domain Railway URL) still returned **200 on every page** long after the switch to `www.skyamman.com` — and served `<link rel="canonical" href="https://sky-amman-production.up.railway.app">`, an og:url on that host, a `robots.txt` advertising `Sitemap: https://sky-amman-production.up.railway.app/sitemap.xml`, and a sitemap listing its own URLs. A complete duplicate site, actively telling Google *it* was canonical, competing with the real domain right after Search Console verification + sitemap submission.
+
+**Root cause:** Laravel's `url()` / `route()` build from the **REQUEST host**, not `APP_URL`. `APP_URL` only applies outside an HTTP request context (console, queues). So the app canonicalises whatever hostname the visitor arrived on. **`URL::forceScheme('https')` does not help — it pins the SCHEME, not the HOST.**
+
+**Fix ([AppServiceProvider](app/Providers/AppServiceProvider.php)):** `URL::forceRootUrl(config('app.url'))` alongside the existing `forceScheme`, under `APP_ENV=production`. Both are needed and they do different jobs — with only `forceRootUrl`, a pinned `https://` root still emits `http://` because the scheme is taken from the request (this is exactly what made the first version of [CanonicalHostTest](tests/Feature/CanonicalHostTest.php) fail).
+
+**⚠️ Consequence for any future staging environment:** it must NOT run with `APP_ENV=production`, or every link, canonical and sitemap URL it emits will point at the live site.
+
+**Also do the infra half:** deleting the unused generated domain in Railway is the real cure; the code change is the backstop that stops *any* stray hostname (future preview URLs included) from self-canonicalising. If the old domain was indexed, remove it in Search Console too — a 404/removed domain isn't retroactive.
+
+### Turnstile: the "first submit always fails, second works" race (2026-07-21)
+
+**Symptom:** users reported that the FIRST attempt at a Turnstile-gated form always failed, and retrying worked. It looked like a flaky Cloudflare check.
+
+**Root cause: a race in OUR form, not Cloudflare.** Turnstile solves **asynchronously**, and a **first-time visitor** takes noticeably longer than a returning one (no prior Cloudflare state, sometimes a real interactive challenge). Every submit button was gated on `disabled={processing}` **only** — nothing stopped a submit before `callback(token)` fired. So: user fills the form fast → submits with `cf-turnstile-response` still `''` → server-side `TurnstileVerifier` rejects it → meanwhile the token arrives → the retry succeeds. A returning visitor solves instantly and never sees it, which is why it read as "first time only".
+
+**Fix:** [Turnstile.tsx](resources/js/Components/Public/Turnstile.tsx) now reports a **`TurnstileStatus`** (`disabled | pending | ready | error`) via `onStatusChange`, and all **four** consumers (Contact, footer newsletter, admin Login, ForgotPassword) gate submit on it. `disabled` means no site key is configured (dev), so the gate stays OPEN there — otherwise local forms would be permanently unsubmittable.
+
+**Second bug found in the same file:** the old `error-callback` set `errored` state permanently, and the effect early-returned on it, so **any** Turnstile error left a dead widget that could only be recovered by a full page reload. It now renders an inline note with a **Retry** button that remounts the widget (via an `attempt` counter) without losing typed input; the "reload the page" hint is kept only there, where it's genuinely the right advice.
+
+**Lesson:** any async third-party verification widget needs its own readiness state wired into the submit button. "Disabled while processing" is not enough — the dangerous window is *before* the user ever clicks.
+
 ### Adding rows to a seeder AFTER first deploy never reaches production (2026-07-21)
 
 **Symptom:** `/privacy` returned **404 in production** while working perfectly in local dev. The route existed, the deploy had landed (verified: the Consent Mode block was in the live HTML), `/about` returned 200 — only the new page 404'd.

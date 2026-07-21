@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Mail, MapPin, Phone, Navigation } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Turnstile, type TurnstileHandle } from '@/Components/Public/Turnstile';
+import { Turnstile, type TurnstileHandle, type TurnstileStatus } from '@/Components/Public/Turnstile';
 import { Select } from '@/Components/Public/Select';
 import { FacebookIcon, InstagramIcon, TwitterIcon } from '@/Components/Layout/SocialIcons';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -43,6 +43,12 @@ export default function Contact() {
         property: project?.slug ?? '',
         'cf-turnstile-response': '',
     });
+
+    // Blocks submitting before the challenge resolves — the cause of the
+    // "first attempt always fails, second works" report. 'disabled' means no
+    // site key is configured (dev), so the gate must stay open there.
+    const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
+    const turnstileReady = turnstileStatus === 'ready' || turnstileStatus === 'disabled';
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -260,11 +266,12 @@ export default function Contact() {
                                 ref={turnstileRef}
                                 onVerify={(token) => form.setData('cf-turnstile-response', token)}
                                 onExpire={() => form.setData('cf-turnstile-response', '')}
+                                onStatusChange={setTurnstileStatus}
                             />
 
                             <button
                                 type="submit"
-                                disabled={form.processing}
+                                disabled={form.processing || !turnstileReady}
                                 className="w-full rounded-xl bg-primary-strong px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-strong-hover disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {form.processing ? t('contact.form.sending') : t('contact.form.submit')}

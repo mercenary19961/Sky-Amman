@@ -28,6 +28,23 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
+
+            // Pin every generated URL to the canonical host, not the host the
+            // request happened to arrive on.
+            //
+            // Laravel builds url()/route() from the REQUEST, so the site was
+            // reachable at the old sky-amman-production.up.railway.app and
+            // served `<link rel="canonical">`, og:url, robots.txt's Sitemap:
+            // line and the whole sitemap pointing at ITSELF — a complete
+            // self-canonicalising duplicate competing with www.skyamman.com in
+            // search. forceScheme alone doesn't help: it fixes the scheme, not
+            // the host.
+            //
+            // ⚠️ If a staging environment is ever added, it must NOT run with
+            // APP_ENV=production, or its links will all point at the live site.
+            if ($root = config('app.url')) {
+                URL::forceRootUrl($root);
+            }
         }
 
         // Override Inertia's SSR gateway with one that applies connect/response
