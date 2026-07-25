@@ -22,19 +22,78 @@ function sectionVisible(section: Record<string, ContentValue> | undefined): bool
 }
 
 /**
- * Body sections, in reading order. Each pulls its heading from `{section}.title`
- * and its paragraphs from the listed keys — so adding a paragraph is one seeder
- * row plus one key here, with no layout work.
+ * A block is either a standalone paragraph (`{ p }`) or a bullet list
+ * (`{ ul }`) with an optional lead paragraph before it. Each string is a key
+ * under the section, resolved via `text(section, key)` — so adding a bullet or
+ * paragraph is one seeder row plus one key here, with no layout work.
  */
-const SECTIONS = [
-    { key: 'collect', paragraphs: ['form', 'newsletter', 'technical', 'consent'] },
-    { key: 'use', paragraphs: ['body'] },
-    { key: 'cookies', paragraphs: ['necessary', 'analytics', 'marketing', 'manage'] },
-    { key: 'sharing', paragraphs: ['body', 'hosting', 'analytics', 'marketing'] },
-    { key: 'retention', paragraphs: ['body'] },
-    { key: 'rights', paragraphs: ['body'] },
-    { key: 'contact', paragraphs: ['body'] },
-] as const;
+type Block = { p: string } | { lead?: string; ul: string[] };
+
+/**
+ * Body sections, in reading order. Each pulls its heading from `{section}.title`.
+ * Mirrors the client's 14-section policy (SiteContentSeeder → 'privacy').
+ */
+const SECTIONS: { key: string; blocks: Block[] }[] = [
+    {
+        key: 'collect',
+        blocks: [
+            { lead: 'lead', ul: ['provided_1', 'provided_2', 'provided_3', 'provided_4', 'provided_5', 'provided_6', 'provided_7', 'provided_8', 'provided_9'] },
+            { lead: 'auto_lead', ul: ['auto_1', 'auto_2', 'auto_3', 'auto_4', 'auto_5', 'auto_6', 'auto_7', 'auto_8'] },
+        ],
+    },
+    {
+        key: 'use',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4', 'item_5', 'item_6', 'item_7', 'item_8'] }],
+    },
+    {
+        key: 'inquiries',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4'] }],
+    },
+    {
+        key: 'marketing',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4'] }, { p: 'outro' }],
+    },
+    {
+        key: 'sharing',
+        blocks: [{ p: 'lead' }, { lead: 'lead_2', ul: ['item_1', 'item_2', 'item_3', 'item_4', 'item_5'] }, { p: 'outro' }],
+    },
+    {
+        key: 'cookies',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4', 'item_5'] }, { p: 'outro' }, { p: 'outro_2' }],
+    },
+    {
+        key: 'security',
+        blocks: [{ p: 'body' }, { p: 'body_2' }],
+    },
+    {
+        key: 'retention',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4'] }, { p: 'outro' }],
+    },
+    {
+        key: 'rights',
+        blocks: [{ lead: 'lead', ul: ['item_1', 'item_2', 'item_3', 'item_4', 'item_5'] }, { p: 'outro' }],
+    },
+    {
+        key: 'third_party',
+        blocks: [{ p: 'body' }, { p: 'body_2' }],
+    },
+    {
+        key: 'children',
+        blocks: [{ p: 'body' }],
+    },
+    {
+        key: 'international',
+        blocks: [{ p: 'body' }],
+    },
+    {
+        key: 'changes',
+        blocks: [{ p: 'body' }, { p: 'body_2' }],
+    },
+    {
+        key: 'contact',
+        blocks: [{ p: 'body' }, { p: 'phone' }],
+    },
+];
 
 export default function Privacy() {
     const { props } = usePage<SecurityPageProps>();
@@ -85,32 +144,74 @@ export default function Privacy() {
                         {updated && <p className="mt-2 text-sm text-ink-muted">{updated}</p>}
                     </header>
 
-                    {sectionVisible(content?.intro) && text('intro', 'body') && (
-                        <p className="mt-8 text-base leading-relaxed text-ink-muted sm:text-lg">
-                            {text('intro', 'body')}
-                        </p>
+                    {sectionVisible(content?.intro) && (text('intro', 'body') || text('intro', 'agree')) && (
+                        <div className="mt-8 space-y-4">
+                            {text('intro', 'body') && (
+                                <p className="text-base leading-relaxed text-ink-muted sm:text-lg">
+                                    {text('intro', 'body')}
+                                </p>
+                            )}
+                            {text('intro', 'agree') && (
+                                <p className="text-base leading-relaxed text-ink-muted sm:text-lg">
+                                    {text('intro', 'agree')}
+                                </p>
+                            )}
+                        </div>
                     )}
 
                     <div className="mt-10 space-y-10">
                         {SECTIONS.filter((s) => sectionVisible(content?.[s.key])).map((section) => {
                             const heading = text(section.key, 'title');
-                            const paragraphs = section.paragraphs
-                                .map((p) => text(section.key, p))
-                                .filter(Boolean);
 
-                            if (!heading && paragraphs.length === 0) return null;
+                            // A block renders only if it resolves to some non-empty copy.
+                            const hasContent = section.blocks.some((block) => {
+                                if ('ul' in block) {
+                                    const lead = block.lead ? text(section.key, block.lead) : '';
+                                    return !!lead || block.ul.some((k) => text(section.key, k));
+                                }
+                                return !!text(section.key, block.p);
+                            });
+
+                            if (!heading && !hasContent) return null;
 
                             return (
                                 <section key={section.key}>
                                     {heading && (
                                         <h2 className="text-xl font-semibold text-ink sm:text-2xl">{heading}</h2>
                                     )}
-                                    <div className="mt-3 space-y-3">
-                                        {paragraphs.map((p, i) => (
-                                            <p key={i} className="text-base leading-relaxed text-ink-muted">
-                                                {p}
-                                            </p>
-                                        ))}
+                                    <div className="mt-3 space-y-4">
+                                        {section.blocks.map((block, bi) => {
+                                            if ('ul' in block) {
+                                                const lead = block.lead ? text(section.key, block.lead) : '';
+                                                const items = block.ul
+                                                    .map((k) => text(section.key, k))
+                                                    .filter(Boolean);
+                                                if (!lead && items.length === 0) return null;
+                                                return (
+                                                    <div key={bi} className="space-y-3">
+                                                        {lead && (
+                                                            <p className="text-base leading-relaxed text-ink-muted">
+                                                                {lead}
+                                                            </p>
+                                                        )}
+                                                        {items.length > 0 && (
+                                                            <ul className="list-disc space-y-2 ps-5 text-base leading-relaxed text-ink-muted marker:text-primary">
+                                                                {items.map((it, i) => (
+                                                                    <li key={i}>{it}</li>
+                                                                ))}
+                                                            </ul>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+                                            const paragraph = text(section.key, block.p);
+                                            if (!paragraph) return null;
+                                            return (
+                                                <p key={bi} className="text-base leading-relaxed text-ink-muted">
+                                                    {paragraph}
+                                                </p>
+                                            );
+                                        })}
                                     </div>
                                 </section>
                             );
