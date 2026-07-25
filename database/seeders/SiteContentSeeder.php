@@ -173,47 +173,137 @@ class SiteContentSeeder extends Seeder
             ['footer', 'copyright', 'privacy_policy', 'Privacy policy',      'سياسة الخصوصية'],
 
             // ── Privacy Policy ────────────────────────────────────────────────
-            // The DATA-FLOW sections below are factual: they describe what this
-            // codebase actually collects (contact form, newsletter, consent log,
-            // server logs) and which third parties actually receive it. Keep them
-            // in sync if those flows change.
-            // ⚠️ The 'retention', 'rights' and 'contact' sections state legal
-            // positions and are deliberately non-specific — they need Jordanian
-            // counsel to confirm before launch. See CLAUDE.md → Remaining.
+            // Client-provided official policy (docx, 2026-07-25) replacing the
+            // earlier AI-drafted placeholder. English is the client's copy; the
+            // Arabic is a matching translation (register-consistent with the rest
+            // of the site) — have counsel confirm the AR before relying on it.
+            // Rendered by Privacy.tsx, which reads these keys as headings +
+            // paragraphs + bullet lists (`lead`/`item_n`/`outro` conventions).
             ['privacy', 'hero', 'title', 'Privacy Policy', 'سياسة الخصوصية'],
             ['privacy', 'hero', 'updated', 'Last updated: July 2026', 'آخر تحديث: تموز ٢٠٢٦'],
 
-            ['privacy', 'intro', 'body', 'This policy explains what personal information Sky Amman collects through this website, why we collect it, and the choices you have. We collect only what we need to respond to you and to run the site.', 'توضّح هذه السياسة ما تجمعه سكاي عمان من معلومات شخصية عبر هذا الموقع، ولماذا نجمعها، وما هي الخيارات المتاحة لك. نحن نجمع فقط ما نحتاجه للرد عليك ولتشغيل الموقع.'],
+            ['privacy', 'intro', 'body', 'SkyAmman ("we", "our", or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and protect your information when you visit our website or interact with our services.', 'تحترم سكاي عمّان ("نحن" أو "لدينا") خصوصيتك وتلتزم بحماية معلوماتك الشخصية. توضّح سياسة الخصوصية هذه كيف نجمع معلوماتك ونستخدمها ونخزّنها ونحميها عند زيارتك لموقعنا الإلكتروني أو تفاعلك مع خدماتنا.'],
+            ['privacy', 'intro', 'agree', 'By using our website, you agree to the practices described in this Privacy Policy.', 'باستخدامك لموقعنا الإلكتروني، فإنك توافق على الممارسات الموضّحة في سياسة الخصوصية هذه.'],
 
-            ['privacy', 'collect', 'title', 'What we collect', 'ما الذي نجمعه'],
-            ['privacy', 'collect', 'form', 'When you submit an enquiry, we collect your name, email address, phone number, your message, the type of request, and the property you asked about if you started from a listing page.', 'عند إرسال استفسار، نجمع اسمك وبريدك الإلكتروني ورقم هاتفك ونص رسالتك ونوع الطلب، والعقار الذي سألت عنه إن كنت قد بدأت من صفحة عقار.'],
-            ['privacy', 'collect', 'newsletter', 'If you subscribe to our newsletter, we store your email address.', 'إذا اشتركت في نشرتنا الإخبارية، فإننا نحتفظ ببريدك الإلكتروني.'],
-            ['privacy', 'collect', 'technical', 'For security and to prevent abuse, we record the IP address used to submit a form. Our servers also keep standard access logs.', 'لأغراض الأمان ومنع إساءة الاستخدام، نسجّل عنوان الـ IP المستخدم عند إرسال أي نموذج. كما تحتفظ خوادمنا بسجلات وصول اعتيادية.'],
-            ['privacy', 'collect', 'consent', 'When you make a choice on the cookie banner, we record that choice together with the date, your IP address and your browser type, as proof of the preference you set.', 'عند اتخاذ قرارك في شريط ملفات تعريف الارتباط، نسجّل هذا القرار مع التاريخ وعنوان الـ IP ونوع المتصفح، كإثبات للتفضيل الذي اخترته.'],
+            // 1. Information We Collect
+            ['privacy', 'collect', 'title', 'Information We Collect', 'المعلومات التي نجمعها'],
+            ['privacy', 'collect', 'lead', 'We may collect personal information that you voluntarily provide, including:', 'قد نجمع معلومات شخصية تقدّمها طوعاً، وتشمل:'],
+            ['privacy', 'collect', 'provided_1', 'Full Name', 'الاسم الكامل'],
+            ['privacy', 'collect', 'provided_2', 'Email Address', 'البريد الإلكتروني'],
+            ['privacy', 'collect', 'provided_3', 'Phone Number', 'رقم الهاتف'],
+            ['privacy', 'collect', 'provided_4', 'WhatsApp Number', 'رقم واتساب'],
+            ['privacy', 'collect', 'provided_5', 'Property preferences', 'تفضيلات العقار'],
+            ['privacy', 'collect', 'provided_6', 'Budget range', 'النطاق السعري'],
+            ['privacy', 'collect', 'provided_7', 'Preferred location', 'الموقع المفضّل'],
+            ['privacy', 'collect', 'provided_8', 'Messages submitted through contact forms', 'الرسائل المُرسَلة عبر نماذج التواصل'],
+            ['privacy', 'collect', 'provided_9', 'Any information you choose to provide when contacting us', 'أي معلومات تختار تقديمها عند التواصل معنا'],
+            ['privacy', 'collect', 'auto_lead', 'We may also automatically collect:', 'كما قد نجمع تلقائياً:'],
+            ['privacy', 'collect', 'auto_1', 'IP Address', 'عنوان الـ IP'],
+            ['privacy', 'collect', 'auto_2', 'Browser type', 'نوع المتصفح'],
+            ['privacy', 'collect', 'auto_3', 'Device information', 'معلومات الجهاز'],
+            ['privacy', 'collect', 'auto_4', 'Operating system', 'نظام التشغيل'],
+            ['privacy', 'collect', 'auto_5', 'Pages visited', 'الصفحات التي تمت زيارتها'],
+            ['privacy', 'collect', 'auto_6', 'Time spent on the website', 'الوقت المُستغرَق على الموقع'],
+            ['privacy', 'collect', 'auto_7', 'Referral source', 'مصدر الإحالة'],
+            ['privacy', 'collect', 'auto_8', 'Cookie information', 'معلومات ملفات تعريف الارتباط'],
 
-            ['privacy', 'use', 'title', 'How we use it', 'كيف نستخدمها'],
-            ['privacy', 'use', 'body', 'We use your details to reply to your enquiry, to route it to the right member of our team, and to send you the newsletter if you asked for it. We do not sell your personal information.', 'نستخدم بياناتك للرد على استفسارك، ولتحويله إلى الشخص المختص في فريقنا، ولإرسال النشرة الإخبارية إن طلبتها. نحن لا نبيع معلوماتك الشخصية.'],
+            // 2. How We Use Your Information
+            ['privacy', 'use', 'title', 'How We Use Your Information', 'كيف نستخدم معلوماتك'],
+            ['privacy', 'use', 'lead', 'We use your information to:', 'نستخدم معلوماتك من أجل:'],
+            ['privacy', 'use', 'item_1', 'Respond to property inquiries', 'الرد على استفسارات العقارات'],
+            ['privacy', 'use', 'item_2', 'Schedule property viewings', 'تحديد مواعيد معاينة العقارات'],
+            ['privacy', 'use', 'item_3', 'Contact you regarding available units', 'التواصل معك بشأن الوحدات المتاحة'],
+            ['privacy', 'use', 'item_4', 'Provide requested quotations', 'تقديم عروض الأسعار المطلوبة'],
+            ['privacy', 'use', 'item_5', 'Assist with financing inquiries through approved banking partners', 'المساعدة في استفسارات التمويل عبر شركاء مصرفيين معتمدين'],
+            ['privacy', 'use', 'item_6', 'Improve our website and services', 'تحسين موقعنا وخدماتنا'],
+            ['privacy', 'use', 'item_7', 'Send updates about new projects, offers, or promotions (only where permitted)', 'إرسال تحديثات حول المشاريع الجديدة أو العروض أو الترويجات (حيثما يُسمح بذلك فقط)'],
+            ['privacy', 'use', 'item_8', 'Comply with legal obligations', 'الامتثال للالتزامات القانونية'],
 
-            ['privacy', 'cookies', 'title', 'Cookies and your choices', 'ملفات تعريف الارتباط وخياراتك'],
-            ['privacy', 'cookies', 'necessary', 'Strictly necessary cookies keep the site working: they remember your language, secure the forms against misuse, and maintain your session. These cannot be switched off and are not used to track you.', 'الملفات الضرورية تُبقي الموقع يعمل: تتذكر لغتك، وتحمي النماذج من إساءة الاستخدام، وتحافظ على جلستك. لا يمكن إيقافها ولا تُستخدم لتتبعك.'],
-            ['privacy', 'cookies', 'analytics', 'Analytics cookies help us understand which pages and properties get attention, so we can improve them. These are only set if you allow them.', 'ملفات التحليلات تساعدنا على معرفة الصفحات والعقارات التي تحظى بالاهتمام لتطويرها. لا تُفعّل إلا إذا سمحت بها.'],
-            ['privacy', 'cookies', 'marketing', 'Marketing cookies let us measure our advertising and show you relevant properties on other websites. These are only set if you allow them.', 'ملفات التسويق تتيح لنا قياس نتائج إعلاناتنا وعرض عقارات مناسبة لك على مواقع أخرى. لا تُفعّل إلا إذا سمحت بها.'],
-            ['privacy', 'cookies', 'manage', 'You choose when you first visit, and your choice is remembered for one year. Analytics and marketing cookies stay switched off unless you turn them on. You can also clear this site\'s cookies in your browser at any time to be asked again.', 'تختار عند زيارتك الأولى، ويُحفظ اختيارك لمدة عام. تبقى ملفات التحليلات والتسويق معطّلة ما لم تُفعّلها بنفسك. ويمكنك أيضاً حذف ملفات هذا الموقع من متصفحك في أي وقت ليُطرح عليك السؤال من جديد.'],
+            // 3. Property Inquiries
+            ['privacy', 'inquiries', 'title', 'Property Inquiries', 'استفسارات العقارات'],
+            ['privacy', 'inquiries', 'lead', 'When you submit an inquiry regarding one of our properties, your information is used solely to:', 'عند إرسالك استفساراً بخصوص أحد عقاراتنا، تُستخدم معلوماتك حصراً من أجل:'],
+            ['privacy', 'inquiries', 'item_1', 'Contact you regarding your request', 'التواصل معك بشأن طلبك'],
+            ['privacy', 'inquiries', 'item_2', 'Recommend suitable properties', 'اقتراح عقارات مناسبة'],
+            ['privacy', 'inquiries', 'item_3', 'Arrange meetings or property visits', 'ترتيب الاجتماعات أو زيارات العقار'],
+            ['privacy', 'inquiries', 'item_4', 'Provide payment plans and project information', 'تقديم خطط الدفع ومعلومات المشروع'],
 
-            ['privacy', 'sharing', 'title', 'Who else receives data', 'من يتلقى البيانات أيضاً'],
-            ['privacy', 'sharing', 'body', 'We use a small number of service providers to run the site. Where a provider is listed below as depending on your consent, it receives nothing at all unless you allowed that cookie category.', 'نستعين بعدد محدود من مزوّدي الخدمات لتشغيل الموقع. وحين يُذكر أدناه أن مزوّداً يعتمد على موافقتك، فإنه لا يتلقى أي شيء إطلاقاً ما لم تسمح بتلك الفئة.'],
-            ['privacy', 'sharing', 'hosting', 'Hosting and email delivery providers process the site and any messages you send us. These are necessary for the site to function.', 'يقوم مزوّدو الاستضافة وإرسال البريد بمعالجة الموقع وأي رسائل ترسلها إلينا. وهذه ضرورية لعمل الموقع.'],
-            ['privacy', 'sharing', 'analytics', 'Google Analytics receives usage data only if you allow analytics cookies.', 'تتلقى خدمة Google Analytics بيانات الاستخدام فقط إذا سمحت بملفات التحليلات.'],
-            ['privacy', 'sharing', 'marketing', 'Google, Meta and LinkedIn receive advertising data only if you allow marketing cookies.', 'تتلقى Google وMeta وLinkedIn بيانات إعلانية فقط إذا سمحت بملفات التسويق.'],
+            // 4. Marketing Communications
+            ['privacy', 'marketing', 'title', 'Marketing Communications', 'الرسائل التسويقية'],
+            ['privacy', 'marketing', 'lead', 'With your consent, SkyAmman may send you:', 'بموافقتك، قد ترسل لك سكاي عمّان:'],
+            ['privacy', 'marketing', 'item_1', 'New project announcements', 'إعلانات المشاريع الجديدة'],
+            ['privacy', 'marketing', 'item_2', 'Investment opportunities', 'فرص الاستثمار'],
+            ['privacy', 'marketing', 'item_3', 'Promotional offers', 'العروض الترويجية'],
+            ['privacy', 'marketing', 'item_4', 'Newsletters', 'النشرات الإخبارية'],
+            ['privacy', 'marketing', 'outro', 'You may unsubscribe from marketing communications at any time by following the unsubscribe instructions or contacting us directly.', 'يمكنك إلغاء الاشتراك في الرسائل التسويقية في أي وقت باتباع تعليمات إلغاء الاشتراك أو بالتواصل معنا مباشرةً.'],
 
-            ['privacy', 'retention', 'title', 'How long we keep it', 'مدة الاحتفاظ بالبيانات'],
-            ['privacy', 'retention', 'body', 'We keep enquiries for as long as we need them to respond to you and to maintain our business records. Newsletter subscriptions are kept until you ask to be removed. Cookie consent records are kept as evidence of the choice you made.', 'نحتفظ بالاستفسارات طالما احتجناها للرد عليك ولحفظ سجلاتنا التجارية. وتبقى اشتراكات النشرة الإخبارية حتى تطلب إزالتها. أما سجلات الموافقة على ملفات تعريف الارتباط فنحتفظ بها كإثبات للاختيار الذي اتخذته.'],
+            // 5. Sharing Your Information
+            ['privacy', 'sharing', 'title', 'Sharing Your Information', 'مشاركة معلوماتك'],
+            ['privacy', 'sharing', 'lead', 'We do not sell your personal information.', 'نحن لا نبيع معلوماتك الشخصية.'],
+            ['privacy', 'sharing', 'lead_2', 'Your information may be shared only when necessary with:', 'قد تتم مشاركة معلوماتك عند الضرورة فقط مع:'],
+            ['privacy', 'sharing', 'item_1', 'Authorized SkyAmman employees', 'موظفي سكاي عمّان المخوّلين'],
+            ['privacy', 'sharing', 'item_2', 'Banking or financing partners (only when financing assistance is requested)', 'شركاء الخدمات المصرفية أو التمويل (فقط عند طلب المساعدة في التمويل)'],
+            ['privacy', 'sharing', 'item_3', 'Professional advisors', 'المستشارين المهنيين'],
+            ['privacy', 'sharing', 'item_4', 'Government authorities where required by law', 'الجهات الحكومية عندما يقتضي القانون ذلك'],
+            ['privacy', 'sharing', 'item_5', 'Website hosting, analytics, and technology providers that assist us in operating our website', 'مزوّدي استضافة الموقع والتحليلات والتقنية الذين يساعدوننا في تشغيل موقعنا'],
+            ['privacy', 'sharing', 'outro', 'All third parties are expected to protect your information appropriately.', 'يُتوقّع من جميع الأطراف الخارجية حماية معلوماتك على النحو الملائم.'],
 
-            ['privacy', 'rights', 'title', 'Your rights', 'حقوقك'],
-            ['privacy', 'rights', 'body', 'You can ask us what personal information we hold about you, ask us to correct it if it is wrong, or ask us to delete it. You can also withdraw your cookie consent at any time. Contact us using the details below and we will respond.', 'يمكنك أن تطلب معرفة المعلومات الشخصية التي نحتفظ بها عنك، أو تصحيحها إن كانت خاطئة، أو حذفها. كما يمكنك سحب موافقتك على ملفات تعريف الارتباط في أي وقت. تواصل معنا عبر البيانات أدناه وسنقوم بالرد.'],
+            // 6. Cookies and Analytics
+            ['privacy', 'cookies', 'title', 'Cookies and Analytics', 'ملفات تعريف الارتباط والتحليلات'],
+            ['privacy', 'cookies', 'lead', 'Our website may use cookies and similar technologies to:', 'قد يستخدم موقعنا ملفات تعريف الارتباط والتقنيات المشابهة من أجل:'],
+            ['privacy', 'cookies', 'item_1', 'Improve website performance', 'تحسين أداء الموقع'],
+            ['privacy', 'cookies', 'item_2', 'Remember your preferences', 'تذكّر تفضيلاتك'],
+            ['privacy', 'cookies', 'item_3', 'Measure website traffic', 'قياس حركة زيارات الموقع'],
+            ['privacy', 'cookies', 'item_4', 'Analyze visitor behavior', 'تحليل سلوك الزوّار'],
+            ['privacy', 'cookies', 'item_5', 'Improve marketing campaigns', 'تحسين الحملات التسويقية'],
+            ['privacy', 'cookies', 'outro', 'These technologies may include services such as Google Analytics or similar website analytics platforms.', 'قد تشمل هذه التقنيات خدمات مثل Google Analytics أو منصّات تحليل مواقع مشابهة.'],
+            ['privacy', 'cookies', 'outro_2', 'You can control cookies through your browser settings; however, disabling cookies may affect certain website features.', 'يمكنك التحكّم في ملفات تعريف الارتباط من خلال إعدادات متصفحك؛ إلا أنّ تعطيلها قد يؤثّر على بعض ميزات الموقع.'],
 
-            ['privacy', 'contact', 'title', 'Contact us', 'تواصل معنا'],
-            ['privacy', 'contact', 'body', 'For any question about this policy or about your personal information, please contact us using the details on our Contact page.', 'لأي استفسار حول هذه السياسة أو حول معلوماتك الشخصية، يُرجى التواصل معنا عبر البيانات الموجودة في صفحة اتصل بنا.'],
+            // 7. Data Security
+            ['privacy', 'security', 'title', 'Data Security', 'أمن البيانات'],
+            ['privacy', 'security', 'body', 'We implement reasonable technical and organizational safeguards to protect your information from unauthorized access, disclosure, alteration, or destruction.', 'نطبّق تدابير تقنية وتنظيمية معقولة لحماية معلوماتك من الوصول غير المصرّح به أو الإفصاح أو التعديل أو الإتلاف.'],
+            ['privacy', 'security', 'body_2', 'While we strive to protect your personal information, no internet transmission or electronic storage method can be guaranteed to be 100% secure.', 'ومع سعينا لحماية معلوماتك الشخصية، لا يمكن ضمان أمان أي وسيلة نقل عبر الإنترنت أو تخزين إلكتروني بنسبة 100%.'],
+
+            // 8. Data Retention
+            ['privacy', 'retention', 'title', 'Data Retention', 'الاحتفاظ بالبيانات'],
+            ['privacy', 'retention', 'lead', 'We retain personal information only for as long as necessary to:', 'نحتفظ بالمعلومات الشخصية فقط للمدة اللازمة من أجل:'],
+            ['privacy', 'retention', 'item_1', 'Respond to inquiries', 'الرد على الاستفسارات'],
+            ['privacy', 'retention', 'item_2', 'Maintain customer relationships', 'الحفاظ على علاقات العملاء'],
+            ['privacy', 'retention', 'item_3', 'Fulfill contractual obligations', 'الوفاء بالالتزامات التعاقدية'],
+            ['privacy', 'retention', 'item_4', 'Meet legal and regulatory requirements', 'تلبية المتطلبات القانونية والتنظيمية'],
+            ['privacy', 'retention', 'outro', 'When information is no longer required, it is securely deleted or anonymized.', 'وعندما تنتفي الحاجة إلى المعلومات، يتم حذفها بشكل آمن أو جعلها مجهولة الهوية.'],
+
+            // 9. Your Rights
+            ['privacy', 'rights', 'title', 'Your Rights', 'حقوقك'],
+            ['privacy', 'rights', 'lead', 'Subject to applicable law, you may request to:', 'مع مراعاة القانون المعمول به، يمكنك أن تطلب:'],
+            ['privacy', 'rights', 'item_1', 'Access your personal information', 'الاطلاع على معلوماتك الشخصية'],
+            ['privacy', 'rights', 'item_2', 'Correct inaccurate information', 'تصحيح المعلومات غير الدقيقة'],
+            ['privacy', 'rights', 'item_3', 'Update your information', 'تحديث معلوماتك'],
+            ['privacy', 'rights', 'item_4', 'Request deletion of your personal information', 'طلب حذف معلوماتك الشخصية'],
+            ['privacy', 'rights', 'item_5', 'Withdraw consent for marketing communications', 'سحب الموافقة على الرسائل التسويقية'],
+            ['privacy', 'rights', 'outro', 'To exercise these rights, please contact us using the details below.', 'لممارسة هذه الحقوق، يُرجى التواصل معنا عبر البيانات الواردة أدناه.'],
+
+            // 10. Third-Party Websites
+            ['privacy', 'third_party', 'title', 'Third-Party Websites', 'المواقع الخارجية'],
+            ['privacy', 'third_party', 'body', 'Our website may contain links to third-party websites.', 'قد يحتوي موقعنا على روابط لمواقع خارجية.'],
+            ['privacy', 'third_party', 'body_2', 'SkyAmman is not responsible for the privacy practices or content of external websites. We encourage you to review their privacy policies before providing personal information.', 'لا تتحمّل سكاي عمّان المسؤولية عن ممارسات الخصوصية أو محتوى المواقع الخارجية. وننصحك بمراجعة سياسات الخصوصية الخاصة بها قبل تقديم أي معلومات شخصية.'],
+
+            // 11. Children's Privacy
+            ['privacy', 'children', 'title', 'Children\'s Privacy', 'خصوصية الأطفال'],
+            ['privacy', 'children', 'body', 'Our website and services are intended for individuals aged 18 years or older. We do not knowingly collect personal information from children.', 'موقعنا وخدماتنا مخصّصة للأفراد الذين تبلغ أعمارهم 18 عاماً فأكثر. ولا نجمع عن قصد أي معلومات شخصية من الأطفال.'],
+
+            // 12. International Visitors
+            ['privacy', 'international', 'title', 'International Visitors', 'الزوّار الدوليون'],
+            ['privacy', 'international', 'body', 'If you access our website from outside Jordan, your information may be processed and stored in Jordan or in other countries where our service providers operate, subject to appropriate safeguards.', 'إذا دخلت إلى موقعنا من خارج الأردن، فقد تتم معالجة معلوماتك وتخزينها في الأردن أو في دول أخرى يعمل فيها مزوّدو خدماتنا، مع مراعاة الضمانات الملائمة.'],
+
+            // 13. Changes to this Privacy Policy
+            ['privacy', 'changes', 'title', 'Changes to this Privacy Policy', 'التعديلات على سياسة الخصوصية'],
+            ['privacy', 'changes', 'body', 'We may update this Privacy Policy periodically to reflect changes in our services, technology, or legal requirements.', 'قد نحدّث سياسة الخصوصية هذه من حين لآخر لتعكس التغييرات في خدماتنا أو تقنياتنا أو المتطلبات القانونية.'],
+            ['privacy', 'changes', 'body_2', 'The updated version will be posted on this page with the revised "Last Updated" date.', 'وسيُنشَر الإصدار المُحدَّث على هذه الصفحة مع تعديل تاريخ "آخر تحديث".'],
+
+            // 14. Contact Us — routed to the Contact page (no dedicated inbox yet).
+            ['privacy', 'contact', 'title', 'Contact Us', 'تواصل معنا'],
+            ['privacy', 'contact', 'body', 'If you have questions regarding this Privacy Policy or wish to exercise your privacy rights, please contact us using the details on our Contact page.', 'إذا كانت لديك أي أسئلة بخصوص سياسة الخصوصية هذه أو رغبت في ممارسة حقوقك في الخصوصية، يُرجى التواصل معنا عبر البيانات الموجودة في صفحة اتصل بنا.'],
+            ['privacy', 'contact', 'phone', 'Phone: +962 77 077 0123', 'الهاتف: +962 77 077 0123'],
         ];
     }
 
